@@ -25,4 +25,5 @@ Robot features include
    overview
    hardware
    software
-   pc ui
+   pcui
+   ssmodel

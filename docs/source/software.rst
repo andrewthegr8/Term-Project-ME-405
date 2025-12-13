@@ -10,7 +10,8 @@ scheduler and inter-task communication objects
 can be found in the `ME405-Support <https://github.com/spluttflob/ME405-Support>`_ repository. 
 
 This diagram shows all the tasks and their scheduled frequency, as well as
-what shares and queues the tasks interface with.
+what shares and queues the tasks interface with. See :ref:`_main-program`
+for the details of each task.
 
 NEED OVERALL DIAGRAM
 
@@ -165,9 +166,11 @@ rather than hardware.
 
 
 
+.. _main-program:
 
-Tasks
+Main Program
 --------------
+All task generator functions are contained in 'main.py'.
 .. automodule:: me405.main
    :members:
    :undoc-members:
@@ -178,6 +181,30 @@ Helper Classes
 ---------------------
 The following classes are initialized and passed to tasks, 
 except, of course, :mod:`me405.cotask` which schedules and runs the tasks.
+
+PI speed controller
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: me405.PIController
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+State-space model
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: me405.SSModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Pure-pursuit path tracker
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: me405.ThePursuer
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Task scheduler
 ~~~~~~~~~~~~~~~~~~~
@@ -199,8 +226,33 @@ Hardware Drivers
 ----------------------------------
 The following classes are used for interfacing with hardware.
 
+Bluetooth communication
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: me405.BTComm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+IMU (BNO055) driver
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: me405.IMU
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Line sensor array
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: me405.LineSensor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 Motor driver
-----------------
+~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.Motor
    :members:
@@ -208,7 +260,7 @@ Motor driver
    :show-inheritance:
 
 Encoder
------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.Encoder
    :members:

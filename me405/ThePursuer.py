@@ -1,152 +1,224 @@
-#Class to implement pure pursuit control on Romi
-#Assume Romi is operating at a constant straightline velocity
-#Inputs: Romi's current X and Y coordinates
-#Returns: offset between left and right wheels (to cause rotation)
+"""Pure-pursuit path following for the Romi robot.
 
-from PIController import PIController
+This module implements a specialized pure-pursuit controller that drives
+the Romi through a fixed sequence of waypoints at varying speeds.
+
+Inputs:
+
+* Current X and Y position.
+* Current heading.
+* A flag indicating whether the controller should advance to the next
+  waypoint immediately (for example when a wall is hit).
+
+Output:
+
+* Differential wheel speed offset (left vs. right).
+* Desired forward speed.
+"""
+
+from PIController import PIController  # noqa: F401  (may be used in extensions)
 import micropython
 from micropython import const
 from array import array
 from math import sin, cos, sqrt, atan2, asin, pi, acos
 from time import ticks_ms
 
-head_weight   = const(30)
-FULLTHROTTLE = const(3) #When perfectly aligned, go this speed
-SLOWDOWN_ON_APPROACH = const(8) #Speed up when farther way, slowdown when close
-SLOWDOWN_DIST = const(7) #When this close to the next point, start slowing down
-KP_FRACT = const(0.6) #Kp_head as a function of linear speed
-#kp_head = const(9) 
+head_weight = const(30)
+FULLTHROTTLE = const(3)
+SLOWDOWN_ON_APPROACH = const(8)
+SLOWDOWN_DIST = const(7)
+KP_FRACT = const(0.6)
 
-class ThePursuer():
+
+class ThePursuer:
+    """Pure-pursuit waypoint follower.
+
+    This controller uses a list of predefined waypoints (X, Y) along the
+    course, with associated base speeds and heading gains. At each call to
+    :meth:`get_offset`, it:
+
+    * Computes the error vector from the current position to the current
+      waypoint.
+    * Checks whether the waypoint has been reached (or if ``NextPoint``
+      is set) and advances to the next waypoint if so.
+    * Computes a heading error ``alpha`` between the robot's current
+      heading and the direction to the waypoint.
+    * Chooses a linear speed based on distance and headings, with
+      slowdown near each waypoint.
+    * Returns a proportional steering offset and the chosen speed.
+    """
 
     def __init__(self, base_speed, success_dist, kp, ki):
-        #Hard code in waypoints
-        self.x_coords = array('f', [33.46456692913386,
-51.181102362204726,
-55.118110236220474,
-49.21259842519685,
-27.559055118110237,
-13.779527559055119,
-2.952755905511811,
-0.0,
-15.748031496062993,
-15.748031496062993,
--1.968503937007874
-])
-        self.y_coords = array('f', [14.763779527559056,
-0.0,
-11.811023622047244,
-27.559055118110237,
-24.606299212598426,
-24.606299212598426,
-24.606299212598426,
-1.968503937007874,
-11.811023622047244,
-0.0,
--1.968503937007874])
-        
-        self.base_speed = array('f',
-                                    [18, #Line to CP 1
-                                    16,  #CP 1  to CP2
-                                    25,  #CP2 to CUP
-                                    14,  #Cup to CP 3
-                                    16.5,  #CP 3 to Garage Ent
-                                    16,  #Garage Ent to Garage Middle
-                                    16,  #Garage Middle to Garage end
-                                    10,  #Garage end to otherside of wall - Slowdown when approaching wall
-                                    14,  #Wall to Cup
-                                    18,  #Cup to line
-                                    18]  #Line to home                       
-                                )
-        self.brake_dist = array('f',     #Distance from next wp when we stop boosting
-                                    [7, #Line to CP 1
-                                    7,  #CP 1  to CP2
-                                    0,  #CP2 to CUP
-                                    6,  #Cup to CP 3
-                                    7,  #CP 3 to Garage Ent
-                                    7,  #Garage Ent to Garage Middle
-                                    7,  #Garage Middle to Garage end
-                                    6,  #Garage end to otherside of wallSlowdown when approaching wall
-                                    7,  #Wall to Cup
-                                    7,  #Cup to line
-                                    7]  #Line to home                       
-                                )
-        self.kp_head = array('f',     #heading error to rotational speed 
-                                    [9, #Line to CP 1
-                                    9,  #CP 1  to CP2
-                                    10,  #CP2 to CUP
-                                    9,  #Cup to CP 3
-                                    9,  #CP 3 to Garage Ent
-                                    9,  #Garage Ent to Garage Middle
-                                    9,  #Garage Middle to Garage end
-                                    9,  #Garage end to otherside of wallSlowdown when approaching wall
-                                    9,  #Wall to Cup
-                                    9,  #Cup to line
-                                    9]  #Line to home
-        )    
-        self.num_wp = len(self.x_coords)-1 #Number of waypoints
-        self.idx = 0 #Index for accessing waypoints
-        self.success_dist = success_dist #When are we close enough to a waypoint to target the next one?
-        #self.aligned_enough = aligned_enough #When are we aligned enough to the target to hammer down?
-        #self.base_speed = base_speed #Min speed when changing alignment
-        self.current_speed = base_speed #Init current speed variable
-        #self.slowdown_dist = slowdown_dist
+        """Initialize pure-pursuit controller and waypoint list.
+
+        Args:
+            base_speed: Default linear speed (unused directly; per-segment
+                base speeds are encoded in :attr:`base_speed` array).
+            success_dist: Distance threshold (inches) below which the next
+                waypoint will be targeted.
+            kp: Heading proportional gain (kept for compatibility; per-
+                segment gains are stored in :attr:`kp_head`).
+            ki: Integral gain (currently unused but retained for possible
+                PI control extensions).
+        """
+        # Predefined waypoint coordinates (inches)
+        self.x_coords = array(
+            "f",
+            [
+                33.46456692913386,
+                51.181102362204726,
+                55.118110236220474,
+                49.21259842519685,
+                27.559055118110237,
+                13.779527559055119,
+                2.952755905511811,
+                0.0,
+                15.748031496062993,
+                15.748031496062993,
+                -1.968503937007874,
+            ],
+        )
+        self.y_coords = array(
+            "f",
+            [
+                14.763779527559056,
+                0.0,
+                11.811023622047244,
+                27.559055118110237,
+                24.606299212598426,
+                24.606299212598426,
+                24.606299212598426,
+                1.968503937007874,
+                11.811023622047244,
+                0.0,
+                -1.968503937007874,
+            ],
+        )
+
+        # Per-segment base speeds
+        self.base_speed = array(
+            "f",
+            [
+                18,
+                16,
+                25,
+                14,
+                16.5,
+                16,
+                16,
+                10,
+                14,
+                18,
+                18,
+            ],
+        )
+        # Distance from the waypoint at which we stop boosting speed
+        self.brake_dist = array(
+            "f",
+            [
+                7,
+                7,
+                0,
+                6,
+                7,
+                7,
+                7,
+                6,
+                7,
+                7,
+                7,
+            ],
+        )
+        # Heading gains per segment
+        self.kp_head = array(
+            "f",
+            [
+                9,
+                9,
+                10,
+                9,
+                9,
+                9,
+                9,
+                9,
+                9,
+                9,
+                9,
+            ],
+        )
+
+        self.num_wp = len(self.x_coords) - 1
+        self.idx = 0
+        self.success_dist = success_dist
+        self.current_speed = base_speed
         self.countdown = 0
-        #initalize controller for controlling the offset
-        #self.ctrller = PIController(kp,ki)
+        # A PI controller could be used here for heading, but currently only P is used
+        # self.ctrller = PIController(kp, ki)
 
     @micropython.native
-    def get_offset(self,C_x,C_y,Psi,NextPoint):
-        Psi = -Psi #This is due of my poor understanding of coordinate systems
-        #Time to go to next point?
-        #Calculate absolute distance between points
-        #For maximum efficiency, bind globals to locals
+    def get_offset(self, C_x, C_y, Psi, NextPoint):
+        """Compute wheel speed offset and forward speed.
+
+        Args:
+            C_x: Current X position (inches).
+            C_y: Current Y position (inches).
+            Psi: Current heading angle (radians).
+            NextPoint: If ``True``, force advancing to the next waypoint
+                (for example, when a wall is detected).
+
+        Returns:
+            tuple[float, float]: ``(offset, speed)`` where
+
+            * ``offset`` is a differential speed term added/subtracted from
+              the base speed on each wheel to create a turn.
+            * ``speed`` is the desired linear speed (same sign and units
+              as your velocity setpoint).
+        """
+        Psi = -Psi  # Coordinate system adjustment
+
+        # Current target waypoint
         P_x = self.x_coords[self.idx]
         P_y = self.y_coords[self.idx]
-        #Calculate error vector
+
+        # Error vector and distance to waypoint
         E_x = P_x - C_x
         E_y = P_y - C_y
-        E = sqrt(E_x**2 + E_y**2) #Absolute distance to wp = magnitude of E vector
+        E = sqrt(E_x ** 2 + E_y ** 2)
+
+        # Check if waypoint reached or forced to advance
         if E < self.success_dist or NextPoint:
-            self.idx +=1
+            self.idx += 1
             if self.idx > self.num_wp:
-                raise KeyboardInterrupt #We arrived
-            P_x = self.x_coords[self.idx] #Rebind at new idx
+                # No more waypoints; signal “done” via KeyboardInterrupt
+                raise KeyboardInterrupt
+            P_x = self.x_coords[self.idx]
             P_y = self.y_coords[self.idx]
-            #Recalc E vector
-            #Calculate error vector
             E_x = P_x - C_x
             E_y = P_y - C_y
-            E = sqrt(E_x**2 + E_y**2)
-        #Find heading error (alpha)
+            E = sqrt(E_x ** 2 + E_y ** 2)
+
+        # Heading error alpha between robot heading and error vector
         cpsi = cos(Psi)
         spsi = sin(Psi)
-        alpha = atan2(cpsi*E_y - spsi*E_x, E_x*cpsi + E_y*spsi) #Heading misalignment in radians alpha = error
-        #Compute desired linear speed as a function of the base speed, heading error, and distance error
-        #speed = self.base_speed + (dist_weight*(E-(self.success_dist+2)))/(1+head_weight*abs(alpha)) #Speed is proportional to distance from point and inversely proportional to heading error
-        speed = self.base_speed[self.idx] + max(FULLTHROTTLE+(SLOWDOWN_ON_APPROACH*(E-self.brake_dist[self.idx])),0)/(1+head_weight*abs(alpha))
+        alpha = atan2(cpsi * E_y - spsi * E_x, E_x * cpsi + E_y * spsi)
 
-        #if alpha < 0.1:
-        #    if E > 10:
-        #        speed = 40
-        #    elif E > 5:
-        #        speed = 20
-        #    else:
-        #        speed = self.base_speed
-        #else:
-        #    speed = self.base_speed
-        #When we hit the wall, and for a couple ticks after, drive slow
-        offset = self.kp_head[self.idx]*alpha #Proportional control on heading error. Kp is a fraction of linear velocity
+        # Desired speed: base segment speed plus a distance-dependent boost
+        # which decreases near the waypoint and with increasing heading error.
+        speed = self.base_speed[self.idx] + max(
+            FULLTHROTTLE
+            + (SLOWDOWN_ON_APPROACH * (E - self.brake_dist[self.idx])),
+            0,
+        ) / (1 + head_weight * abs(alpha))
 
+        # Proportional steering offset on heading error
+        offset = self.kp_head[self.idx] * alpha
+
+        # Slow down briefly when NextPoint is asserted
         if NextPoint:
             self.countdown = 10
             speed = 0.1
         if self.countdown:
             self.countdown -= 1
             speed = 0.1
-        #if abs(alpha) < self.aligned_enough and E > self.slowdown_dist: #If closely enough aligned to target and we're far enough away from the next point
-        #    speed = self.base_speed+2*E #Basic proportional control on romi velocity based on distance from point
-        #else:
-        #    speed = self.base_speed
-        return offset, speed #IDK why offset needs to be negative but apparently it does
 
+        return offset, speed

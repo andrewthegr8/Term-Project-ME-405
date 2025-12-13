@@ -42,6 +42,8 @@ import types
 import time as _time
 from collections import deque
 import builtins
+import sys
+
 
 # Sphinx should not try to import real MicroPython modules
 autodoc_mock_imports = ["pyb", "micropython", "ucollections"]
@@ -119,6 +121,10 @@ sys.modules["ucollections"] = ucollections
 def ticks_us():
     return int(_time.perf_counter() * 1_000_000)
 
+def ticks_ms():
+    """Monotonic millisecond ticks (stub for MicroPython)."""
+    return int(_time.perf_counter() * 1_000)
+
 def ticks_diff(new, old):
     return new - old
 
@@ -126,6 +132,8 @@ def ticks_diff(new, old):
 # "from time import ticks_us, ticks_diff" works.
 if not hasattr(_time, "ticks_us"):
     _time.ticks_us = ticks_us
+if not hasattr(_time, "ticks_ms"):
+    _time.ticks_ms = ticks_ms
 if not hasattr(_time, "ticks_diff"):
     _time.ticks_diff = ticks_diff
 

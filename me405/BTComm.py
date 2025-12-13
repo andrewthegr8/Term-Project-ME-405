@@ -1,61 +1,98 @@
-#Class for communicating using serial via a bluetooth module.
-#Having a seperate class for this is maybe slightly less memory and time effiecient (more lines of code),
-#But the main script was getting crowded
+"""Bluetooth serial communication helper.
+
+This module provides the :class:`BTComm` class, a small wrapper around a
+MicroPython ``UART`` (or similar serial device) used to communicate with the
+robot over Bluetooth.
+
+The class:
+
+* Collects incoming characters into a line-oriented command string.
+* Provides a non-blocking :meth:`check` method suitable for use in a
+  cooperative task.
+* Sends pre-built binary packets using :meth:`ship`.
+"""
+
 import micropython
 
+
 class BTComm:
+    """Bluetooth serial communications wrapper.
+
+    This class encapsulates a serial device (such as a MicroPython
+    :class:`pyb.UART`) and provides simple methods for non-blocking command
+    reception and packet transmission.
+    """
+
     def __init__(self, serial_device):
-        #Initializer function. inits class variables and handles serial communications
+        """Initialize the Bluetooth communications helper.
+
+        Args:
+            serial_device: An object implementing a UART-like interface with
+                methods such as ``any()``, ``read()``, and ``write()``. On the
+                robot, this is typically a :class:`pyb.UART` instance.
+        """
+        # Serial port used for communication
         self.serial_device = serial_device
-        #self._line          = str()
-        self.command       = str() #Decoded commands to be intrepreted
-        self._buf          = bytearray(24) #Buffer for individual characters 
-        self._idx          = 0 #Index to keep track of where we are in the buffer     
-
-
-
-    #def handshake(self,command):
-    #    #Send command handshake over serial
-    #    padding = b'\x00'*(self.packet_length-3-len(command)) #Add padding so our glorious packet is the right length
-    #    #***^^^ THIS ASSUMES COMMAND IS LESS THAT 36 BYTES!
-    #    data = self.sync + b'\xFF' + command.encode('utf-8') + padding
-    #    self.serial_device.write(data)
+        # Most recently decoded command string
+        self.command = str()
+        # Fixed-size byte buffer for assembling a line
+        self._buf = bytearray(24)
+        # Current index into the buffer
+        self._idx = 0
 
     @micropython.native
     def check(self):
-        #Check for data, maintain buffer, send completed lines of data4
-        #Returns [True, command] if a complete line was recieved
-        #Otherwise, returns false
-        """! MUCH IS BORROWED FROM DR RIDGLEY'S CODE (and ChatGPT)
-        This is run within a task function to watch for characters
-        coming through a serial port. As characters are received, it assembles
-        them into a line and makes a reference to the line available when the
-        user has pressed Enter.
+        """Check for new serial data and assemble complete commands.
+
+        This method is intended to be called regularly from a cooperative
+        task. It reads at most one character from the underlying serial
+        device, updates an internal line buffer, and detects when a complete
+        command line (terminated by carriage return) has been received.
+
+        Line handling rules:
+
+        * ``\\r`` (carriage return, ASCII 13) → terminate the current line,
+          decode the buffer as UTF-8, store it in :attr:`command`, reset the
+          buffer index, and return ``True``.
+        * ``\\n`` (line feed, ASCII 10) → ignored.
+        * Backspace (ASCII 8) → remove the last character from the buffer.
+        * Any other character → appended to the buffer until it is full.
+
+        Returns:
+            bool: ``True`` if a complete command line has just been received,
+            ``False`` otherwise.
         """
-            
         if self.serial_device.any():
             b = self.serial_device.read(1)[0]
-            if b == 13:   # If carriage return, command is complete!
-                self.command = self._buf[:self._idx].decode('utf-8') #Decode what we have in the buffer
-                self._idx = 0 #Reset index to zero
+            if b == 13:      # Carriage return -> end of command
+                self.command = self._buf[:self._idx].decode("utf-8")
+                self._idx = 0
                 return True
-            elif b == 10: #New line '\n'. Ignore
+            elif b == 10:    # Line feed -> ignore
                 pass
-            elif b == 8 and self._idx: #For backspace, just move the index back one
+            elif b == 8 and self._idx:  # Backspace
                 self._idx -= 1
-            elif self._idx < len(self._buf): #As long as buffer isn't full, add to the buffer
+            elif self._idx < len(self._buf):
                 self._buf[self._idx] = b
                 self._idx += 1
-        return False #Return false unless new command is availables
-    
+        return False
+
     @micropython.native
     def get_command(self):
-        #Returns most recent command recieved over serial
+        """Return the most recent command string.
+
+        Returns:
+            str: The last complete command received over the serial link. If no
+            complete command has been received yet, this is an empty string.
+        """
         return self.command
 
-    @micropython.native     
+    @micropython.native
     def ship(self, packet):
-        #Send pre-built packet
-        self.serial_device.write(memoryview(packet)) #send off the data!
-        #Not sure why memoryview() is necessary but chat recommended and I figured it couldn't hurt
+        """Send a pre-built packet over the serial link.
 
+        Args:
+            packet: A bytes-like object (for example, :class:`bytearray`)
+                containing the already-packed packet to transmit.
+        """
+        self.serial_device.write(memoryview(packet))
