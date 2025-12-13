@@ -7,9 +7,9 @@ Firmware
    modules, how motion commands work, etc.).
 
 Motor driver
-===============
+===========
 
-.. automodule:: code.motor
+.. automodule:: code.src.Motor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -17,7 +17,7 @@ Motor driver
 Encoder
 =======
 
-.. automodule:: code.encoder
+.. automodule:: code.src.Encoder
    :members:
    :undoc-members:
    :show-inheritance:

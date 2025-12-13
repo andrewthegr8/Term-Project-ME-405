@@ -4,4 +4,5 @@ API Reference
 .. autosummary::
    :toctree: generated
 
-   code
+   code.src.Motor
+   code.src.Encoder
