@@ -18,6 +18,7 @@ version = '1.0.0'
 
 extensions = [
     'sphinx.ext.duration',
+    'sphinxcontrib.youtube',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
