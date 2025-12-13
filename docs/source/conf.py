@@ -5,33 +5,6 @@ import sys
 # Add repo root (folder that contains `code/` and `pyproject.toml`)
 sys.path.insert(0, os.path.abspath('../..'))
 
-import importlib
-
-def alias_module(short_name, full_name):
-    """Map a fully-qualified module to a short top-level name.
-
-    Example: alias_module("cotask", "me405.cotask") makes
-    'import cotask' work by returning me405.cotask.
-    """
-    try:
-        mod = importlib.import_module(full_name)
-    except Exception:
-        return
-    sys.modules.setdefault(short_name, mod)
-
-# Map package modules to the short names used in main.py
-alias_module("cotask", "me405.cotask")
-alias_module("task_share", "me405.task_share")
-
-alias_module("Encoder", "me405.Encoder")
-alias_module("Motor", "me405.Motor")
-alias_module("LineSensor", "me405.LineSensor")
-alias_module("BTComm", "me405.BTComm")
-alias_module("IMU", "me405.IMU")
-alias_module("SSModel", "me405.SSModel")
-alias_module("PIController", "me405.PIController")
-alias_module("ThePursuer", "me405.ThePursuer")
-
 
 # -- Project information
 
@@ -307,6 +280,37 @@ if not hasattr(mp, "native"):
     def native(func):
         return func
     mp.native = native
+
+# ------------------------------------------------------------
+# After all MicroPython mocks are in place, alias package modules
+# to the short names used inside the firmware code.
+# ------------------------------------------------------------
+import importlib
+
+def alias_module(short_name, full_name):
+    """Map a fully-qualified module to a short top-level name.
+
+    Example: alias_module("cotask", "me405.cotask") makes
+    ``import cotask`` return ``me405.cotask``.
+    """
+    try:
+        mod = importlib.import_module(full_name)
+    except Exception:
+        return
+    sys.modules.setdefault(short_name, mod)
+
+# Map package modules to the short names used in main.py
+alias_module("cotask", "me405.cotask")
+alias_module("task_share", "me405.task_share")
+
+alias_module("Encoder", "me405.Encoder")
+alias_module("Motor", "me405.Motor")
+alias_module("LineSensor", "me405.LineSensor")
+alias_module("BTComm", "me405.BTComm")
+alias_module("IMU", "me405.IMU")
+alias_module("SSModel", "me405.SSModel")
+alias_module("PIController", "me405.PIController")
+alias_module("ThePursuer", "me405.ThePursuer")
 
 
 intersphinx_mapping = {
