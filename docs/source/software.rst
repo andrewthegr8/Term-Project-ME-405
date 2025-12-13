@@ -13,8 +13,112 @@ This diagram shows all the tasks and their scheduled frequency, as well as
 what shares and queues the tasks interface with. See :ref:`_main-program`
 for the details of each task.
 
-NEED OVERALL DIAGRAM
+The diagram below shows how the cooperative tasks interact with drivers
+and pass data via shares and queues.
 
+.. graphviz::
+   :align: center
+
+   digraph firmware_arch {
+     rankdir=LR;
+     fontsize=10;
+     node [shape=box, style="rounded,filled", fillcolor="#f8f8f8", fontname="Helvetica"];
+
+     // =========================
+     // Task nodes (with P/T)
+     // =========================
+     subgraph cluster_tasks {
+       label = "Tasks (priority P, period T)";
+       style = "rounded";
+       color = "#cccccc";
+
+       Talker       [label="Talker\nP=1, T=10 ms"];
+       IMU_Interface[label="IMU_Interface\nP=4, T=30 ms"];
+       Controller   [label="Controller\nP=5, T=30 ms"];
+       LineFollow   [label="LineFollow\nP=2, T=30 ms"];
+       Pursuer      [label="Pursuer\nP=3, T=30 ms"];
+       SS_Simulator [label="SS_Simulator\nP=3, T=30 ms"];
+       Garbage      [label="GarbageCollector\nP=0, T=30 ms"];
+     }
+
+     // =========================
+     // Drivers / hardware
+     // =========================
+     subgraph cluster_drivers {
+       label = "Drivers / Hardware";
+       style = "rounded";
+       color = "#cccccc";
+
+       MotorDrv   [label="Motors\n(Motor left/right)"];
+       EncoderDrv [label="Encoders\n(Encoder left/right)"];
+       IMUDrv     [label="IMU\n(BNO055)"];
+       LineSens   [label="LineSensor\n(array)"];
+       BTDrv      [label="BTComm\n(UART)"];
+       ObstSens   [label="Obstacle sensor"];
+     }
+
+     // Common edge style
+     edge [fontname="Helvetica", fontsize=9];
+
+     // =========================
+     // Task <-> Driver interactions
+     // =========================
+
+     // Talker <-> Bluetooth
+     BTDrv   -> Talker      [label="rx bytes"];
+     Talker  -> BTDrv       [label="telemetry packets"];
+
+     // IMU interface
+     IMUDrv      -> IMU_Interface [label="sensor data"];
+     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate\n(Queues)"];
+
+     // Controller <-> motors/encoders
+     EncoderDrv  -> Controller    [label="wheel pos/vel\n(Encoder APIs)"];
+     Controller  -> MotorDrv      [label="set_effort()"];
+
+     // Line sensor
+     LineSens    -> LineFollow    [label="line readings"];
+
+     // Obstacle sensor
+     ObstSens    -> Pursuer       [label="wall hit?"];
+
+     // =========================
+     // Shares / queues as labeled data flows
+     // =========================
+
+     // Speed setpoint share
+     Talker      -> Controller    [label="velo_set (Share)\n$SPD commands"];
+     Pursuer     -> Controller    [label="velo_set (Share)"];
+     Controller  -> Talker        [label="cmd_L/R (Queues)\nfor telemetry"];
+
+     // Line-follow & pursuit offset
+     LineFollow  -> Controller    [label="offset (Share)\nline follower"];
+     Pursuer     -> Controller    [label="offset (Share)\npure pursuit"];
+
+     // Line-follower enable flag
+     Pursuer     -> LineFollow    [label="lf_stop (Share)\nstop line follow"];
+
+     // IMU disable flag to SS model
+     Pursuer     -> SS_Simulator  [label="imu_off (Share)\nIMU disable flag"];
+
+     // Wheel logs from controller
+     Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R (Queues)"];
+     Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R (Queues)"];
+
+     // IMU heading / yaw to others
+     IMU_Interface -> Talker      [label="Eul_head,\nyaw_rate (Queues)"];
+
+     // State-space outputs
+     SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R (Queues)"];
+     SS_Simulator -> LineFollow   [label="X_pos (Queue)"];
+     SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head (Queues)"];
+
+     // Pursuer adjusts commands
+     Pursuer     -> Talker        [label="indirectly affects\ntelemetry via\nvelo_set/offset"];
+
+     // Garbage collector (background)
+     Garbage     -> Garbage       [style=dotted, label="gc.collect()"];
+   }
 The following table contains additional information about the 
 inter-task communication variables shown in the diagram. Variables 
 labeled (predicted) contian datat that came from the state space observer

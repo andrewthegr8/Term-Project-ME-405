@@ -24,6 +24,8 @@ extensions = [
     "sphinx.ext.napoleon",
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.graphviz',   
+
 ]
 autosummary_generate = True
 
