@@ -35,6 +35,57 @@ autodoc_mock_imports = [
     "ucollections",
 ]
 
+# ------------------------------------------------------------
+# MicroPython compatibility mocks so CPython can import firmware
+# ------------------------------------------------------------
+import types
+
+# Create dummy 'pyb' module with dummy classes used in your code
+pyb = types.ModuleType("pyb")
+
+class DummyPin:
+    OUT_PP = 0
+    def __init__(self, *a, **kw): pass
+    def high(self): pass
+    def low(self): pass
+
+class DummyTimer:
+    PWM = 0
+    ENC_AB = 1
+    def __init__(self, *a, **kw): pass
+    def channel(self, *a, **kw): return self
+    def counter(self, *a, **kw): return 0
+    def period(self): return 65535
+
+pyb.Pin = DummyPin
+pyb.Timer = DummyTimer
+
+sys.modules["pyb"] = pyb
+
+
+# ---- Mock micropython.native decorator ----
+micropython = types.ModuleType("micropython")
+def native(func): return func
+micropython.native = native
+sys.modules["micropython"] = micropython
+
+
+# ---- Mock ucollections.deque ----
+ucollections = types.ModuleType("ucollections")
+from collections import deque
+ucollections.deque = deque
+sys.modules["ucollections"] = ucollections
+
+
+# ---- Mock time.ticks_us and ticks_diff ----
+import time as _time
+def ticks_us(): return int(_time.perf_counter() * 1_000_000)
+def ticks_diff(new, old): return new - old
+
+if not hasattr(_time, "ticks_us"):
+    # inject these into the time module for import compatibility
+    _time.ticks_us = ticks_us
+    _time.ticks_diff = ticks_diff
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
