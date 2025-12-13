@@ -331,7 +331,7 @@ Hardware Drivers
 The following classes are used for interfacing with hardware.
 
 Bluetooth Communication Driver
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.BTComm
    :members:
@@ -339,7 +339,7 @@ Bluetooth Communication Driver
    :show-inheritance:
 
 IMU (BNO055) Driver
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.IMU
    :members:
@@ -347,7 +347,7 @@ IMU (BNO055) Driver
    :show-inheritance:
 
 Line Sensor Array Driver
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.LineSensor
    :members:

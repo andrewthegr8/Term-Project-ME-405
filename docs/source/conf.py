@@ -46,6 +46,7 @@ import time as _time
 from collections import deque
 import builtins
 import sys
+import struct as _struct
 
 
 # Sphinx should not try to import real MicroPython modules
@@ -280,6 +281,20 @@ if not hasattr(mp, "native"):
     def native(func):
         return func
     mp.native = native
+
+# ------------------------------
+# Fake/compat ustruct module
+# ------------------------------
+if "ustruct" not in sys.modules:
+    ustruct = types.ModuleType("ustruct")
+
+    # Just proxy to the standard library struct functions
+    ustruct.pack = _struct.pack
+    ustruct.unpack = _struct.unpack
+    ustruct.pack_into = _struct.pack_into
+    ustruct.calcsize = _struct.calcsize
+
+    sys.modules["ustruct"] = ustruct
 
 # ------------------------------------------------------------
 # After all MicroPython mocks are in place, alias package modules
