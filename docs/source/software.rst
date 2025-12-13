@@ -119,6 +119,8 @@ and pass data via shares and queues.
      // Garbage collector (background)
      Garbage     -> Garbage       [style=dotted, label="gc.collect()"];
    }
+
+
 The following table contains additional information about the 
 inter-task communication variables shown in the diagram. Variables 
 labeled (predicted) contian datat that came from the state space observer
@@ -270,7 +272,7 @@ rather than hardware.
 
 
 
-.. _main-program:``
+.. _main-program:
 
 Main Program
 --------------
