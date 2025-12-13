@@ -198,6 +198,48 @@ if not hasattr(_time, "ticks_us"):
     _time.ticks_us = ticks_us
     _time.ticks_diff = ticks_diff
 
+# --- Extra pyb stubs for docs build (UART, I2C, IRQ helpers) ---
+
+class UART:
+    """Stub for pyb.UART used only for documentation."""
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def read(self, *args, **kwargs):
+        return b""
+
+    def write(self, *args, **kwargs):
+        return 0
+
+class I2C:
+    """Stub for pyb.I2C used only for documentation."""
+    CONTROLLER = 0
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def mem_read(self, *args, **kwargs):
+        return b""
+
+    def mem_write(self, *args, **kwargs):
+        return 0
+
+# Attach to the fake pyb module
+pyb.UART = UART
+pyb.I2C = I2C
+
+# IRQ helpers used by task_share.Queue/Share
+def _disable_irq():
+    return 0
+
+def _enable_irq(state):
+    return None
+
+pyb.disable_irq = _disable_irq
+pyb.enable_irq = _enable_irq
+
+
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
