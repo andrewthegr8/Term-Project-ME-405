@@ -5,6 +5,34 @@ import sys
 # Add repo root (folder that contains `code/` and `pyproject.toml`)
 sys.path.insert(0, os.path.abspath('../..'))
 
+import importlib
+
+def alias_module(short_name, full_name):
+    """Map a fully-qualified module to a short top-level name.
+
+    Example: alias_module("cotask", "me405.cotask") makes
+    'import cotask' work by returning me405.cotask.
+    """
+    try:
+        mod = importlib.import_module(full_name)
+    except Exception:
+        return
+    sys.modules.setdefault(short_name, mod)
+
+# Map package modules to the short names used in main.py
+alias_module("cotask", "me405.cotask")
+alias_module("task_share", "me405.task_share")
+
+alias_module("Encoder", "me405.Encoder")
+alias_module("Motor", "me405.Motor")
+alias_module("LineSensor", "me405.LineSensor")
+alias_module("BTComm", "me405.BTComm")
+alias_module("IMU", "me405.IMU")
+alias_module("SSModel", "me405.SSModel")
+alias_module("PIController", "me405.PIController")
+alias_module("ThePursuer", "me405.ThePursuer")
+
+
 # -- Project information
 
 project = 'ME 405 Term Project'
@@ -86,6 +114,18 @@ class Timer:
 
     def period(self):
         return 65535
+
+# Stub ADC used by LineSensor
+class ADC:
+    """Stub for pyb.ADC used only during docs build."""
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def read(self):
+        # Return something plausible; docs don't care about the value
+        return 0
+
+pyb.ADC = ADC
 
 
 pyb.Pin = Pin
@@ -248,6 +288,25 @@ def _enable_irq(state):
 pyb.disable_irq = _disable_irq
 pyb.enable_irq = _enable_irq
 
+# ------------------------------
+# Fake/augment micropython module
+# ------------------------------
+mp = sys.modules.get("micropython")
+if mp is None:
+    mp = types.ModuleType("micropython")
+    sys.modules["micropython"] = mp
+
+# const(x) should just return x on CPython
+if not hasattr(mp, "const"):
+    def const(x):
+        return x
+    mp.const = const
+
+# native decorator: no-op on CPython
+if not hasattr(mp, "native"):
+    def native(func):
+        return func
+    mp.native = native
 
 
 intersphinx_mapping = {

@@ -270,7 +270,7 @@ rather than hardware.
 
 
 
-.. _main-program:
+.. _main-program:``
 
 Main Program
 --------------
@@ -286,7 +286,7 @@ Helper Classes
 The following classes are initialized and passed to tasks, 
 except, of course, :mod:`me405.cotask` which schedules and runs the tasks.
 
-PI speed controller
+PI Speed Controller
 ~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.PIController
@@ -294,7 +294,7 @@ PI speed controller
    :undoc-members:
    :show-inheritance:
 
-State-space model
+State-Space Model
 ~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.SSModel
@@ -302,7 +302,7 @@ State-space model
    :undoc-members:
    :show-inheritance:
 
-Pure-pursuit path tracker
+Point Targeting Algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.ThePursuer
@@ -310,7 +310,7 @@ Pure-pursuit path tracker
    :undoc-members:
    :show-inheritance:
 
-Task scheduler
+Task Scheduler
 ~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.cotask
@@ -318,7 +318,7 @@ Task scheduler
    :undoc-members:
    :show-inheritance:
 
-Shared data structures
+Shared Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.task_share
@@ -330,7 +330,7 @@ Hardware Drivers
 ----------------------------------
 The following classes are used for interfacing with hardware.
 
-Bluetooth communication
+Bluetooth Communication Driver
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.BTComm
@@ -338,7 +338,7 @@ Bluetooth communication
    :undoc-members:
    :show-inheritance:
 
-IMU (BNO055) driver
+IMU (BNO055) Driver
 ~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.IMU
@@ -346,7 +346,7 @@ IMU (BNO055) driver
    :undoc-members:
    :show-inheritance:
 
-Line sensor array
+Line Sensor Array Driver
 ~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.LineSensor
@@ -355,7 +355,7 @@ Line sensor array
    :show-inheritance:
 
 
-Motor driver
+Motor Driver
 ~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.Motor
@@ -363,7 +363,7 @@ Motor driver
    :undoc-members:
    :show-inheritance:
 
-Encoder
+Encoder Driver
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: me405.Encoder
