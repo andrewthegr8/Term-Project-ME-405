@@ -14,5 +14,5 @@ differential drive robot. It covers:
 
    getting-started
    hardware
-   firmware
+   software
    api
