@@ -2,15 +2,8 @@
 import os
 import sys
 
-# Path to repo root (the folder that contains `code/` and `pyproject.toml`)
-PROJECT_ROOT = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
-
-# Put our project root *before* everything else so it wins over stdlib `code`
-sys.path.insert(0, PROJECT_ROOT)
-
-# Optionally also add the `code` directory itself and its `src` subpackage
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "code"))
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "code", "src"))
+# Add repo root (folder that contains `code/` and `pyproject.toml`)
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information
 

@@ -9,7 +9,7 @@ Firmware
 Motor driver
 ===========
 
-.. automodule:: code.src.Motor
+.. automodule:: code.Motor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -17,7 +17,7 @@ Motor driver
 Encoder
 =======
 
-.. automodule:: code.src.Encoder
+.. automodule:: code.Encoder
    :members:
    :undoc-members:
    :show-inheritance:

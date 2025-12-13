@@ -1,7 +1,6 @@
-Getting started
+Overview
 ===============
 
 .. note::
 
-   TODO: Describe how to flash MicroPython, copy the code to the board,
-   and run a simple test program on the robot.
+   TODO: Background about ME 405, course overview, results
