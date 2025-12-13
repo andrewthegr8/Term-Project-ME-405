@@ -21,9 +21,20 @@ extensions = [
     'sphinxcontrib.youtube',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
+    "sphinx.ext.napoleon",
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
 ]
+autosummary_generate = True
+
+# Tell autodoc to pretend these MicroPython-only modules exist.
+# This lets us import me405.Motor, me405.Encoder, etc. on Read the Docs.
+autodoc_mock_imports = [
+    "pyb",
+    "micropython",
+    "ucollections",
+]
+
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),

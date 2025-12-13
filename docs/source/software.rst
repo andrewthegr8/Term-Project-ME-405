@@ -7,7 +7,7 @@ Firmware
    modules, how motion commands work, etc.).
 
 Motor driver
-===========
+=============
 
 .. automodule:: me405.Motor
    :members:
@@ -15,7 +15,7 @@ Motor driver
    :show-inheritance:
 
 Encoder
-=======
+=========
 
 .. automodule:: me405.Encoder
    :members:

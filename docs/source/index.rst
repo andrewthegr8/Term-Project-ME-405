@@ -22,7 +22,6 @@ Robot features include
    :caption: Contents:
 
    overview
-   getting-started
    hardware
    software
    api
