@@ -1,8 +1,18 @@
-API Reference
+API reference
 =============
 
-.. autosummary::
-   :toctree: generated
+Motor driver
+------------
 
-   code.src.Motor
-   code.src.Encoder
+.. automodule:: code.Motor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Encoder
+-------
+
+.. automodule:: code.Encoder
+   :members:
+   :undoc-members:
+   :show-inheritance:
