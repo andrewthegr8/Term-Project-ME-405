@@ -6,3 +6,6 @@ build-backend = "flit_core.buildapi"
 name = "ME-405-Term-Project"
 authors = [{name = "Andrew Jones", email = "ajone168@calpoly.edu"}]
 dynamic = ["version", "description"]
+
+[tool.flit.module]
+name = "code"
