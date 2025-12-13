@@ -9,4 +9,4 @@ description = "Code and documentation for a differential drive robot to navigate
 authors = [{name = "Andrew Jones", email = "ajone168@calpoly.edu"}]
 
 [tool.flit.module]
-name = "code"
+name = "me405"

@@ -4,7 +4,7 @@ API reference
 Motor driver
 ------------
 
-.. automodule:: code.Motor
+.. automodule:: me405.Motor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -12,7 +12,7 @@ Motor driver
 Encoder
 -------
 
-.. automodule:: code.Encoder
+.. automodule:: me405.Encoder
    :members:
    :undoc-members:
    :show-inheritance:
