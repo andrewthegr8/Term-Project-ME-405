@@ -31,7 +31,6 @@ at which point it targets checkpoints and solo cups on the course.
        padding-bottom: 100%; /* 9:16 aspect ratio */
        height: 0;
        overflow: hidden;
-       max-width: 400px; /* optional: limit width so it's not huge */
        margin: 20px auto;
        background: #000;
      }
@@ -52,7 +51,7 @@ at which point it targets checkpoints and solo cups on the course.
      </iframe>
    </div>
 
-   
+
 
 
 

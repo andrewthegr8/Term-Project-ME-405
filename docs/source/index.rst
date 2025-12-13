@@ -9,6 +9,7 @@ The primary project objective was for the robot to quickly and reliably
 complete a small obstacle course.
 
 Robot features include
+
 * Realtime State Estimation via a State Space Observer with Feedback
 * Line Following Capabilities via Analog IR Sesnors
 * Path Planning with Velocity and Heading Control
