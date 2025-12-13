@@ -12,6 +12,7 @@
 
 from pyb import Pin, Timer
 import micropython
+import pyb
 
 class Motor:
     """Driver for a single DC motor using a DRV8838-style driver.
