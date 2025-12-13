@@ -1,11 +1,3 @@
-#TODO
-#Bunch of improvements from chat, mainly preallocating array for sending data and then passing into talker
-#Retooled bluetooth sending stuff NOT TESTED!!    
-#Impoved encoder driver NOT TESTED!!
-#Implemented new SS model and improved some memory stuff NOT TESTED!!
-#Combine motor drivers 
-#Need to apply overflow logic to imu for heading because model will infinitely increment and decrement I think
-
 """!
 @file basic_tasks.py
     This file contains a demonstration program that runs some tasks, an
@@ -21,7 +13,7 @@
 import gc
 from pyb import Pin, Timer, UART, I2C
 import time
-from time import ticks_ms, ticks_diff, sleep, ticks_us
+from time import ticks_ms, ticks_diff, sleep
 import cotask
 import task_share
 import ustruct
@@ -38,13 +30,8 @@ from SSModel import SSModel
 from PIController import PIController
 from ThePursuer import ThePursuer
 
-#Tunabel Parameters
+#Tunable Parameters
 MAXDELTA = const(25) #Maximum amount by which the duty cycle will be increased or decreased per tick
-#kp_lf = const()
-#Ki_lf = const()
-BASESPEED = const(15) #Romi's base linear velocity
-kp_head = const(9)       #Proportional gain for heading control
-ki_head = const(0)     #Integral gain for heading control
 ARRIVED = const(2.5)     #Once we're this close to the point, start targeting the next
 
 
@@ -102,37 +89,14 @@ def Talker_fun(shares):
                         sendit = True
         elif state == 1:  #Interpret input
             rawcmd = btcomm.get_command() #We only end up here when there's a command waiting
-            cmd_success = True
             if not rawcmd:
                 pass
             elif rawcmd[0] == '$': #See if we were given a command
-                if rawcmd[1:3] == 'AA':
-                      pass
-                      #serial_device.write('$AA\r\n'.encode('utf-8')) #Complete handshake
-                elif rawcmd[1:7] == 'D_S_GO': #Data_Stream_Go
-                    streamdata = True
-                elif rawcmd[1:7] == 'D_S_ST': #Data_Stream_Stop
-                    streamdata = False
-                elif rawcmd[1:4] == 'SPD': #Set Motor Speed (in/s)
+                if rawcmd[1:4] == 'SPD': #Set Motor Speed (in/s)
                     try:
                         velo_set.put(float(rawcmd[4:]))
                     except:
-                        cmd_success = False
-                #Disable checking for contorller gains for line follower for now
-                #elif rawcmd[1:6] == 'LF_KP': #Line follower Ki value
-                #    try:
-                #        #print(float(rawcmd[6:]))
-                #        kp_lf.put(float(rawcmd[6:]))
-                #    except:
-                #        cmd_success = False
-                #elif rawcmd[1:6] == 'LF_KI': #Line follower Ki value
-                #    try:
-                #        #print(float(rawcmd[6:]))
-                #        ki_lf.put(float(rawcmd[6:]))
-                #    except:
-                #        cmd_success = False
-            #btcomm.handshake(rawcmd) #****DISABLING HANDSHAKING BECAUSE IT ISN"T WORKING ANYWAY          
-            #if not cmd_success: serial_device.write((':(' + '\r\n').encode('utf-8'))
+                        pass
             state = 0 #Go back to interfacing
         yield state
 
@@ -140,12 +104,7 @@ def IMU_Interface_fun(shares):
     imu, Eul_head, yaw_rate, SENS_LED = shares
     while True:
         Eul_head.put(imu.get_heading()) #Convert rads to degs
-        yaw_rate.put(0) #We don't use it so why bother reading?
-        #yaw_rate.put(imu.get_yaw_rate()) #Convert rad/s to deg/s
-        #if not imu.cal_status():
-        #    SENS_LED.high()
-        #else:
-        #    SENS_LED.low()
+        yaw_rate.put(0) #Not currently using yaw_rate so no reason to read it from IMU
         yield
 
 def SS_Simulator_fun(shares):

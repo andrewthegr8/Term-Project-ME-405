@@ -1,22 +1,18 @@
-Welcome to Lumache's documentation!
-===================================
+Differential Drive Robot (MicroPython)
+======================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+This project contains the MicroPython firmware and documentation for a small
+differential drive robot. It covers:
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
-
-.. note::
-
-   This project is under active development.
-
-Contents
---------
+* Motor control and PWM
+* Simple kinematics & odometry
+* Basic motion commands (drive straight, turn, follow arc)
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
-   usage
+   getting-started
+   hardware
+   firmware
    api
