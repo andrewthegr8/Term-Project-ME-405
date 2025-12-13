@@ -300,6 +300,9 @@ PI Speed Controller
 State-Space Model
 ~~~~~~~~~~~~~~~~~
 
+See the :doc:`ssmodel` page for more detailled information about
+the model. This section focuses primarily on program functionality.
+
 .. automodule:: me405.SSModel
    :members:
    :undoc-members:
