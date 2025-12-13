@@ -24,4 +24,3 @@ Robot features include
    overview
    hardware
    software
-   api

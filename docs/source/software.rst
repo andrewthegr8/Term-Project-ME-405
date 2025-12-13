@@ -6,7 +6,7 @@ are run by a prioritized scheduler. Each task is a generator function,
 and many are configured as finite state machines. Tasks communicate using
 ``share`` and ``queue`` objects. 
 
-All tasks are stored in 
+All tasks are stored in a single 
 
 
 
