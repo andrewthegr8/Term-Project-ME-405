@@ -7,19 +7,15 @@ and many are configured as finite state machines. Tasks communicate using
 ``share`` and ``queue`` objects from :mod:`me405.task_share`, which, along with the scheduler, are 
 adapted from code developed by Dr. John Ridgley. The original code for the
 scheduler and inter-task communication objects
-can be found in the `ME405-Support
-<https://github.com/spluttflob/ME405-Support>` repository. 
+can be found in the `ME405-Support <https://github.com/spluttflob/ME405-Support>`_ repository. 
 
 This diagram shows all the tasks and their scheduled frequency, as well as
 what shares and queues the tasks interface with.
 
 NEED OVERALL DIAGRAM
 
-The following table contians additional information about the 
+The following table contains additional information about the 
 inter-task communication variables shown in the diagram.
-
-Shared Variables and Queues
-===========================
 
 .. list-table::
    :header-rows: 1
