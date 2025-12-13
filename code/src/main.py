@@ -1,13 +1,7 @@
-"""!
-@file basic_tasks.py
-    This file contains a demonstration program that runs some tasks, an
-    inter-task shared variable, and a queue. The tasks don't really @b do
-    anything; the example just shows how these elements are created and run.
+"""Main control file for Romi
 
-@author JR Ridgely
-@date   2021-Dec-15 JRR Created from the remains of previous example
-@copyright (c) 2015-2021 by JR Ridgely and released under the GNU
-    Public License, Version 2. 
+    This file is comprised of several tasks that are scheduled to run at 
+    desired intervals
 """
 
 import gc
