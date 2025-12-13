@@ -1,8 +1,8 @@
-Differential Drive Robot (MicroPython)
+Romi Control Architecture (MicroPython)
 ======================================
 
 This project contains MicroPython software and documentation for a small
-differential drive robot. It was completed as part of a course (ME 405) at
+differential drive robot (Romi). It was completed as part of a course (ME 405) at
 Cal Poly SLO.
 
 The primary project objective was for the robot to quickly and reliably
