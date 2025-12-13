@@ -1,16 +1,25 @@
 # Configuration file for the Sphinx documentation builder.
-
-# -- Project information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))  # so `import code` works
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+# Path to repo root (the folder that contains `code/` and `pyproject.toml`)
+PROJECT_ROOT = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
-release = '0.1'
-version = '0.1.0'
+# Put our project root *before* everything else so it wins over stdlib `code`
+sys.path.insert(0, PROJECT_ROOT)
+
+# Optionally also add the `code` directory itself and its `src` subpackage
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "code"))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "code", "src"))
+
+# -- Project information
+
+project = 'ME 405 Term Project'
+copyright = '2025, Andrew Jones'
+author = 'Andrew Jones'
+
+release = '1.0'
+version = '1.0.0'
 
 # -- General configuration
 
