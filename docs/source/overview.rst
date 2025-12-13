@@ -28,7 +28,7 @@ at which point it targets checkpoints and solo cups on the course.
    <style>
      .video-container-vertical {
        position: relative;
-       padding-bottom: 177.78%; /* 9:16 aspect ratio */
+       padding-bottom: 100%; /* 9:16 aspect ratio */
        height: 0;
        overflow: hidden;
        max-width: 400px; /* optional: limit width so it's not huge */
@@ -51,6 +51,8 @@ at which point it targets checkpoints and solo cups on the course.
        allowfullscreen>
      </iframe>
    </div>
+
+   
 
 
 

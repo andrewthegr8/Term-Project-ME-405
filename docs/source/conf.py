@@ -39,32 +39,102 @@ autodoc_mock_imports = [
 # MicroPython compatibility mocks so CPython can import firmware
 # ------------------------------------------------------------
 import types
+import time as _time
+from collections import deque
+import builtins
 
-# Create dummy 'pyb' module with dummy classes used in your code
+# Sphinx should not try to import real MicroPython modules
+autodoc_mock_imports = ["pyb", "micropython", "ucollections"]
+
+# ------------------------------
+# Mock 'pyb' module and classes
+# ------------------------------
 pyb = types.ModuleType("pyb")
 
-class DummyPin:
+class Pin:
+    """Stub for pyb.Pin used only for documentation."""
     OUT_PP = 0
-    def __init__(self, *a, **kw): pass
-    def high(self): pass
-    def low(self): pass
 
-class DummyTimer:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def high(self):
+        pass
+
+    def low(self):
+        pass
+
+
+class Timer:
+    """Stub for pyb.Timer used only for documentation."""
     PWM = 0
     ENC_AB = 1
-    def __init__(self, *a, **kw): pass
-    def channel(self, *a, **kw): return self
-    def counter(self, *a, **kw): return 0
-    def period(self): return 65535
 
-pyb.Pin = DummyPin
-pyb.Timer = DummyTimer
+    def __init__(self, *args, **kwargs):
+        pass
 
+    def channel(self, *args, **kwargs):
+        # Return self so that `self.tim.channel(...)` is harmless
+        return self
+
+    def counter(self, *args, **kwargs):
+        return 0
+
+    def period(self):
+        return 65535
+
+
+pyb.Pin = Pin
+pyb.Timer = Timer
+
+# Make this fake module available as 'pyb'
 sys.modules["pyb"] = pyb
 
+# Also put it in builtins so code that *only* does
+# "from pyb import Pin, Timer" can still see `pyb` in annotations.
+builtins.pyb = pyb
+
+# ------------------------------
+# Mock 'micropython' module
+# ------------------------------
+micropython = types.ModuleType("micropython")
+
+def native(func):
+    """Decorator stub that just returns the function unchanged."""
+    return func
+
+micropython.native = native
+sys.modules["micropython"] = micropython
+
+# ------------------------------
+# Mock 'ucollections.deque'
+# ------------------------------
+ucollections = types.ModuleType("ucollections")
+ucollections.deque = deque
+sys.modules["ucollections"] = ucollections
+
+# ------------------------------
+# Provide time.ticks_us / ticks_diff
+# ------------------------------
+def ticks_us():
+    return int(_time.perf_counter() * 1_000_000)
+
+def ticks_diff(new, old):
+    return new - old
+
+# Inject into the real 'time' module so
+# "from time import ticks_us, ticks_diff" works.
+if not hasattr(_time, "ticks_us"):
+    _time.ticks_us = ticks_us
+if not hasattr(_time, "ticks_diff"):
+    _time.ticks_diff = ticks_diff
+
+#Show type hints nicely in the parameter docs
+autodoc_typehints = "description"
+
 autodoc_type_aliases = {
-    "DummyPin": "pyb.Pin",
-    "DummyTimer": "pyb.Timer",
+    "Pin": "pyb.Pin",
+    "Timer": "pyb.Timer",
 }
 
 
