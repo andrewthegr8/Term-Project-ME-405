@@ -480,20 +480,8 @@ if __name__ == "__main__":
     #Shares
     velo_set = task_share.Share('f', thread_protect=False, name="Motor Speed Set Point")
     imu_off  = task_share.Share('I', thread_protect=False, name="IMU disable flag")
-    #kp_lm      = task_share.Share('f', thread_protect=False, name="Kp - Left Motor")
-    #ki_lm      = task_share.Share('f', thread_protect=False, name="Ki - Left Motor")
-    #kp_rm      = task_share.Share('f', thread_protect=False, name="Kp - Right Motor")
-    #ki_rm      = task_share.Share('f', thread_protect=False, name="Ki - Right Motor")
-    #kp_lf      = task_share.Share('f', thread_protect=False, name="Kp - Line Follower")
-    #ki_lf      = task_share.Share('f', thread_protect=False, name="Ki - Line Follower")
     offset     = task_share.Share('f', thread_protect=False, name="Motor setpoint adjustment from line follower")
     lf_stop    = task_share.Share('I', thread_protect=False, name="Line follow stop flag")
-    #near_y     = task_share.Share('I', thread_protect=False, name="near the Y flag")
-
-    #last_velo_L= task_share.Share('f', thread_protect=False, name="Last Velocity Value - Left Motor")
-    #last_time_L= task_share.Share('f', thread_protect=False, name="Last Time Value -  Left Motor")
-    #last_velo_R= task_share.Share('f', thread_protect=False, name="Last Velocity Value - Right Motor")
-    #last_time_R= task_share.Share('f', thread_protect=False, name="Last Time Value - Right Motor")
     gc.collect()
 
 

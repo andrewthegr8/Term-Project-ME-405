@@ -129,6 +129,42 @@ if not hasattr(_time, "ticks_us"):
 if not hasattr(_time, "ticks_diff"):
     _time.ticks_diff = ticks_diff
 
+
+# ------------------------------------------------------------
+# MicroPython compatibility: fake 'utime' for docs build only
+# ------------------------------------------------------------
+utime = types.ModuleType("utime")
+
+def _ticks_us():
+    """Return a monotonically increasing time in microseconds (stub)."""
+    return int(_time.perf_counter() * 1_000_000)
+
+def _ticks_ms():
+    """Return a monotonically increasing time in milliseconds (stub)."""
+    return int(_time.perf_counter() * 1_000)
+
+def _ticks_diff(new, old):
+    """Return signed difference between two tick readings (stub)."""
+    return new - old
+
+def _sleep_ms(ms):
+    """Sleep for the given number of milliseconds (stub)."""
+    _time.sleep(ms / 1000.0)
+
+def _sleep_us(us):
+    """Sleep for the given number of microseconds (stub)."""
+    _time.sleep(us / 1_000_000.0)
+
+# Wire these into the fake utime module
+utime.ticks_us = _ticks_us
+utime.ticks_ms = _ticks_ms
+utime.ticks_diff = _ticks_diff
+utime.sleep_ms = _sleep_ms
+utime.sleep_us = _sleep_us
+
+# Register the fake module so `import utime` works
+sys.modules["utime"] = utime
+
 #Show type hints nicely in the parameter docs
 autodoc_typehints = "description"
 

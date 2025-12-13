@@ -10,8 +10,158 @@ scheduler and inter-task communication objects
 can be found in the `ME405-Support
 <https://github.com/spluttflob/ME405-Support>` repository. 
 
+This diagram shows all the tasks and their scheduled frequency, as well as
+what shares and queues the tasks interface with.
 
+NEED OVERALL DIAGRAM
 
+The following table contians additional information about the 
+inter-task communication variables shown in the diagram.
+
+Shared Variables and Queues
+===========================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 10 15 10 50
+
+   * - **Name**
+     - **Kind**
+     - **Data Type**
+     - **Size**
+     - **Description**
+
+   * - velo_set
+     - Share
+     - f (float)
+     - —
+     - Motor speed setpoint
+
+   * - imu_off
+     - Share
+     - I (uint16)
+     - —
+     - IMU disable flag
+
+   * - offset
+     - Share
+     - f (float)
+     - —
+     - Motor setpoint adjustment from line follower
+
+   * - lf_stop
+     - Share
+     - I (uint16)
+     - —
+     - Line-follow stop flag
+
+   * - cmd_L
+     - Queue
+     - f (float)
+     - 10
+     - Left motor command signal
+
+   * - cmd_R
+     - Queue
+     - f (float)
+     - 10
+     - Right motor command signal
+
+   * - time_L
+     - Queue
+     - I (uint16)
+     - 20
+     - Left motor timestamp
+
+   * - pos_L
+     - Queue
+     - f (float)
+     - 20
+     - Left motor position
+
+   * - velo_L
+     - Queue
+     - f (float)
+     - 20
+     - Left motor velocity
+
+   * - time_R
+     - Queue
+     - I (uint16)
+     - 20
+     - Right motor timestamp
+
+   * - pos_R
+     - Queue
+     - f (float)
+     - 20
+     - Right motor position
+
+   * - velo_R
+     - Queue
+     - f (float)
+     - 20
+     - Right motor velocity
+
+   * - Eul_head
+     - Queue
+     - f (float)
+     - 20
+     - Euler heading (radians) from IMU
+
+   * - yaw_rate
+     - Queue
+     - f (float)
+     - 20
+     - Yaw rate (radians/s) from IMU
+
+   * - X_pos
+     - Queue
+     - f (float)
+     - 10
+     - Absolute X position
+
+   * - Y_pos
+     - Queue
+     - f (float)
+     - 10
+     - Absolute Y position
+
+   * - p_v_R
+     - Queue
+     - f (float)
+     - 10
+     - Total path length (right wheel)
+
+   * - p_v_L
+     - Queue
+     - f (float)
+     - 10
+     - Total velocity
+
+   * - p_head
+     - Queue
+     - f (float)
+     - 10
+     - Heading (radians)
+
+   * - p_yaw
+     - Queue
+     - f (float)
+     - 10
+     - Yaw rate (radians/s)
+
+   * - p_pos_L
+     - Queue
+     - f (float)
+     - 10
+     - Path length — left wheel
+
+   * - p_pos_R
+     - Queue
+     - f (float)
+     - 10
+     - Path length — right wheel
 
 
 
