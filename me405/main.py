@@ -1,7 +1,38 @@
-"""Main control file for Romi
+"""Main control script for the Romi differential-drive robot.
 
-    This file is comprised of several tasks that are scheduled to run at 
-    desired intervals
+This module is the top-level firmware entry point for the ME 405 term
+project. It wires together all of the hardware drivers (motors, encoders,
+IMU, line sensor, Bluetooth, etc.), configures the cooperative task
+scheduler (:mod:`cotask`), and starts a set of periodic tasks that
+implement the robot's behavior.
+
+Overview
+--------
+
+On startup, the ``__main__`` block performs the following steps:
+
+* Configure timers, pins, and peripherals for:
+  - Motor drivers and encoders
+  - Bluetooth UART link
+  - Line sensor array
+  - IMU (BNO055)
+  - Obstacle sensor and status LEDs
+* Create :class:`task_share.Share` and :class:`task_share.Queue` instances
+  used to exchange data between tasks.
+* Construct cooperative tasks for:
+  - Bluetooth communication (:func:`Talker_fun`)
+  - IMU interface (:func:`IMU_Interface_fun`)
+  - Motor PI control (:func:`Controller_fun`)
+  - Line following (:func:`LineFollow_fun`)
+  - Pure pursuit path tracking (:func:`Pursuer_fun`)
+  - State-space model simulation (:func:`SS_Simulator_fun`)
+  - Periodic garbage collection (:func:`GarbageCollector_fun`)
+* Register those tasks with :mod:`cotask` and run the priority scheduler
+  in a loop until a keyboard interrupt is received.
+
+This module is intended to run on a MicroPython-enabled Romi robot. When
+used with Sphinx/ReadTheDocs, the task functions are imported so that
+their docstrings can be rendered in the firmware documentation.
 """
 
 import gc
@@ -14,7 +45,8 @@ import ustruct
 from array import array
 from math import copysign
 from micropython import const
-#Import custom object (drivers, etc)
+
+# Import custom drivers and controller classes
 from Encoder import Encoder
 from Motor import Motor
 from LineSensor import LineSensor
@@ -24,111 +56,216 @@ from SSModel import SSModel
 from PIController import PIController
 from ThePursuer import ThePursuer
 
-#Tunable Parameters
-MAXDELTA = const(25) #Maximum amount by which the duty cycle will be increased or decreased per tick
-ARRIVED = const(2.5)     #Once we're this close to the point, start targeting the next
+# Tunable parameters
+#: Maximum change in motor duty cycle per control tick.
+MAXDELTA = const(25)
+#: Distance threshold (inches) used by the pure-pursuit path planner to
+#: decide when a waypoint has been "arrived" at.
+ARRIVED = const(2.5)
 
 
-###WARNING: If you continually send commands to Romi, it currently prioritizes recieving over sending so it will never stream data
 def Talker_fun(shares):
-    '''
-    This task is responsible for sending and recieivng data over bluetooth
-    '''
+    """Bluetooth communication task.
 
-    #Unpack chares and queues
-    packet, packet_fmt, btcomm, velo_set, kp_lf, ki_lf, time_L, pos_L, velo_L, time_R, pos_R, velo_R, cmd_L, cmd_R, offset, Eul_head, yaw_rate, X_pos, Y_pos, p_v_R, p_v_L, p_head, p_yaw, p_pos_L, p_pos_R = shares
+    This task is responsible for sending and receiving data over the
+    Bluetooth link. It uses the :class:`BTComm` helper class to parse
+    incoming commands and to ship telemetry packets containing motor
+    states, kinematic estimates, and controller variables.
+
+    The task operates as a small state machine:
+
+    * **State 0** – Listen for incoming characters. If a complete command
+      is available, transition to state 1. Otherwise, if enough samples
+      are present in the various telemetry queues, pack them into a
+      structured binary packet and send (every other iteration) over
+      Bluetooth.
+    * **State 1** – Interpret a fully received command. Currently
+      supports a ``$SPDxx.x`` command to change the requested wheel
+      speed. After processing, transitions back to state 0.
+
+    Args:
+        shares: Tuple of share/queue objects and configuration values, in
+            the following order:
+
+            * ``packet`` (:class:`bytearray`): Outgoing telemetry buffer.
+            * ``packet_fmt`` (:class:`str`): ``ustruct`` format string.
+            * ``btcomm`` (:class:`BTComm`): Bluetooth communications object.
+            * ``velo_set`` (:class:`task_share.Share`): Requested wheel speed.
+            * ``kp_lf``, ``ki_lf`` (:class:`float`): Line-follow controller gains.
+            * ``time_L``, ``pos_L``, ``velo_L`` (:class:`task_share.Queue`):
+              Left wheel time, position, and velocity.
+            * ``time_R``, ``pos_R``, ``velo_R`` (:class:`task_share.Queue`):
+              Right wheel time, position, and velocity.
+            * ``cmd_L``, ``cmd_R`` (:class:`task_share.Queue`):
+              Commanded efforts for left and right motors.
+            * ``offset`` (:class:`task_share.Share`): Line-follow speed offset.
+            * ``Eul_head`` (:class:`task_share.Queue`): Euler heading from IMU.
+            * ``yaw_rate`` (:class:`task_share.Queue`): Yaw rate from IMU.
+            * ``X_pos``, ``Y_pos`` (:class:`task_share.Queue`): Estimated X/Y.
+            * ``p_v_R``, ``p_v_L`` (:class:`task_share.Queue`):
+              State-space path length and velocity.
+            * ``p_head``, ``p_yaw`` (:class:`task_share.Queue`):
+              State-space heading and yaw rate.
+            * ``p_pos_L``, ``p_pos_R`` (:class:`task_share.Queue`):
+              Path length per wheel from the state-space model.
+
+    Yields:
+        int: The current internal state (0 or 1) at each scheduler step.
+    """
+    # Unpack shares and queues
+    (packet, packet_fmt, btcomm, velo_set, kp_lf, ki_lf, time_L, pos_L,
+     velo_L, time_R, pos_R, velo_R, cmd_L, cmd_R, offset, Eul_head,
+     yaw_rate, X_pos, Y_pos, p_v_R, p_v_L, p_head, p_yaw, p_pos_L,
+     p_pos_R) = shares
+
     state = 0
     sendit = True
 
     while True:
-        if state == 0: #State zero: init (Setup serial port)
-            #State zero: Listening mode - See if we have input. If we do, retrieve it.
-            if btcomm.check(): #Recieve and process 1 character, and see if we have a complete command
-                state = 1 #If command got to state 2 to intrepret
-            else: #If nothing to read, then we write!
-                #Check to make sure there's something in every single one of our queues
-                #Use .many() for these queues to make sure we don't empty it and upset the controller/estimator
-                #Note we only check a few queues but pull from many. This is becuase several of the queues are filled 
-                # from the smae taks so checking both is redundant
+        if state == 0:
+            # Listen for input; if a full command is ready, go interpret it
+            if btcomm.check():
+                state = 1
+            else:
+                # Only ship data if all critical queues have enough samples
                 if (time_L.many() and
                     time_R.many() and
                     cmd_L.many() and
                     Eul_head.many() and
-                    p_pos_L.many()): 
-                    ustruct.pack_into((packet_fmt), packet, 3, #Format, buffer, offset
-                                            time_L.get(),
-                                            time_R.get(),
-                                            pos_L.get(),
-                                            velo_L.get(),
-                                            velo_R.get(),
-                                            pos_R.get(),
-                                            cmd_L.get(),
-                                            cmd_R.get(),
-                                            Eul_head.get(),
-                                            yaw_rate.get(),
-                                            offset.get(),
-                                            X_pos.get(),
-                                            Y_pos.get(),
-                                            p_v_R.get(),
-                                            p_v_L.get(),
-                                            p_head.get(),
-                                            velo_set.get(),
-                                            p_pos_L.get(),
-                                            p_pos_R.get())
-                    #Sneaky... only send every other packet...
+                        p_pos_L.many()):
+                    ustruct.pack_into(
+                        packet_fmt,
+                        packet,
+                        3,
+                        time_L.get(),
+                        time_R.get(),
+                        pos_L.get(),
+                        velo_L.get(),
+                        velo_R.get(),
+                        pos_R.get(),
+                        cmd_L.get(),
+                        cmd_R.get(),
+                        Eul_head.get(),
+                        yaw_rate.get(),
+                        offset.get(),
+                        X_pos.get(),
+                        Y_pos.get(),
+                        p_v_R.get(),
+                        p_v_L.get(),
+                        p_head.get(),
+                        velo_set.get(),
+                        p_pos_L.get(),
+                        p_pos_R.get(),
+                    )
+                    # Only send every other packet to throttle bandwidth
                     if sendit:
                         btcomm.ship(packet)
                         sendit = False
-                    else: 
+                    else:
                         sendit = True
-        elif state == 1:  #Interpret input
-            rawcmd = btcomm.get_command() #We only end up here when there's a command waiting
+
+        elif state == 1:
+            # Interpret a fully received command string
+            rawcmd = btcomm.get_command()
             if not rawcmd:
                 pass
-            elif rawcmd[0] == '$': #See if we were given a command
-                if rawcmd[1:4] == 'SPD': #Set Motor Speed (in/s)
+            elif rawcmd[0] == "$":
+                # Example: "$SPD1.5" sets wheel speed to 1.5 in/s
+                if rawcmd[1:4] == "SPD":
                     try:
                         velo_set.put(float(rawcmd[4:]))
-                    except:
+                    except Exception:
                         pass
-            state = 0 #Go back to interfacing
+            state = 0
+
         yield state
 
+
 def IMU_Interface_fun(shares):
+    """IMU interface task.
+
+    This task reads the current heading from the IMU and publishes it
+    into the shared queues which are used by other tasks and the
+    state-space estimator.
+
+    Args:
+        shares: Tuple ``(imu, Eul_head, yaw_rate, SENS_LED)`` where:
+
+            * ``imu`` (:class:`IMU`): IMU driver instance.
+            * ``Eul_head`` (:class:`task_share.Queue`): Euler heading (rad).
+            * ``yaw_rate`` (:class:`task_share.Queue`): Yaw rate (rad/s).
+            * ``SENS_LED`` (:class:`pyb.Pin`): Status LED (currently unused).
+    """
     imu, Eul_head, yaw_rate, SENS_LED = shares
     while True:
-        Eul_head.put(imu.get_heading()) #Convert rads to degs
-        yaw_rate.put(0) #Not currently using yaw_rate so no reason to read it from IMU
+        Eul_head.put(imu.get_heading())
+        # Yaw rate is currently unused, but left for future expansion
+        yaw_rate.put(0)
         yield
 
+
 def SS_Simulator_fun(shares):
-    #Run a glorious state-space simulation of Romi
-    #State equations and RK4 solver are contained in SSModel object
-    RUN_LED, imu_off, ssmodel, mainperiod, y, u, Eul_head, velo_L, velo_R, pos_L, pos_R, cmd_L, cmd_R, X_pos, Y_pos, p_v_R, p_v_L, p_head, p_yaw, p_pos_L, p_pos_R = shares
+    """State-space simulation task.
+
+    This task runs a discrete-time state-space model of the Romi robot
+    in parallel with the real hardware. It uses the latest measured
+    velocities, positions, and IMU heading to run one step of a Runge–Kutta
+    (RK4) integration and publishes the estimated state to a set of
+    queues.
+
+    Args:
+        shares: Tuple of objects in the following order:
+
+            * ``RUN_LED`` (:class:`pyb.Pin`): Toggles each run to show activity.
+            * ``imu_off`` (:class:`task_share.Share`): Flag to disable IMU
+              feedback when a wall is detected.
+            * ``ssmodel`` (:class:`SSModel`): State-space model instance.
+            * ``mainperiod`` (:class:`float`): Simulation step period (s).
+            * ``y`` (:class:`array`): Measurement vector buffer.
+            * ``u`` (:class:`array`): Input vector buffer (motor voltages).
+            * ``Eul_head`` (:class:`task_share.Queue`): IMU heading.
+            * ``velo_L``, ``velo_R`` (:class:`task_share.Queue`):
+              Left/right wheel velocities.
+            * ``pos_L``, ``pos_R`` (:class:`task_share.Queue`):
+              Left/right wheel positions.
+            * ``cmd_L``, ``cmd_R`` (:class:`task_share.Queue`):
+              Commanded motor efforts.
+            * ``X_pos``, ``Y_pos`` (:class:`task_share.Queue`):
+              Estimated absolute position.
+            * ``p_v_R``, ``p_v_L`` (:class:`task_share.Queue`):
+              Estimated path length and velocity.
+            * ``p_head``, ``p_yaw`` (:class:`task_share.Queue`):
+              Estimated heading and yaw rate.
+            * ``p_pos_L``, ``p_pos_R`` (:class:`task_share.Queue`):
+              Estimated path length per wheel.
+    """
+    (RUN_LED, imu_off, ssmodel, mainperiod, y, u, Eul_head, velo_L, velo_R,
+     pos_L, pos_R, cmd_L, cmd_R, X_pos, Y_pos, p_v_R, p_v_L, p_head, p_yaw,
+     p_pos_L, p_pos_R) = shares
 
     while True:
-        #If we have hit the wall, disable feedback from the IMU
-        if RUN_LED.value():
-            RUN_LED.value(0)
-        else:
-            RUN_LED.value(1)
+        # Blink the run LED to show activity
+        RUN_LED.value(0 if RUN_LED.value() else 1)
+
+        # Optionally disable heading correction when IMU is considered unreliable
         if imu_off.get() == 1:
             ssmodel.L_Psi = 0
-        #Run our RK4 solver using the latest motor voltages
-        #Assumes constant 9 volts supplied to motors
-        u[0] = 0.09*cmd_L.view()
-        u[1] = 0.09*cmd_R.view()
-        #time_now = ticks_us()
-        #delta_t = ticks_diff(time_now,time_last)/1000000
-        #time_last = time_now
-        #Build y-matrix of true values
+
+        # Build input vector from motor commands (assumes ~9V supply)
+        u[0] = 0.09 * cmd_L.view()
+        u[1] = 0.09 * cmd_R.view()
+
+        # Build measurement vector from latest sensor data
         y[0] = Eul_head.view()
         y[1] = velo_L.view()
         y[2] = velo_R.view()
         y[3] = pos_L.view()
         y[4] = pos_R.view()
+
+        # Advance the state-space model
         ssmodel.RK4_step(u, y, mainperiod)
-        #Get outputs and send to shares
+
+        # Publish estimated outputs
         yhat = ssmodel.y_hat_fcn()
         p_v_L.put(yhat[0])
         p_v_R.put(yhat[1])
@@ -136,152 +273,238 @@ def SS_Simulator_fun(shares):
         p_pos_L.put(yhat[3])
         p_pos_R.put(yhat[4])
         X_pos.put(yhat[5])
-        Y_pos.put(-yhat[6]) #This might screw me over later... we'll see
+        # Invert Y for convenience of the chosen coordinate frame
+        Y_pos.put(-yhat[6])
         p_yaw.put(0)
         yield
 
 
-
 def LineFollow_fun(shares):
-    """!
-        Line Follower Task
-        Implements PI controller for setpoint offset for left an right motors
-        based on line sensor readings.
-        Passes command signal offset to the controller
-        Inputs:
-            Shares: offset (float) - speed offset to be added to right motor/subtracted from left
-            Queues: IRread (int)   - returns the individual IR sensor readings normalized and multiplied by 1000
-            
-            Line_sensor: Line Sensor object. Should already be initialized and calibrated.
+    """Line follower task.
+
+    This task implements a PI controller that adjusts the left/right motor
+    speed setpoints based on the position of a line under the reflective
+    sensor array. It computes the centroid of the sensor readings to form
+    an error signal and writes a speed offset into the ``offset`` share.
+
+    Args:
+        shares: Tuple in the following order:
+
+            * ``SENS_LED`` (:class:`pyb.Pin`): LED indicating line follower
+              activity.
+            * ``length`` (:class:`float`): Half-width of the sensor index
+              range used in centroid computation.
+            * ``Aixi_sum`` (:class:`float`): Working variable for centroid
+              numerator (unused outside).
+            * ``Ai_sum`` (:class:`float`): Working variable for centroid
+              denominator (unused outside).
+            * ``X_pos`` (:class:`task_share.Queue`): Estimated X position.
+            * ``velo_set`` (:class:`task_share.Share`): Requested average speed.
+            * ``lf_stop`` (:class:`task_share.Share`): Flag to disable the
+              line follower.
+            * ``kp_lf``, ``ki_lf`` (:class:`float`): PI gains for line following.
+            * ``offset`` (:class:`task_share.Share`): Speed offset written
+              to the motor controller task.
+            * ``Line_sensor`` (:class:`LineSensor`): Calibrated line sensor
+              driver instance.
     """
-    SENS_LED, length, Aixi_sum, Ai_sum, p_X, velo_set, lf_stop, kp_lf, ki_lf, offset, Line_sensor = shares
+    (SENS_LED, length, Aixi_sum, Ai_sum, X_pos, velo_set, lf_stop, kp_lf,
+     ki_lf, offset, Line_sensor) = shares
 
     state = 0
-    #Initialize controller variables
     esum = 0
     time_last = 0
 
     while True:
-        if state == 0: 
+        if state == 0:
             if lf_stop.get() == 1:
                 SENS_LED.value(0)
                 state = 1
                 yield state
-            #Make sure time_last is initialized
-            if time_last == 0: time_last = ticks_ms()
-            #Read line sensor
+
+            if time_last == 0:
+                time_last = ticks_ms()
+
             readings = Line_sensor.read()
             Aixi_sum = 0
             Ai_sum = 0
-            #Calculate centroid (x_bar)
-            #Assumes all sensors have width 1.
-            for idx,val in enumerate(readings):
-                Aixi_sum += val*(idx-length)
+
+            for idx, val in enumerate(readings):
+                Aixi_sum += val * (idx - length)
                 Ai_sum += val
-            if Aixi_sum == 0: #Happens when all sensors read 0, ie, just white, ie, line lost
+
+            if Aixi_sum == 0:
                 error = 0
             else:
-                error = Aixi_sum/sum(readings)
-            #Do P control
-            p_ctrl = kp_lf*error
-            time = ticks_ms()
-            dt = ticks_diff(time,time_last)/1000 #convert ms to s
-            time_last = time
-            #Only do I ctrl if we have a speed command to prevent integral windup
+                error = Aixi_sum / sum(readings)
+
+            # P control
+            p_ctrl = kp_lf * error
+
+            time_now = ticks_ms()
+            dt = ticks_diff(time_now, time_last) / 1000
+            time_last = time_now
+
+            # I control (with anti-windup when speed command is zero)
             if int(velo_set.get()) == 0:
                 esum = 0
             else:
-                esum += error*dt
-            i_ctrl = ki_lf*esum
-            #d_ctrl = kd_lf.get()*(error-last_error)/dt
-            ctrl_sig = p_ctrl+i_ctrl
+                esum += error * dt
+            i_ctrl = ki_lf * esum
+
+            ctrl_sig = p_ctrl + i_ctrl
+
+            # Small bias after robot has moved a certain distance
             if X_pos.view() > 25:
                 ctrl_sig += 8.5
+
             offset.put(ctrl_sig)
             SENS_LED.value(1)
+
         elif state == 1:
             SENS_LED.value(0)
-            pass #Do nothing
+            # Do nothing until lf_stop is cleared
+            pass
+
         yield state
 
-def Pursuer_fun(shares): #Task which implements pure pursuit
-    WALL_LED, imu_off, obst_sens, velo_set, lf_stop, thepursuer, p_X, p_Y, p_head, offset = shares
-    
+
+def Pursuer_fun(shares):
+    """Pure-pursuit path tracking task.
+
+    This task uses a simple pure-pursuit controller to guide the robot
+    along a sequence of target points. It coordinates with the line
+    follower and obstacle sensor to switch modes once the intersection
+    has been reached and a wall is detected.
+
+    Args:
+        shares: Tuple in the following order:
+
+            * ``WALL_LED`` (:class:`pyb.Pin`): LED indicating wall detection.
+            * ``imu_off`` (:class:`task_share.Share`): Flag to disable IMU
+              feedback once a wall is hit.
+            * ``obst_sens`` (:class:`pyb.Pin`): Digital obstacle sensor.
+            * ``velo_set`` (:class:`task_share.Share`): Requested wheel speed.
+            * ``lf_stop`` (:class:`task_share.Share`): Flag to stop the line
+              follower.
+            * ``thepursuer`` (:class:`ThePursuer`): Pure pursuit controller.
+            * ``p_X``, ``p_Y`` (:class:`task_share.Queue`): Estimated X/Y from
+              state-space model.
+            * ``p_head`` (:class:`task_share.Queue`): Estimated heading.
+            * ``offset`` (:class:`task_share.Share`): Commanded speed offset
+              for the motor controller.
+    """
+    (WALL_LED, imu_off, obst_sens, velo_set, lf_stop, thepursuer, p_X, p_Y,
+     p_head, offset) = shares
+
     state = 0
     wall = False
     wall_hit = False
 
     while True:
         if state == 0:
-            #thepursuer.ctrller.time_last = ticks_ms() #Init offset controller for I ctrl
-            if p_X.view() >= 31.25: # and p_Y.view() >= 3: #If we're past the magic point
-                lf_stop.put(1) #Tell line follower to stop
+            # When the robot passes a certain point, switch from line follower
+            if p_X.view() >= 31.25:
+                lf_stop.put(1)
                 state = 1
-        elif state == 1: 
+
+        elif state == 1:
             X = X_pos.view()
             Y = Y_pos.view()
-            if X < 3 and Y < 10 and wall_hit is False: #if close to wall and wall not hit yet
-                if obst_sens.value() == 0: #if obstacle detected
+            if X < 3 and Y < 10 and not wall_hit:
+                if obst_sens.value() == 0:
                     wall = True
                     wall_hit = True
                     WALL_LED.value(1)
-                    #imu_off.put(1)
+                    # imu_off.put(1)
             else:
                 wall = False
-            off, speed = thepursuer.get_offset(p_X.view(),p_Y.view(),p_head.view(),wall)
-            if not velo_set.get() == 0: #Unless we have a 0 speed command
+
+            off, speed = thepursuer.get_offset(
+                p_X.view(),
+                p_Y.view(),
+                p_head.view(),
+                wall,
+            )
+
+            if velo_set.get() != 0:
                 velo_set.put(speed)
                 offset.put(off)
-            else: #stop and stay in place
+            else:
                 velo_set.put(0)
                 offset.put(0)
+
         yield state
-    
-    
-    
-        
 
 
+def Controller_fun(shares):
+    """Motor controller task (PI control for both wheels).
 
-def Controller_fun(shares): #Goated PI controller
-    """!
-    Motor Controller Task
-    Implements PI control for both motors
-    Also has the ability to set both motors to zero speed and signal
-    the motor controllers to reset the encoders.
+    This task implements a PI controller for each motor, uses encoder
+    feedback to estimate wheel speed, and saturates the duty cycle
+    changes to avoid sudden jumps. It also supports a "stopped" state
+    where both motors are held at zero and encoders/controllers are
+    re-initialized on exit.
+
+    Args:
+        shares: Tuple in the following order:
+
+            * ``offset`` (:class:`task_share.Share`): Speed offset from line
+              follower / pursuer.
+            * ``leftencoder``, ``rightencoder`` (:class:`Encoder`):
+              Encoder drivers.
+            * ``leftmotor``, ``rightmotor`` (:class:`Motor`): Motor drivers.
+            * ``pos_L``, ``pos_R`` (:class:`task_share.Queue`): Position
+              queues for logging.
+            * ``t_L``, ``t_R`` (:class:`int`): Scratch variables for timestamps.
+            * ``v_L``, ``v_R`` (:class:`float`): Scratch variables for velocity.
+            * ``r_ctrl``, ``l_ctrl`` (:class:`PIController`): Motor PI controllers.
+            * ``velo_L``, ``velo_R`` (:class:`task_share.Queue`):
+              Velocity logging queues.
+            * ``time_L``, ``time_R`` (:class:`task_share.Queue`):
+              Timestamp logging queues.
+            * ``velo_set`` (:class:`task_share.Share`): Requested speed.
+            * ``cmd_L``, ``cmd_R`` (:class:`task_share.Queue`):
+              Commanded efforts written for logging/telemetry.
     """
+    (offset, leftencoder, leftmotor, pos_L, rightencoder, rightmotor, pos_R,
+     t_L, v_L, t_R, v_R, r_ctrl, l_ctrl, velo_L, velo_R, time_L, time_R,
+     velo_set, cmd_L, cmd_R) = shares
 
-    #Unpack shares and queues
-    offset, leftencoder, leftmotor, pos_L ,rightencoder, rightmotor, pos_R, t_L, v_L, t_R, v_R, r_ctrl, l_ctrl, velo_L, velo_R, time_L, time_R, velo_set, cmd_L, cmd_R = shares
     state = 0
     lastsig_L = 0.0
     lastsig_R = 0.0
     delta = 0.0
 
     while True:
-        #Always update encoders and grab data to use
+        # Always update encoder readings
         leftencoder.update()
         t_L = time.ticks_ms()
         rightencoder.update()
         t_R = time.ticks_ms()
         v_L = leftencoder.get_velocity()
         v_R = rightencoder.get_velocity()
-        if state == 0: #State 0: set last time varibales after the motor controllers have initalized and put something in the queues
+
+        if state == 0:
+            # Initialize controller timing once data is available
             l_ctrl.last_time = t_L
             r_ctrl.last_time = t_R
             state = 1
-        elif state == 1: #State 1: Run the controller
+
+        elif state == 1:
+            # Normal closed-loop speed control
             cmd = velo_set.get()
-            if cmd == 0.0: #If command is zero, reset and go to state 2
-                cmd_L.put(0)     
+            if cmd == 0.0:
+                cmd_L.put(0)
                 leftmotor.set_effort(0)
                 cmd_R.put(0)
                 rightmotor.set_effort(0)
                 state = 2
-            else:   #Run the controller
+            else:
                 off = offset.get()
-                #Left motor stuff
-                l_sig = l_ctrl.get_ctrl_sig((cmd+off),v_L,t_L)
+
+                # Left motor PI with slew-rate limiting
+                l_sig = l_ctrl.get_ctrl_sig((cmd + off), v_L, t_L)
                 delta = l_sig - lastsig_L
                 if delta > MAXDELTA:
                     l_sig = lastsig_L + MAXDELTA
@@ -290,9 +513,9 @@ def Controller_fun(shares): #Goated PI controller
                 lastsig_L = l_sig
                 leftmotor.set_effort(l_sig)
                 cmd_L.put(l_sig)
-                
-                #Right motor stuff
-                r_sig = r_ctrl.get_ctrl_sig((cmd-off),v_R,t_R)
+
+                # Right motor PI with slew-rate limiting
+                r_sig = r_ctrl.get_ctrl_sig((cmd - off), v_R, t_R)
                 delta = r_sig - lastsig_R
                 if delta > MAXDELTA:
                     r_sig = lastsig_R + MAXDELTA
@@ -301,301 +524,458 @@ def Controller_fun(shares): #Goated PI controller
                 lastsig_R = r_sig
                 rightmotor.set_effort(r_sig)
                 cmd_R.put(r_sig)
-        
-        elif state == 2: #State 2 do other things and reinitialize on rentry to state 2
+
+        elif state == 2:
+            # Stopped state: keep logging, wait for non-zero command
             cmd = velo_set.get()
-            cmd_L.put(0) #Update these every tick for accurate monitoring
+            cmd_L.put(0)
             cmd_R.put(0)
-            if not cmd == 0.0: #If command is not zero, go back to state 1
-                #Reinit and go back to state 1
-                #Reset Encoders (to zero position and velocity (esp since velocity is moving average))
+            if cmd != 0.0:
                 leftencoder.zero()
                 rightencoder.zero()
-                #Reset PI controllers
                 l_ctrl.reset(t_L)
                 r_ctrl.reset(t_R)
                 state = 1
-        #Always send data for collection
+
+        # Always log position, velocity, and time
         pos_L.put(leftencoder.get_position())
         velo_L.put(v_L)
         time_L.put(t_L)
         pos_R.put(rightencoder.get_position())
         velo_R.put(v_R)
         time_R.put(t_R)
+
         yield state
 
+
 def GarbageCollector_fun():
+    """Periodic garbage collection task.
+
+    This very low-priority task runs :func:`gc.collect` periodically to
+    help reduce memory fragmentation in the MicroPython heap.
+    """
     while True:
         gc.collect()
         yield
 
-def Cali_test(Line_sensor,button,SENS_LED):
-        #Run blocking calibration sequence
-        SENS_LED.high()
-        print('Begin blocking calibration sequence')
-        print('Press blue button to calibrate on black.')
-        while button.value() == 1:
-            pass
-        print('Calibrating!')
-        black = Line_sensor.cal_black()
-        print('Black calibration array')
-        print(black)
-        sleep(1)
-        print('Press blue button to calibrate on white.')
-        while button.value() == 1:
-            pass
-        white = Line_sensor.cal_white()
-        print('White calibration array')
-        print(white)
-        sleep(1)
-        print('Press blue button to begin.')
-        while button.value() == 1:
-            pass
-        SENS_LED.low()
-        return Line_sensor
+
+def Cali_test(Line_sensor, button, SENS_LED):
+    """Blocking calibration helper for the line sensor.
+
+    This function runs an interactive calibration sequence for the line
+    sensor array:
+
+    1. Wait for the user to press the blue button over a black surface
+       and record the black calibration values.
+    2. Wait for the user to press the button over a white surface and
+       record the white calibration values.
+    3. Wait for a final button press to begin normal operation.
+
+    Args:
+        Line_sensor: :class:`LineSensor` instance to be calibrated.
+        button: :class:`pyb.Pin` configured as a pushbutton input.
+        SENS_LED: :class:`pyb.Pin` used as a status LED.
+
+    Returns:
+        LineSensor: The same sensor instance, after calibration.
+    """
+    SENS_LED.high()
+    print("Begin blocking calibration sequence")
+    print("Press blue button to calibrate on black.")
+    while button.value() == 1:
+        pass
+    print("Calibrating!")
+    black = Line_sensor.cal_black()
+    print("Black calibration array")
+    print(black)
+    sleep(1)
+    print("Press blue button to calibrate on white.")
+    while button.value() == 1:
+        pass
+    white = Line_sensor.cal_white()
+    print("White calibration array")
+    print(white)
+    sleep(1)
+    print("Press blue button to begin.")
+    while button.value() == 1:
+        pass
+    SENS_LED.low()
+    return Line_sensor
+
 
 # This code creates all the needed shares and queues then starts the tasks.
-# The tasks run until a keyboard interrupt, at which time the scheduler stops and
-# printouts show diagnostic information about the tasks, share, and queue.
+# The tasks run until a keyboard interrupt, at which time the scheduler stops
+# and diagnostic information about tasks, shares, and queues is printed.
 if __name__ == "__main__":
-    print("Here we go!\r\n"
-          "Press Ctrl-C to stop and show diagnostics.")
+    print(
+        "Here we go!\r\n"
+        "Press Ctrl-C to stop and show diagnostics."
+    )
 
-    #MOTOR & ENCODER SETUP
-    #Setup Timers
-    tim1 = Timer(1, freq=10000) #For left motor encoder
-    tim2 = Timer(2, freq=10000) #For right motor encoder
-    tim3 = Timer(3, freq=10000) #For left motor PWM
-    tim4 = Timer(4, freq=10000)   #For right motor PWM
-    
-    #Remap pins for Timer2
-    Pin(Pin.cpu.A0,mode=Pin.ANALOG) # Set pin modes back to default
-    Pin(Pin.cpu.A1,mode=Pin.ANALOG)
+    # MOTOR & ENCODER SETUP
+    # Setup Timers
+    tim1 = Timer(1, freq=10000)  # For left motor encoder
+    tim2 = Timer(2, freq=10000)  # For right motor encoder
+    tim3 = Timer(3, freq=10000)  # For left motor PWM
+    tim4 = Timer(4, freq=10000)  # For right motor PWM
+
+    # Remap pins for Timer2
+    Pin(Pin.cpu.A0, mode=Pin.ANALOG)
+    Pin(Pin.cpu.A1, mode=Pin.ANALOG)
     Pin(Pin.cpu.A15, mode=Pin.ALT, alt=1)
     Pin(Pin.cpu.B3, mode=Pin.ALT, alt=1)
 
-    #Setup motor and encoder objects
-    leftmotor = Motor(Pin.cpu.B4,Pin.cpu.B10,Pin.cpu.C8,tim3,1)
+    # Setup motor and encoder objects
+    leftmotor = Motor(Pin.cpu.B4, Pin.cpu.B10, Pin.cpu.C8, tim3, 1)
     leftmotor.enable()
-    rightmotor = Motor(Pin.cpu.B6,Pin.cpu.B11,Pin.cpu.C7,tim4,1)
+    rightmotor = Motor(Pin.cpu.B6, Pin.cpu.B11, Pin.cpu.C7, tim4, 1)
     rightmotor.enable()
-    rightencoder = Encoder(tim2,Pin.cpu.A15,Pin.cpu.B3)
-    leftencoder = Encoder(tim1,Pin.cpu.A8,Pin.cpu.A9)
+    rightencoder = Encoder(tim2, Pin.cpu.A15, Pin.cpu.B3)
+    leftencoder = Encoder(tim1, Pin.cpu.A8, Pin.cpu.A9)
 
     gc.collect()
 
-    #Init controller objects
-    r_ctrl = PIController(0.6,15) #Set kp and ki for motors
-    l_ctrl = PIController(0.6,15)
+    # Init controller objects
+    r_ctrl = PIController(0.6, 15)
+    l_ctrl = PIController(0.6, 15)
 
-    #Init internal variables for controller generator
+    # Init internal variables for controller generator
     t_L = 0
     v_L = 0.0
     t_R = 0
     v_R = 0.0
 
-
-    #TALKER SETUP
-    #Setup serial device for communicator and create BTComm object
-    serial_device = UART(5,460800)
+    # TALKER SETUP
+    serial_device = UART(5, 460800)
     btcomm = BTComm(serial_device)
 
-    #Initalize a buffer for talker to store output data in    
-    packet_fmt = "<II" + "f"*17
-    packet = bytearray(3 + ustruct.calcsize(packet_fmt))          #Create a buffer that we can later pack numbers into
-    #Set the sync and type bytes
-    packet[0] = 0xAA 
-    packet[1] = 0x55 
+    packet_fmt = "<II" + "f" * 17
+    packet = bytearray(3 + ustruct.calcsize(packet_fmt))
+    packet[0] = 0xAA
+    packet[1] = 0x55
     packet[2] = 0x00
-    
+
     gc.collect()
 
-    #LINE SENSOR SETUP
-    #Setup pins for Line Sensor
-    #s15 = Pin.cpu.D2
+    # LINE SENSOR SETUP
     s14 = Pin.cpu.C5
     s13 = Pin.cpu.B1
     s12 = Pin.cpu.C4
     s11 = Pin.cpu.A7
     s10 = Pin.cpu.A6
-    s9  = Pin.cpu.A0
-    s8  = Pin.cpu.A1
-    s7  = Pin.cpu.A4
-    s6  = Pin.cpu.B0
-    s5  = Pin.cpu.C1
-    s4  = Pin.cpu.C0
-    s3  = Pin.cpu.C3
-    s2  = Pin.cpu.C2
-    #s1  = Pin.cpu.A10
-    #Setup control pins - outut, push-pull with pull down resistors, init to low
+    s9 = Pin.cpu.A0
+    s8 = Pin.cpu.A1
+    s7 = Pin.cpu.A4
+    s6 = Pin.cpu.B0
+    s5 = Pin.cpu.C1
+    s4 = Pin.cpu.C0
+    s3 = Pin.cpu.C3
+    s2 = Pin.cpu.C2
+
     evenctrl = Pin(Pin.cpu.H0, mode=Pin.OUT_PP, pull=Pin.PULL_DOWN, value=0)
     oddctrl = Pin(Pin.cpu.H1, mode=Pin.OUT_PP, pull=Pin.PULL_DOWN, value=0)
 
     gc.collect()
-    #Create Line Sensor object
-    sensors = [s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14]
+    sensors = [s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
     num_sens = len(sensors)
-    Line_sensor = LineSensor(sensors,evenctrl,oddctrl)
-    button = Pin(Pin.cpu.C13, Pin.IN, Pin.PULL_UP) 
-    SENS_LED = Pin(Pin.cpu.C6, Pin.OUT_PP, value=0) #To indicate if calibration is complete or not
+    Line_sensor = LineSensor(sensors, evenctrl, oddctrl)
+    button = Pin(Pin.cpu.C13, Pin.IN, Pin.PULL_UP)
+    SENS_LED = Pin(Pin.cpu.C6, Pin.OUT_PP, value=0)
 
-    #Line_sensor = Cali_test(Line_sensor,button,LED)
-    #Init vars
     Aixi_sum = 0
     Ai_sum = 0
-    length = (num_sens - 1)/2
+    length = (num_sens - 1) / 2
     gc.collect()
 
-
-    #Setup IMU
+    # IMU SETUP
     i2c = I2C(1, I2C.CONTROLLER)
     imu = IMU(i2c)
-    #Put IMU in config mode and write calibration data
     imu.set_config()
     sleep(0.1)
-    imu.write_cal_data('calibration.txt')
+    imu.write_cal_data("calibration.txt")
     sleep(0.1)
-    #Put IMU in fusion mode and make sure it's calibrated
     imu.set_fusion()
     sleep(0.1)
-    
-    #Initialize out glorious state space model object
-    ssmodel = SSModel()
-    #Initalize y and u arrays
-    u = array('f', [0.0, 0.0])
-    y = array('f', [0.0, 0.0, 0.0, 0.0, 0.0])
-    mainperiod = 30 #Period that the simulation (and pretty much all of our tasks) runs at
 
-    #Initalize pure pursuit object
+    # State-space model setup
+    ssmodel = SSModel()
+    u = array("f", [0.0, 0.0])
+    y = array("f", [0.0, 0.0, 0.0, 0.0, 0.0])
+    mainperiod = 30  # ms
+
+    # Pure pursuit setup (assumes BASESPEED, kp_head, ki_head are defined elsewhere)
     thepursuer = ThePursuer(BASESPEED, ARRIVED, kp_head, ki_head)
 
-    #Initalize obstacle sensor
+    # Obstacle sensor and LEDs
     obst_sens = Pin(Pin.cpu.B7, Pin.IN, pull=Pin.PULL_DOWN)
     RUN_LED = Pin(Pin.cpu.C10, Pin.OUT_PP, value=0)
     WALL_LED = Pin(Pin.cpu.C11, Pin.OUT_PP, value=0)
     gc.collect()
 
-    # Create shares and queues. See task definitions for descriptions
-    
-    #Shares
-    velo_set = task_share.Share('f', thread_protect=False, name="Motor Speed Set Point")
-    imu_off  = task_share.Share('I', thread_protect=False, name="IMU disable flag")
-    offset     = task_share.Share('f', thread_protect=False, name="Motor setpoint adjustment from line follower")
-    lf_stop    = task_share.Share('I', thread_protect=False, name="Line follow stop flag")
+    # SHARES
+    velo_set = task_share.Share("f", thread_protect=False, name="Motor Speed Set Point")
+    imu_off = task_share.Share("I", thread_protect=False, name="IMU disable flag")
+    offset = task_share.Share(
+        "f",
+        thread_protect=False,
+        name="Motor setpoint adjustment from line follower",
+    )
+    lf_stop = task_share.Share("I", thread_protect=False, name="Line follow stop flag")
     gc.collect()
 
-
-
-
-    #Queues
-    cmd_L    = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Left Motor Command Signal")
-    cmd_R    = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Right Motor Command Signal")
-    time_L   = task_share.Queue('I', 20, thread_protect=False, overwrite=True, name="Left Motor Time")
-    pos_L    = task_share.Queue('f', 20, thread_protect=False, overwrite=True, name="Left Motor Position")
-    velo_L   = task_share.Queue('f', 20, thread_protect=False, overwrite=True, name="Left Motor Velocity")
-    time_R   = task_share.Queue('I', 20, thread_protect=False, overwrite=True, name="Right Motor Time")
-    pos_R    = task_share.Queue('f', 20, thread_protect=False, overwrite=True, name="Right Motor Position")
-    velo_R   = task_share.Queue('f', 20, thread_protect=False, overwrite=True, name="Right Motor Velocity")
-    Eul_head = task_share.Queue('f', 20, thread_protect=False, overwrite=True, name='Euler heading (in radians) from the IMU')
-    yaw_rate = task_share.Queue('f', 20, thread_protect=False, overwrite=True, name='Yaw rate (in radians/s) from the IMU')
+    # QUEUES
+    cmd_L = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Left Motor Command Signal"
+    )
+    cmd_R = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Right Motor Command Signal"
+    )
+    time_L = task_share.Queue(
+        "I", 20, thread_protect=False, overwrite=True, name="Left Motor Time"
+    )
+    pos_L = task_share.Queue(
+        "f", 20, thread_protect=False, overwrite=True, name="Left Motor Position"
+    )
+    velo_L = task_share.Queue(
+        "f", 20, thread_protect=False, overwrite=True, name="Left Motor Velocity"
+    )
+    time_R = task_share.Queue(
+        "I", 20, thread_protect=False, overwrite=True, name="Right Motor Time"
+    )
+    pos_R = task_share.Queue(
+        "f", 20, thread_protect=False, overwrite=True, name="Right Motor Position"
+    )
+    velo_R = task_share.Queue(
+        "f", 20, thread_protect=False, overwrite=True, name="Right Motor Velocity"
+    )
+    Eul_head = task_share.Queue(
+        "f",
+        20,
+        thread_protect=False,
+        overwrite=True,
+        name="Euler heading (in radians) from the IMU",
+    )
+    yaw_rate = task_share.Queue(
+        "f",
+        20,
+        thread_protect=False,
+        overwrite=True,
+        name="Yaw rate (in radians/s) from the IMU",
+    )
     gc.collect()
-    #Output variables of Glorious SS model
-    X_pos    = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Absolute X Position")
-    Y_pos    = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Absolte Y Position")
-    p_v_R      = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Total Path Length")
-    p_v_L      = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Total Velocity")
-    p_head   = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Heading (rads)")
-    p_yaw    = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Yaw Rate (rad/s)")
-    p_pos_L  = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Path Length - Left Wheel")
-    p_pos_R  = task_share.Queue('f', 10, thread_protect=False, overwrite=True, name="Path Length - Right Wheel")
+
+    X_pos = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Absolute X Position"
+    )
+    Y_pos = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Absolte Y Position"
+    )
+    p_v_R = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Total Path Length"
+    )
+    p_v_L = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Total Velocity"
+    )
+    p_head = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Heading (rads)"
+    )
+    p_yaw = task_share.Queue(
+        "f", 10, thread_protect=False, overwrite=True, name="Yaw Rate (rad/s)"
+    )
+    p_pos_L = task_share.Queue(
+        "f",
+        10,
+        thread_protect=False,
+        overwrite=True,
+        name="Path Length - Left Wheel",
+    )
+    p_pos_R = task_share.Queue(
+        "f",
+        10,
+        thread_protect=False,
+        overwrite=True,
+        name="Path Length - Right Wheel",
+    )
     gc.collect()
 
-
-    #Set a bunch of default values
-    velo_set.put(0.0) #Motor requested speed 0
-
+    # Default values
+    velo_set.put(0.0)
     imu_off.put(0)
-
-    #Motor ctrl signal to zero
-    cmd_L.put(0) 
+    cmd_L.put(0)
     cmd_R.put(0)
-   
-    #Line Follower Stuff
     offset.put(0)
     kp_lf = 1.1
     ki_lf = 0
-    lf_stop.put(0) #Startout following the line
+    lf_stop.put(0)
 
-
-
-
-    # Create the tasks. If trace is enabled for any task, memory will be
-    # allocated for state transition tracing, and the application will run out
-    # of memory after a while and quit. Therefore, use tracing only for 
-    # debugging and set trace to False when it's not needed
-    Controller    = cotask.Task(Controller_fun, name="Controller", priority=5, period=mainperiod,
-                         profile=True, trace=False, shares=(offset, leftencoder, leftmotor, pos_L ,rightencoder, rightmotor, pos_R, t_L, v_L, t_R, v_R, r_ctrl, l_ctrl, velo_L, velo_R, time_L, time_R, velo_set, cmd_L, cmd_R))
-    IMU_Interface = cotask.Task(IMU_Interface_fun, name="IMU Interface", priority=4, period=mainperiod,
-                            profile=True, trace=False, shares=(imu, Eul_head, yaw_rate, SENS_LED))
-
-    Talker        = cotask.Task(Talker_fun, name="Talker", priority=1, period=10,
-                        profile=True, trace=False, shares=(packet, packet_fmt, btcomm, velo_set, kp_lf, ki_lf, time_L, pos_L, velo_L, time_R, pos_R, velo_R, cmd_L, cmd_R, offset, Eul_head, yaw_rate, X_pos, Y_pos, p_v_R, p_v_L, p_head, p_yaw, p_pos_L, p_pos_R))
-    
-    Pursuer       = cotask.Task(Pursuer_fun, name="Pursuer", priority=3, period=mainperiod,
-                            profile=True, trace=False, shares=(WALL_LED, imu_off, obst_sens, velo_set, lf_stop, thepursuer, X_pos, Y_pos, p_head, offset))
-    LineFollow    = cotask.Task(LineFollow_fun, name="Line Follower", priority=2, period=mainperiod,
-                            profile=True, trace=False, shares=(SENS_LED, length, Aixi_sum, Ai_sum, X_pos, velo_set, lf_stop,kp_lf, ki_lf, offset,Line_sensor))
-    
-    SS_Simulator  = cotask.Task(SS_Simulator_fun, name="State Simulator", priority=3, period=mainperiod,
-                            profile=True, trace=False, shares=(RUN_LED, imu_off, ssmodel, (mainperiod/1000), y, u, Eul_head, velo_L, velo_R, pos_L, pos_R, cmd_L, cmd_R, X_pos, Y_pos, p_v_R, p_v_L, p_head, p_yaw, p_pos_L, p_pos_R))
-    #Wall_Detector = cotask.Task(Wall_detect_fun, name="Wall Detector", priority=3, period=mainperiod,
-    #                        profile=True, trace=False, shares=(obst_sens, X_pos, Y_pos, velo_set))
-    
-    
-    GarbageCollector = cotask.Task(GarbageCollector_fun, name="Garbage Collect", priority=0, period=mainperiod, profile=True, trace=False)
+    # TASK CREATION
+    Controller = cotask.Task(
+        Controller_fun,
+        name="Controller",
+        priority=5,
+        period=mainperiod,
+        profile=True,
+        trace=False,
+        shares=(
+            offset,
+            leftencoder,
+            leftmotor,
+            pos_L,
+            rightencoder,
+            rightmotor,
+            pos_R,
+            t_L,
+            v_L,
+            t_R,
+            v_R,
+            r_ctrl,
+            l_ctrl,
+            velo_L,
+            velo_R,
+            time_L,
+            time_R,
+            velo_set,
+            cmd_L,
+            cmd_R,
+        ),
+    )
+    IMU_Interface = cotask.Task(
+        IMU_Interface_fun,
+        name="IMU Interface",
+        priority=4,
+        period=mainperiod,
+        profile=True,
+        trace=False,
+        shares=(imu, Eul_head, yaw_rate, SENS_LED),
+    )
+    Talker = cotask.Task(
+        Talker_fun,
+        name="Talker",
+        priority=1,
+        period=10,
+        profile=True,
+        trace=False,
+        shares=(
+            packet,
+            packet_fmt,
+            btcomm,
+            velo_set,
+            kp_lf,
+            ki_lf,
+            time_L,
+            pos_L,
+            velo_L,
+            time_R,
+            pos_R,
+            velo_R,
+            cmd_L,
+            cmd_R,
+            offset,
+            Eul_head,
+            yaw_rate,
+            X_pos,
+            Y_pos,
+            p_v_R,
+            p_v_L,
+            p_head,
+            p_yaw,
+            p_pos_L,
+            p_pos_R,
+        ),
+    )
+    Pursuer = cotask.Task(
+        Pursuer_fun,
+        name="Pursuer",
+        priority=3,
+        period=mainperiod,
+        profile=True,
+        trace=False,
+        shares=(WALL_LED, imu_off, obst_sens, velo_set, lf_stop, thepursuer,
+                X_pos, Y_pos, p_head, offset),
+    )
+    LineFollow = cotask.Task(
+        LineFollow_fun,
+        name="Line Follower",
+        priority=2,
+        period=mainperiod,
+        profile=True,
+        trace=False,
+        shares=(SENS_LED, length, Aixi_sum, Ai_sum, X_pos, velo_set, lf_stop,
+                kp_lf, ki_lf, offset, Line_sensor),
+    )
+    SS_Simulator = cotask.Task(
+        SS_Simulator_fun,
+        name="State Simulator",
+        priority=3,
+        period=mainperiod,
+        profile=True,
+        trace=False,
+        shares=(
+            RUN_LED,
+            imu_off,
+            ssmodel,
+            (mainperiod / 1000),
+            y,
+            u,
+            Eul_head,
+            velo_L,
+            velo_R,
+            pos_L,
+            pos_R,
+            cmd_L,
+            cmd_R,
+            X_pos,
+            Y_pos,
+            p_v_R,
+            p_v_L,
+            p_head,
+            p_yaw,
+            p_pos_L,
+            p_pos_R,
+        ),
+    )
+    GarbageCollector = cotask.Task(
+        GarbageCollector_fun,
+        name="Garbage Collect",
+        priority=0,
+        period=mainperiod,
+        profile=True,
+        trace=False,
+    )
     gc.collect()
-   
+
     cotask.task_list.append(Controller)
     cotask.task_list.append(IMU_Interface)
     cotask.task_list.append(Talker)
     cotask.task_list.append(SS_Simulator)
     cotask.task_list.append(Pursuer)
     cotask.task_list.append(LineFollow)
-    #cotask.task_list.append(Wall_Detector)
     cotask.task_list.append(GarbageCollector)
     gc.collect()
 
-    print('All tasks initialized.')
+    print("All tasks initialized.")
     print(gc.mem_alloc())
     print(gc.mem_free())
 
-    # Run the memory garbage collector to ensure memory is as defragmented as
-    # possible before the real-time scheduler is started
     gc.collect()
 
-    imu.init_heading() #Wait until the last possible second to init IMU heading b/c it keeps jumping a few ms after being setup
+    imu.init_heading()
 
-
-    # Run the scheduler with the chosen scheduling algorithm. Quit if ^C pressed
     while True:
         try:
             cotask.task_list.pri_sched()
         except KeyboardInterrupt:
             leftmotor.set_effort(0)
             rightmotor.set_effort(0)
-            #Save IMU calibration data
             imu.set_config()
             sleep(0.1)
-            imu.read_cal_data('calibration.txt')
+            imu.read_cal_data("calibration.txt")
             break
 
-    # Print a table of task data and a table of shared information data
-    print('\n' + str (cotask.task_list))
+    print("\n" + str(cotask.task_list))
     print(task_share.show_all())
     print(Controller.get_trace())
     print(Talker.get_trace())
     print(Pursuer.get_trace())
-    #print(Wall_Detector.get_trace())
     print(LineFollow.get_trace())
-
-    print('')
+    print("")

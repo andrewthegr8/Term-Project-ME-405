@@ -15,7 +15,9 @@ what shares and queues the tasks interface with.
 NEED OVERALL DIAGRAM
 
 The following table contains additional information about the 
-inter-task communication variables shown in the diagram.
+inter-task communication variables shown in the diagram. Variables 
+labeled (predicted) contian datat that came from the state space observer
+rather than hardware.
 
 .. list-table::
    :header-rows: 1
@@ -43,7 +45,7 @@ inter-task communication variables shown in the diagram.
      - Share
      - f (float)
      - —
-     - Motor setpoint adjustment from line follower
+     - Motor setpoint adjustment (rotational velocity setpoint)
 
    * - lf_stop
      - Share
@@ -73,31 +75,31 @@ inter-task communication variables shown in the diagram.
      - Queue
      - f (float)
      - 20
-     - Left motor position
+     - Left wheel path length
 
    * - velo_L
      - Queue
      - f (float)
      - 20
-     - Left motor velocity
+     - Left wheel velocity
 
    * - time_R
      - Queue
      - I (uint16)
      - 20
-     - Right motor timestamp
+     - Right wheel timestamp
 
    * - pos_R
      - Queue
      - f (float)
      - 20
-     - Right motor position
+     - Right wheel path length
 
    * - velo_R
      - Queue
      - f (float)
      - 20
-     - Right motor velocity
+     - Right wheel velocity
 
    * - Eul_head
      - Queue
@@ -115,49 +117,49 @@ inter-task communication variables shown in the diagram.
      - Queue
      - f (float)
      - 10
-     - Absolute X position
+     - Absolute X position (predicted)
 
    * - Y_pos
      - Queue
      - f (float)
      - 10
-     - Absolute Y position
+     - Absolute Y position (predicted)
 
    * - p_v_R
      - Queue
      - f (float)
      - 10
-     - Total path length (right wheel)
+     - Right wheel velocity (predicted)
 
    * - p_v_L
      - Queue
      - f (float)
      - 10
-     - Total velocity
+     - Left wheel velocity (predicted)
 
    * - p_head
      - Queue
      - f (float)
      - 10
-     - Heading (radians)
+     - Heading (radians) (predicted)
 
    * - p_yaw
      - Queue
      - f (float)
      - 10
-     - Yaw rate (radians/s)
+     - Yaw rate (radians/s) (predicted)
 
    * - p_pos_L
      - Queue
      - f (float)
      - 10
-     - Path length — left wheel
+     - Left wheel path length (predicted)
 
    * - p_pos_R
      - Queue
      - f (float)
      - 10
-     - Path length — right wheel
+     - Right wheel path length (predicted)
 
 
 
@@ -166,7 +168,10 @@ inter-task communication variables shown in the diagram.
 
 Tasks
 --------------
-
+.. automodule:: me405.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 
 Helper Classes
