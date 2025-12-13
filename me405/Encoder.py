@@ -1,4 +1,4 @@
-"""Quadrature encoder driver for the differential-drive robot.
+"""Quadrature encoder driver.
 
 This module provides an :class:`Encoder` class that uses a hardware timer
 configured in ``ENC_AB`` mode to decode a quadrature encoder. It tracks

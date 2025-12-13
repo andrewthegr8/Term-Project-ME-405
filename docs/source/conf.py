@@ -62,6 +62,11 @@ pyb.Timer = DummyTimer
 
 sys.modules["pyb"] = pyb
 
+autodoc_type_aliases = {
+    "DummyPin": "pyb.Pin",
+    "DummyTimer": "pyb.Timer",
+}
+
 
 # ---- Mock micropython.native decorator ----
 micropython = types.ModuleType("micropython")
