@@ -1,9 +1,4 @@
-Template for the Read the Docs tutorial
+Differential Drive Robotics Project
 =======================================
 
-This GitHub template includes fictional Python library
-with some basic Sphinx docs.
-
-Read the tutorial here:
-
-https://docs.readthedocs.io/en/stable/tutorial/
+Go here for `project documentation <https://term-project-me-405.readthedocs.io/en/latest/index.html>`_.
