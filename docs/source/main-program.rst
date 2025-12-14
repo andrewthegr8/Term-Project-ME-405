@@ -310,8 +310,6 @@ rather than hardware.
      - Right wheel path length (predicted)
 
 
-.. _main-program:
-
 Main Program
 --------------
 All task generator functions are contained in 'main.py'.
