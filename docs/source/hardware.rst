@@ -201,7 +201,7 @@ It performs **on-board sensor fusion**, providing high-level metrics such as:
 - Angular velocity  
 - Linear acceleration  
 
-Communication occurs over **I²C**.
+Communicates with the STM32 via **I²C**.
 
 .. note::
    The BNO055 requires calibration for accurate measurements. Calibration

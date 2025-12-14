@@ -310,9 +310,9 @@ rather than hardware.
      - Right wheel path length (predicted)
 
 
-Main Program
+Main Script
 --------------
-All task generator functions are contained in 'main.py'.
+All task generator functions are contained in ``main.py``.
 
 .. automodule:: me405.main
    :members:
