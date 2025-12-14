@@ -21,7 +21,8 @@ navigate an obstacle sourse using a variety of sensors. The video below shows
 the robot successfully completing the course.
 
 In the video, the robot uses an IR line sensor to follow the line until the "Y"
-at which point it targets checkpoints and solo cups on the course.
+at which point it targets checkpoints and solo cups while avoiding obstacles.
+It also utilizes its bump sensor to detect and avoid the "wall" near the start.
 
 .. raw:: html
 
