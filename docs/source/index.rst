@@ -29,3 +29,4 @@ Robot features include
    pcui
    ssmodel
    drivingalgorithm
+   importantnotes

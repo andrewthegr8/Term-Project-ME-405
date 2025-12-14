@@ -29,7 +29,12 @@ Relevant on-chip peripherals include:
 - **I²C** (Used to interface with the IMU)
 - **UART** (Used to interface with the Bluetooth modile)  
 - **GPIO** (Used for motor control, status LEDS, and bump sensing)
-- **ADC (16-channel)** (Used for reflectance sensor array sampling)  
+- **ADC (16-channel)** (Used for reflectance sensor array sampling) 
+
+.. toctree::
+   :maxdepth: 1
+
+   stm32-pins
 
 
 Shoe of Brian Interface Board
