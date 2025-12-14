@@ -11,6 +11,14 @@ can be found in the `ME405-Support <https://github.com/spluttflob/ME405-Support>
 
 The software documentation is broken up into 3 sections:
 
-* :doc:`main-program` - This contains information about the tasks that provide high level functionality
-* :doc:`helper-classes` - This contains information about object types developed to preform specific functions in this project
-* :doc:`drivers` - This contians infromation about driver classes developed to interface with hardware
+* :doc:`main-program` - Documentation for the tasks that provide high level functionality
+* :doc:`helper-classes` - Documentation for specalized object types developed to preform specific functions in this project
+* :doc:`drivers` - Documentation for driver classes developed to interface with hardware
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Software Modules
+
+   main-program
+   helper-classes
+   drivers

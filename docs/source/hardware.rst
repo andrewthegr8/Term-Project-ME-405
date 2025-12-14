@@ -7,7 +7,7 @@ microcontroller, a custom interface board, multiple Pololu-provided
 modules, and a variety of sensors that enable closed-loop autonomous
 operation.
 
----
+
 
 STM32 Nucleo-64 (L476RG)
 ------------------------
@@ -26,12 +26,11 @@ instead of the on-board ST-Link interface.
 
 Relevant on-chip peripherals include:
 
-- **I²C** – communication with the IMU  
-- **UART** – Bluetooth telemetry link  
-- **GPIO** – motor control, line sensor LED control, and digital inputs  
-- **ADC (16-channel)** – reflectance sensor array sampling  
+- **I²C** (Used to interface with the IMU)
+- **UART** (Used to interface with the Bluetooth modile)  
+- **GPIO** (Used for motor control, status LEDS, and bump sensing)
+- **ADC (16-channel)** (Used for reflectance sensor array sampling)  
 
----
 
 Shoe of Brian Interface Board
 -----------------------------
@@ -44,16 +43,15 @@ Shoe of Brian Interface Board
    :align: center
 
 Developed by **Dr. John Ridgely** (Cal Poly), the Shoe of Brian attaches
-directly to the Nucleo-64 and provides:
+directly to the Nucleo-64 and provides a reliable programming/debugging
+interface for MicroPython.
 
-- Micro-USB interface for **REPL** and **filesystem** access  
+- Mini-USB interface for **REPL** and **filesystem** access  
 - Power routing and additional convenience wiring  
-- A reliable programming/debugging interface for MicroPython  
 
 This board greatly simplifies program upload and debugging during
 development.
 
----
 
 Romi Chassis Kit
 ----------------
@@ -71,13 +69,12 @@ the robot. This low-cost, modular platform includes:
 - Injection-molded chassis  
 - Differential-drive motors  
 - 70 mm wheels  
-- Battery housing for **6× AA cells**  
+- Battery housing for **6x AA cells**  
 - Numerous mounting points for sensors and electronics  
 
 Its standardized mounting pattern ensures compatibility with other Pololu
 hardware, including the encoders and power distribution board used here.
 
----
 
 Romi Power Distribution Board (PDB)
 -----------------------------------
@@ -95,16 +92,17 @@ The Romi PDB integrates:
 - A **step-down regulator** to power the Nucleo  
 - Breakouts and headers for motor/encoder connections  
 
-Motor control uses:
+The motor drivers support multiple control methods.
+For this project, they were configured to use
 
-- **Enable/disable** signals  
-- **Direction pins**  
+- **Enable/disable** pins  
+- **Motor Direction** pins 
 - **Unsigned PWM** for motor effort  
 
 The PDB mounts directly onto the chassis and provides clean electrical
 integration between motors, encoders, and control electronics.
 
----
+
 
 Romi Motors
 -----------
@@ -125,7 +123,7 @@ The Romi motors are brushed DC gearmotors with:
 These motors provide enough torque and speed for the obstacle-course tasks
 in this project while remaining lightweight and inexpensive.
 
----
+
 
 Romi Quadrature Encoders
 ------------------------
@@ -137,18 +135,16 @@ Romi Quadrature Encoders
    :width: 400px
    :align: center
 
-Each encoder module attaches directly to the motor’s rear shaft and uses:
+Each encoder module attaches directly to the motor's rear shaft and uses:
 
 - **Two Hall-effect sensors**  
 - A **6-pole magnetic disk**
 
 This produces **approximately 1440 ticks per wheel revolution**, enabling:
 
-- High-resolution odometry  
-- Accurate wheel velocity estimation  
-- Quadrature decoding via the MCU’s timer encoder interface  
+- Wheel velocity estimation  
+- Quadrature decoding via the MCU's timer encoder interface  
 
----
 
 Reflectance (Line) Sensor Array
 -------------------------------
@@ -165,14 +161,18 @@ producing an analog voltage proportional to reflected IR intensity.
 Characteristics:
 
 - LEDs can be driven at variable brightness  
-- **Odd and even LEDs** can be toggled independently  
-- Each channel is read by the STM32’s **ADC**  
+- Odd and even LEDs can be toggled independently  
+- Each channel is read by the STM32's ADC
 - Used for detecting the black line on the course and computing a centroid
-  for steering control  
+  for steering control
 
 This sensor was mounted to the underside of the chassis.
 
----
+:note::
+    For this project, only the center 13 channels were used 
+    since some of the STM32's ADC channels correspond to pins
+    which were used for other purposes
+
 
 IMU (BNO055)
 ------------
@@ -199,15 +199,5 @@ It performs **on-board sensor fusion**, providing high-level metrics such as:
 Communication occurs over **I²C**.
 
 .. note::
-
    The BNO055 requires calibration for accurate measurements. Calibration
-   data should be stored and reapplied at boot time for best performance.
-
----
-
-If you'd like, I can also convert this into:
-
-- a **comparison table** of hardware  
-- a **bill of materials (BOM)**  
-- a linked sidebar or gallery  
-- schematic-style diagrams (Graphviz or Mermaid)
+   data was stored on program exit and loaded on program startup.
