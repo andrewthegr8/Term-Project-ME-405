@@ -1,7 +1,7 @@
-Romi Control Architecture (MicroPython)
+Romi Control Architecture 
 ======================================
 
-This website contains information about a project revolving around
+This website contains hardware and software documentation for a project revolving around
 a small differential drive robot (Romi). It was completed as part of a course (ME 405) at
 Cal Poly SLO.
 
