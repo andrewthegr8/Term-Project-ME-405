@@ -1,12 +1,12 @@
 Romi Control Architecture (MicroPython)
 ======================================
 
-This project contains MicroPython software and documentation for a small
-differential drive robot (Romi). It was completed as part of a course (ME 405) at
+This website contains information about a project revolving around
+a small differential drive robot (Romi). It was completed as part of a course (ME 405) at
 Cal Poly SLO.
 
 The primary project objective was for the robot to quickly and reliably
-complete a small obstacle course.
+complete an obstacle course.
 
 Robot features include
 
@@ -15,6 +15,7 @@ Robot features include
 * Path Planning with Velocity and Heading Control
 * Realtime Transmission of Telemetry Data to a PC via Bluetooth
 * Obstacle Detection and Avoidance
+
 
 
 
