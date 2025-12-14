@@ -26,5 +26,8 @@ Robot features include
    overview
    hardware
    software
+   main-program
+   helper-classes
+   drivers
    pcui
    ssmodel
