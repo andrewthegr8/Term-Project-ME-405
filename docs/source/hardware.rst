@@ -151,7 +151,7 @@ Reflectance (Line) Sensor Array
 
 `Product page <https://www.pololu.com/product/4215/resources>`_
 
-.. image:: images/linesens
+.. image:: images/linesens.jpg
    :alt: Pololu line sensor array
    :width: 500px
    :align: center
