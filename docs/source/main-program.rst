@@ -5,7 +5,7 @@ all contained in ``main.py``. This page has information about how the tasks comm
 as well as detailed documentation for ``main.py``.
 
 .. note::
-    For some of the tasks, the functionaility is bundled into a helper class,
+    For some of the tasks, much of the functionality is bundled into a helper class,
     and the task does little more than run a method of one of the helper classes.
 
 Task List
@@ -19,33 +19,28 @@ The following cooperative tasks and helper function are defined in
   streams telemetry packets over the serial link.
 
 * :func:`~me405.main.IMU_Interface_fun` –
-  Periodically reads the BNO055 IMU and pushes heading (and optional yaw rate)
+  Periodically reads the BNO055 IMU and pushes heading (and optionally yaw rate)
   measurements into shared queues.
 
 * :func:`~me405.main.SS_Simulator_fun` –
   Runs the state-space model to estimate robot position, heading, and related
-  states from encoder and IMU data, then logs them to queues.
+  states using feedback from encoder and IMU data, then logs them to queues.
 
 * :func:`~me405.main.LineFollow_fun` –
-  Uses the reflectance sensor array to follow the black line and computes a
+  Uses the reflectance sensor array to follow a black line. Computes a
   lateral offset command for the controller.
 
 * :func:`~me405.main.Pursuer_fun` –
-  Implements pure-pursuit path following, generating speed and turning
-  commands based on the estimated pose and obstacle flags.
+  Implements point targeting path following, generating speed and turning
+  commands based on the estimated pose.
 
 * :func:`~me405.main.Controller_fun` –
-  Performs PI wheel-speed control, reading setpoints and encoder feedback to
-  compute motor efforts and log wheel data.
+  Performs PI wheel-speed control. Reading setpoints and encoder feedback to
+  compute and set motor efforts. Logs wheel position and velocity data.
 
 * :func:`~me405.main.GarbageCollector_fun` –
   Low-priority background task that periodically runs :func:`gc.collect` to
   manage heap usage on the microcontroller.
-
-* :func:`~me405.main.Cali_test` –
-  Blocking calibration routine that guides the user through black/white
-  calibration of the line sensor using the pushbutton and status LED.
-
 
 Task diagram
 ~~~~~~~~~~~~~~~~

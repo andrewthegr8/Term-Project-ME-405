@@ -1,4 +1,4 @@
-Hardware Overview
+Hardware
 =================
 
 This section describes the hardware components used in the Romi robot
@@ -228,5 +228,5 @@ enables wireless serial communication between the robot and a PC. The
 module interfaces with the STM32 via a UART connection and must configured
 and paired with the PC prior to use.
 
-See `<pcui>`_ for details on the PC-side application used to interface
+See :doc:`pcui` for details on the PC-side application used to interface
 with the robot via Bluetooth.

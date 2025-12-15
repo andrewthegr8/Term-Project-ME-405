@@ -12,7 +12,7 @@ can be found in the `ME405-Support <https://github.com/spluttflob/ME405-Support>
 The software documentation is broken up into 3 sections:
 
 * :doc:`main-program` - Documentation for the tasks that provide high level functionality
-* :doc:`helper-classes` - Documentation for specalized object types developed to preform specific functions in this project
+* :doc:`helper-classes` - Documentation for specialized object types developed to preform specific functions in this project
 * :doc:`drivers` - Documentation for driver classes developed to interface with hardware
 
 .. toctree::
