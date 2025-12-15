@@ -1,0 +1,6 @@
+.zoomable-graph svg {
+  transition: opacity 0.15s;
+}
+.zoomable-graph svg:hover {
+  opacity: 0.85;
+}

@@ -187,8 +187,13 @@ def IMU_Interface_fun(shares):
     """IMU interface task.
 
     This task reads the current heading from the IMU and publishes it
-    into the shared queues which are used by other tasks and the
-    state-space estimator.
+    into the shared queue for telemetry and state estimation.
+
+    .. note::
+        The current implementation only reads the heading angle. The initial
+        itertion also read the yaw rate, but to minimize exceuption time,
+        this feature was removed. A zero value is currently published for yaw
+        rate so an empty queue doen't block data transmission.
 
     Args:
         shares: Tuple ``(imu, Eul_head, yaw_rate, SENS_LED)`` where:

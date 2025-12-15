@@ -51,28 +51,31 @@ and priority (P) is shown as well.
 
 .. graphviz::
    :align: center
+   :class: zoomable-graph
 
    digraph firmware_arch {
      rankdir=LR;
-     fontsize=16;                 // global font size (bigger!)
-     nodesep="0.5";               // moderate spacing
-     ranksep="1.0 equally";       // modest vertical spread
+
+     // Overall font / spacing
+     fontsize=16;
+     nodesep="0.6";
+     ranksep="1.0 equally";
 
      node [
        shape=box,
        style="rounded,filled",
        fillcolor="#f8f8f8",
        fontname="Helvetica",
-       fontsize=16                // bigger node labels
+       fontsize=16
      ];
 
      edge [
        fontname="Helvetica",
-       fontsize=12                // bigger edge text
+       fontsize=12
      ];
 
      // =========================
-     // Task nodes
+     // Task nodes (Garbage removed)
      // =========================
      subgraph cluster_tasks {
        label = "Tasks (priority P, period T)";
@@ -85,36 +88,47 @@ and priority (P) is shown as well.
        LineFollow    [label="LineFollow\nP=2, T=30 ms"];
        Pursuer       [label="Pursuer\nP=3, T=30 ms"];
        SS_Simulator  [label="SS_Simulator\nP=3, T=30 ms"];
-       Garbage       [label="GarbageCollector\nP=0, T=30 ms"];
      }
 
      // =========================
-     // Shares / queues
+     // Column layout (reduces edge crossing)
+     // =========================
+     { rank = same; IMU_Interface; Talker; }
+     { rank = same; SS_Simulator; Controller; }
+     { rank = same; Pursuer; LineFollow; }
+
+     // =========================
+     // Shares / queues between tasks
      // =========================
 
+     // Speed commands
      Talker      -> Controller    [label="velo_set (Share)\n$SPD commands"];
      Pursuer     -> Controller    [label="velo_set (Share)"];
-     Controller  -> Talker        [label="cmd_L/R (Queues)\nfor telemetry"];
+     Controller  -> Talker        [label="cmd_L/R (Queues)\ntelemetry"];
 
+     // Offsets
      LineFollow  -> Controller    [label="offset (Share)\nline follower"];
      Pursuer     -> Controller    [label="offset (Share)\npure pursuit"];
 
-     Pursuer     -> LineFollow    [label="lf_stop (Share)\nstop line follow"];
+     // Line follower enable/disable
+     Pursuer     -> LineFollow    [label="lf_stop (Share)"];
 
+     // IMU to simulator & talker
      IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate\n(Queues)"];
      IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate (Queues)"];
 
+     // Controller → others
      Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R (Queues)"];
      Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R (Queues)"];
 
+     // State-space simulator outputs
      SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R (Queues)"];
      SS_Simulator -> LineFollow   [label="X_pos (Queue)"];
      SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head (Queues)"];
 
-     Pursuer     -> Talker        [label="indirectly affects\ntelemetry via\nvelo_set/offset"];
-
+     // Pursuer adjusting behavior
+     Pursuer     -> Talker        [label="indirect effect via\nvelo_set/offset"];
    }
-
 
 
 Inter-task communication variables

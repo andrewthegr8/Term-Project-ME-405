@@ -445,12 +445,12 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
    * -
      - ``A5``
      - ``A12``
-     - USB comm through Shoe of Brian
+     - USB comm via Shoe of Brian
 
    * - Line Sensor - 10
      - ``A6`` |LINE|
      - ``A11``
-     - USB comm through Shoe of Brian
+     - USB comm via Shoe of Brian
 
    * - Line Sensor - 11
      - ``A7`` |LINE|

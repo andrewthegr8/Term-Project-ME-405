@@ -336,6 +336,11 @@ intersphinx_disabled_domains = ['std']
 
 add_module_names = False
 
+#To make output graphs clickable
+graphviz_output_format = "svg"
+
+html_css_files = ["zoom-graph.css"]
+html_js_files = ["zoom-graph.js"]
 
 templates_path = ['_templates']
 
