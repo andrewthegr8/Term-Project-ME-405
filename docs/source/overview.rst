@@ -24,6 +24,8 @@ In the video, the robot uses an IR line sensor to follow the line until the "Y"
 at which point it targets checkpoints and solo cups while avoiding obstacles.
 It also utilizes its bump sensor to detect and avoid the "wall" near the start.
 
+Access the full code repositry on GitHub `here <https://github.com/andrewthegr8/Term-Project-ME-405/tree/main>`.
+
 .. raw:: html
 
    <style>

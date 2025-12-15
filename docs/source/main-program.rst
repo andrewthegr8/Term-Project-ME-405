@@ -311,7 +311,7 @@ rather than hardware.
 
 
 Main Script
---------------
+~~~~~~~~~~~~~~~~~~~~
 All task generator functions are contained in ``main.py``.
 
 .. automodule:: me405.main
