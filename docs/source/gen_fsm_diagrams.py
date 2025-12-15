@@ -30,7 +30,7 @@ def make_talker_fsm():
     )
     dot.edge(
         "S1", "S0",
-        xlabel="Always"
+        label="Always"
     )
 
     dot.render(os.path.join(OUT_DIR, "talker_fsm"),
@@ -99,7 +99,7 @@ def make_controller_fsm():
     )
     dot.edge(
         "S2", "S1",
-        xlabel="cmd = velo_set.get() != 0.0\n"
+        label="cmd = velo_set.get() != 0.0\n"
               "Reset integrators \n"
               "and encoders"
     )

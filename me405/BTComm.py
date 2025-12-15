@@ -1,14 +1,14 @@
 """Bluetooth serial communication helper.
 
 This module provides the :class:`BTComm` class, a small wrapper around a
-MicroPython ``UART`` (or similar serial device) used to communicate with the
+MicroPython ``UART`` object used to faciliate communication with the
 robot over Bluetooth.
 
 The class:
 
 * Collects incoming characters into a line-oriented command string.
 * Provides a non-blocking :meth:`check` method suitable for use in a
-  cooperative task.
+  cooperative multitasking.
 * Sends pre-built binary packets using :meth:`ship`.
 """
 
@@ -21,6 +21,9 @@ class BTComm:
     This class encapsulates a serial device (such as a MicroPython
     :class:`pyb.UART`) and provides simple methods for non-blocking command
     reception and packet transmission.
+
+    Args:
+            serial_device: A :class:`pyb.UART` object
     """
 
     def __init__(self, serial_device):
@@ -52,14 +55,14 @@ class BTComm:
         Line handling rules:
 
         * ``\\r`` (carriage return, ASCII 13) → terminate the current line,
-          decode the buffer as UTF-8, store it in :attr:`command`, reset the
-          buffer index, and return ``True``.
+          decode and store the buffer, reset the
+          buffer, and return ``True``.
         * ``\\n`` (line feed, ASCII 10) → ignored.
         * Backspace (ASCII 8) → remove the last character from the buffer.
-        * Any other character → appended to the buffer until it is full.
+        * Any other character → appended to the buffer until ``\r`` is recieved.
 
         Returns:
-            bool: ``True`` if a complete command line has just been received,
+            bool: ``True`` if a complete line has just been received,
             ``False`` otherwise.
         """
         if self.serial_device.any():
@@ -92,7 +95,7 @@ class BTComm:
         """Send a pre-built packet over the serial link.
 
         Args:
-            packet: A bytes-like object (for example, :class:`bytearray`)
-                containing the already-packed packet to transmit.
+            packet: A :class:`bytearray` object
+            containing the already-packed packet to transmit.
         """
         self.serial_device.write(memoryview(packet))
