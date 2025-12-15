@@ -394,8 +394,7 @@ A figure is created which contains four subplots:
     vs. time, contianing both true and predicted values.
 
 4. **XY Path with Reference Setpoints**
-   - Actual trajectory (X,Y), mirrored across the +Y axis for plot
-     convention
+   - Actual trajectory (X,Y), mirrored across the +Y axis so the plot aligns wiht the obstacle course layout
    - Red dots indicating path setpoints  
    - Equal axis scaling for geometric accuracy
 
