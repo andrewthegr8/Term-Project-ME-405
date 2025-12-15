@@ -50,8 +50,8 @@ class ThePursuer:
     * Returns a proportional steering offset and the chosen speed.
 
     .. note::
-        The controller currently raises a ``KeyboardInterrupt`` when all
-        waypoints have been reached. This ensures that the motors stop at the
+        The pursuer raises a ``KeyboardInterrupt`` when the last
+        waypoiint has been reached. This ensures that the motors stop at the
         end of the path and that the IMU calibration coeffiecnts are saved after
         every run.
     

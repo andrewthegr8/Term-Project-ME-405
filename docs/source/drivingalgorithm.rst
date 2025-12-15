@@ -168,12 +168,87 @@ from the target, yet decelerates for high heading error or when approaching a
 waypoint. The ``max(…, 0)`` term guarantees speed is never penalized for being
 too close to a target.
 
-Performance Notes
-=================
+PPerformance Graphs
+==================
 
-Although the speed and heading controllers could be refined further, this
-implementation performed robustly in competition conditions. The tuning values
-were selected empirically due to time constraints, but the combined strategy
-enabled Romi to navigate the track accurately, handle complex obstacle regions,
-and maintain stable behavior across all required path segments.
+The following performance graphs were generated from a full end-to-end run of
+Romi navigating the competition course. They capture detailed velocity behavior,
+controller predictions, waypoint transitions, and the executed trajectory in the
+world frame.
 
+These plots provide quantitative insight into how the heading controller and
+speed-modulation logic perform in real conditions.
+
+Wheel Velocity Tracking
+-----------------------
+
+The top-row graphs show the *left* and *right* wheel velocities, both measured
+and predicted, along with the corresponding command signals. Several important
+features are visible:
+
+* The predicted wheel velocities closely follow the measured velocities,
+  indicating that the internal kinematic model matches Romi’s physical response.
+* Sharp changes in commanded velocity correspond to turns, waypoint transitions,
+  and alignment corrections.
+* The saturation behavior is evident when Romi requests high torque during major
+  heading changes.
+
+Velocity Setpoint Behavior
+--------------------------
+
+The lower-left graph shows the commanded linear velocity setpoint over time.
+Several characteristics of the speed-control algorithm are clearly observable:
+
+* **Plateaus in the velocity curve** occur as Romi approaches a waypoint.  
+  These plateaus result from the **speed-bonus term dropping to zero** when the
+  error distance :math:`\lVert \mathbf{E} \rVert` falls below the braking
+  threshold. At this point Romi is no longer rewarded for moving quickly and
+  transitions into a controlled approach phase.
+* Each **red dashed vertical line** indicates the approximate moment Romi passed
+  a waypoint. Immediately following these moments, the **heading error jumps**
+  because Romi begins targeting the *next* waypoint in the list. This sudden
+  change in :math:`\alpha` causes the controller to temporarily reduce the
+  commanded speed until alignment is recovered.
+* The magnitude and duration of each plateau correspond closely to waypoint
+  spacing: longer plateaus occur near tightly spaced points, especially in areas
+  requiring high precision (e.g., traversing the narrow column corridor).
+
+Taken together, these features demonstrate that the speed-control logic is
+functioning as intended—accelerating during well-aligned motion and decelerating
+smoothly as Romi prepares for directional changes.
+
+Executed Trajectory and Waypoint Hits
+-------------------------------------
+
+The lower-right graph shows Romi’s tracked world-frame path mirrored about the
+positive :math:`Y` axis (for visualization) alongside the red circular
+waypoints. Several trends can be seen:
+
+* Romi’s trajectory passes very close to each waypoint, confirming correct
+  operation of the heading-error controller and the waypoint-switching logic.
+* The plotted **red dashed vertical time markers** correspond to Romi crossing
+  the horizontal projection of each waypoint. These timestamps match expected
+  transitions in the velocity plots.
+* In confined regions of the course, such as the straight corridor between
+  columns, Romi maintains highly linear motion thanks to the intermediate
+  waypoint placement and the proportional heading correction.
+
+These graphs together indicate that the controller behaves robustly across a
+variety of geometric constraints and that the interplay between heading control,
+speed modulation, and waypoint switching is well balanced.
+
+Summary of Observed Performance
+-------------------------------
+
+* The heading-error computation reliably reorients Romi toward each new
+  waypoint with minimal overshoot.
+* Speed modulation prevents overshoot at close-range waypoints and maintains
+  stability during rapid heading transitions.
+* Wheel-velocity prediction and measurement show strong agreement, validating
+  the underlying motion model.
+* The overall path closely follows the intended waypoint sequence, even in
+  regions requiring significant precision.
+
+Although additional optimization is possible—particularly in reducing speed
+fluctuation during rapid waypoint transitions—the collected data illustrates
+consistent, reliable, and competition-ready behavior.

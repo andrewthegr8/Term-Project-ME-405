@@ -206,8 +206,10 @@ By trial and error,
 a period of 25 ms was found to be the smallest task period which resulted in reliable
 timesteps.
 
-..image:: 
-    /images/alltasks25.png
+.. figure:: images/alltasks25.png
+   :alt: Actual circle trajectory simulation
+   :align: center
+   :width: 90%
 
 In the image above, task periods, avergae and max execution times, and 
 average and max "late" times are shown. The "late" time is the amount of time
@@ -257,12 +259,15 @@ are the same color as the true values in the other graphs.
     Some of the following graphs have large spikes. This is due to
     data being corrupted during Bluetooth transmission.
 
+.. tip::
+    Click on a graph to view a fullscreen version.
+
 .. figure:: images/StraightLine.png
    :alt: Straight-line motion simulation
    :align: center
    :width: 90%
 
-   Observer preformace for a straight-line trajectory.
+   Observer preformance for a straight-line trajectory.
 
 .. figure:: images/ActualCircle.png
    :alt: Actual circle trajectory simulation
