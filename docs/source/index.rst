@@ -21,7 +21,7 @@ Access the full code repository on GitHub `here <https://github.com/andrewthegr8
 
 Demo
 -----------------
-The term project for the class was to program the robot to autonomously 
+The goal of the project was to program the robot to autonomously 
 navigate an obstacle sourse using a variety of sensors. The video below shows
 the robot successfully completing the course.
 

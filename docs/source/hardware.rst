@@ -29,11 +29,16 @@ Relevant on-chip peripherals include:
 - **I²C** (Used to interface with the IMU)
 - **UART** (Used to interface with the Bluetooth modile)  
 - **GPIO** (Used for motor control, status LEDS, and bump sensing)
-- **ADC (16-channel)** (Used for reflectance sensor array sampling) 
+- **ADC (16-channel)** (Used for reflectance sensor array sampling)
+
+STM32 Pinout Details
+--------------------------
+
+See the :doc:`STM32 Pin Configuration <stm32-pins>` page for a complete
+breakdown of the pin assignments used in this project.
 
 .. toctree::
    :maxdepth: 2
-   :caption: STM32 Peripheral Connections:
 
    stm32-pins
 
@@ -174,7 +179,7 @@ Characteristics:
 
 This sensor was mounted to the underside of the chassis.
 
-:note::
+.. note::
     For this project, only the center 13 channels were used 
     since some of the STM32's ADC channels correspond to pins
     which were used for other purposes
@@ -209,9 +214,9 @@ Communicates with the STM32 via **I²C**.
    data was stored on program exit and loaded on program startup.
 
 Bluetooth Module (HC-05)
-----------------------
+--------------------------------
 
-`Product page <https://www.pololu.com/product/2510>`_
+`Product page <https://www.amazon.com/HiLetgo-Wireless-Bluetooth-Transceiver-Arduino/dp/B071YJG8DR>`_
 
 .. image:: images/bluetooth.jpg
    :alt: HC-05 Bluetooth module
@@ -223,5 +228,5 @@ enables wireless serial communication between the robot and a PC. The
 module interfaces with the STM32 via a UART connection and must configured
 and paired with the PC prior to use.
 
-See :ref:`pcui` for details on the PC-side application used to interface
+See `<pcui>`_ for details on the PC-side application used to interface
 with the robot via Bluetooth.
