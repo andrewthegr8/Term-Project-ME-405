@@ -11,11 +11,7 @@ module. The original work is:
     Copyright (c) 2017–2023 by J. R. Ridgely
 
 and is released under the GNU General Public License, version 3 (GPLv3).
-This adapted version keeps the original logic (plus your local additions such
-as :meth:`Queue.view` and :meth:`Queue.many`) but replaces Doxygen-style
-comments with Sphinx/ReadTheDocs-friendly docstrings so that the API can be
-documented using ``autodoc``. The license and copyright remain the same as
-in the original source.:contentReference[oaicite:1]{index=1}
+The license and copyright remain the same as in the original source.
 
 It is intended for educational use, but its use is not limited thereto.
 THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND; see the

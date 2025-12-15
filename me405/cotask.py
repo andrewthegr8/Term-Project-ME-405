@@ -12,7 +12,7 @@ cooperative scheduler. The original work is:
 
 and is released under the GNU General Public License, version 3 (GPLv3).
 The license and copyright remain the
-same as in the original source.:contentReference[oaicite:0]{index=0}
+same as in the original source.
 
 It is intended for educational use, but its use is not limited thereto.
 THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND; see the
