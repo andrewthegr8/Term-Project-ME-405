@@ -253,6 +253,10 @@ from the encoders and IMU, while the "estimated" values are those produced
 by the observer. Also, the paths shown are the predicted path even though they 
 are the same color as the true values in the other graphs.
 
+.. note::
+    Some of the following graphs have large spikes. This is due to
+    data being corrupted during Bluetooth transmission.
+
 .. figure:: images/StraightLine.png
    :alt: Straight-line motion simulation
    :align: center
