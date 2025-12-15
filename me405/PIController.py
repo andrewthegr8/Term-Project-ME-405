@@ -16,8 +16,8 @@ class PIController:
         """Initialize the PI controller.
 
         Args:
-            kp: Proportional gain constamt.
-            ki: Integral gain constant.
+            kp -  Proportional gain constant.
+            ki -  Integral gain constant.
         """
         self.esum = 0.0
         self.kp = kp

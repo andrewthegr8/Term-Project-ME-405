@@ -327,6 +327,20 @@ alias_module("SSModel", "me405.SSModel")
 alias_module("PIController", "me405.PIController")
 alias_module("ThePursuer", "me405.ThePursuer")
 
+import subprocess
+
+def generate_fsm_diagrams(app):
+    """Run the FSM diagram generator so SVGs exist before pages are built."""
+    here = os.path.dirname(__file__)
+    script = os.path.join(here, "gen_fsm_diagrams.py")
+    # Use the same Python that runs Sphinx
+    subprocess.run([sys.executable, script], check=True)
+
+
+def setup(app):
+    # If you already had a setup(app), keep its existing contents
+    app.connect("builder-inited", generate_fsm_diagrams)
+
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),

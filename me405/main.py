@@ -114,6 +114,16 @@ def Talker_fun(shares):
         The PC side code expects this, but this packet modification
         is not well documented.
 
+    .. _talker-fsm:
+
+    Talker task state machine
+    -------------------------
+
+    .. figure:: /_static/images/talker_fsm.svg
+    :alt: Talker_fun finite state machine
+    :align: center
+    :caption: Talker_fun finite state machine
+
     Args:
         shares: Tuple of share/queue objects and configuration values, in
             the following order:
@@ -341,38 +351,14 @@ def LineFollow_fun(shares):
        The line follower implements anti-windup by resetting the integral
        error sum when the requested speed is zero.
 
-    .. graphviz::
-       :caption: LineFollow_fun finite state machine
+    .. _linefollow-fsm:
 
-       digraph LineFollowFSM {
-         rankdir=LR;
-         node [shape=circle];
+    Line follower state machine
+    ---------------------------
 
-         S0 [label="Active follow"];
-         S1 [label="Follower stopped"];
-
-         // Active -> Stopped
-         S0 -> S1 [
-           label="lf_stop.get() == 1\\n"
-                 "SENS_LED.value(0)"
-         ];
-
-         // Active -> Active (normal line following)
-         S0 -> S0 [
-           label="Line_sensor.read()\\n"
-                 "Aixi_sum,Ai_sum,error\\n"
-                 "kp_lf,ki_lf,esum\\n"
-                 "velo_set,offset\\n"
-                 "X_pos.view() bias\\n"
-                 "SENS_LED.value(1)"
-         ];
-
-         // Stopped -> Stopped (no exit in code)
-         S1 -> S1 [
-           label="lf_stop.get() == 1\\n"
-                 "SENS_LED.value(0)"
-         ];
-       }
+    .. figure:: /_static/images/linefollow_fsm.svg
+    :alt: LineFollow_fun finite state machine
+    :align: center
 
     :param shares: Tuple in the following order:
 
@@ -473,6 +459,17 @@ def Pursuer_fun(shares):
         on the solo cups. Once a wall is detected, it sets a flag
         to ignore further detections to prevent repeated triggering.
 
+    .. _pursuer-fsm:
+
+    Pursuer task state machine
+    --------------------------
+
+    .. figure:: /_static/images/pursuer_fsm.svg
+    :alt: Pursuer_fun finite state machine
+    :align: center
+
+
+    
     Args:
         shares: Tuple in the following order:
 
@@ -555,10 +552,19 @@ def Controller_fun(shares):
         differentially to control rotational velocity. A positive offset
         increases the left wheel velocity and decreases the right wheel velocity.
     
-    .. image:: controllerfsm.png
-        :alt: Finite state machine diagram for the motor controller task.
-        :width: 400px
-        :align: center
+    .. _controller-fsm:
+
+    Speed controller state machine
+    ------------------------------
+
+    .. figure:: /_static/images/controller_fsm.svg
+    :alt: Controller_fun finite state machine
+    :align: center
+
+    Finite state machine for :func:`me405.main.Controller_fun`, showing the
+    initialization, active PI speed control, and stopped hold states used
+    to command the motors.
+
 
 
     Args:

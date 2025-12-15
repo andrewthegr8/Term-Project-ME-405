@@ -9,7 +9,7 @@ State vector (indices):
 * ``v_L`` – Left wheel linear velocity.
 * ``v_R`` – Right wheel linear velocity.
 * ``Psi`` – Heading angle (radians).
-* ``s_L`` – Left wheel path length (integrated displacement).
+* ``s_L`` – Left wheel path length.
 * ``s_R`` – Right wheel path length.
 * ``X_r`` – X position in the world frame (inches).
 * ``Y_r`` – Y position in the world frame (inches).
@@ -88,7 +88,7 @@ class SSModel:
 
     @micropython.native
     def x_dot_fcn(self, u, x, y):
-        """Compute the time derivative of the state vector.
+        '''Compute the time derivative of the state vector.
 
         Args:
             u: Input vector (e.g. motor voltages) of length 2.
@@ -97,7 +97,7 @@ class SSModel:
 
         Side Effects:
             Updates :attr:`xd` with the computed state derivatives.
-        """
+        '''
         xd = self.xd
 
         xd[v_L] = (
@@ -118,8 +118,10 @@ class SSModel:
     def y_hat_fcn(self):
         """Return the current estimated output vector.
 
-        Currently this returns the last state vector directly, which
-        includes the most recently integrated kinematic quantities.
+        .. tip::
+        Since the model is configured so that the output vector
+        matches the state vector, this method simply returns the last
+        state vector.
 
         Returns:
             array('f'): Estimated state/output vector.

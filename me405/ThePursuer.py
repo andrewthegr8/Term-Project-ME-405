@@ -39,10 +39,12 @@ class ThePursuer:
 
     * Computes the error vector from the current position to the current
       waypoint.
-    * Checks whether the waypoint has been reached (or if ``NextPoint``
+    * Checks whether the robot is close enough to the waypoint (or if ``NextPoint``
       is set) and advances to the next waypoint if so.
     * Computes a heading error ``alpha`` between the robot's current
-      heading and the direction to the waypoint.
+      heading and a vector pointing to the waypoint.
+    * Applies basic proportional control on ``alpha`` to compute a
+      steering offset.
     * Chooses a linear speed based on distance and headings, with
       slowdown near each waypoint.
     * Returns a proportional steering offset and the chosen speed.
