@@ -40,7 +40,7 @@ Nucleo-64 in this project.
    <span style="background-color:#D9D9D9; padding:1px 4px; border-radius:3px;">UI&nbsp;/&nbsp;Status</span>
 
 
-Line sensor array (QTR-style reflectance sensors)
+Line Sensor Array
 -------------------------------------------------
 
 .. list-table::
@@ -119,7 +119,7 @@ Line sensor array (QTR-style reflectance sensors)
 
 
 
-Wheel encoders (quadrature)
+Wheel Encoders (quadrature)
 ---------------------------
 
 .. list-table::
@@ -148,7 +148,7 @@ Wheel encoders (quadrature)
      - Alternate function mode ``AF1``.
 
 
-IMU (BNO055 over I2C)
+IMU (I²C)
 ---------------------
 
 .. list-table::
@@ -172,7 +172,7 @@ IMU (BNO055 over I2C)
      - ``Pin.OUT_PP``
      - Optional hardware reset for the IMU; available on the header but not actively driven in the current firmware.
 
-Obstacle sensor
+Obstacle Sensor
 ---------------
 
 .. list-table::
@@ -189,7 +189,7 @@ Obstacle sensor
      - Simple limit switch. GND when pressed, pulled high otherwise.
 
 
-Bluetooth UART (HC-05 style link)
+Bluetooth (UART)
 ---------------------------------
 
 .. list-table::
