@@ -10,9 +10,9 @@ Romi Control Architecture
   - Background: complete
   - Hardware: complete
   - Software: mostly complete
-    - Main Program: complete
-    - Helper Classes: complete
-    - Drivers: mostly AI gen, needs to be proofread
+     - Main Program: complete
+     - Helper Classes: complete
+     - Drivers: mostly AI gen, needs to be proofread
   - PC UI: not started
   - SS model: Needs fine tuning and formatting
   - Driving Algorithm: needs images and major adjustments

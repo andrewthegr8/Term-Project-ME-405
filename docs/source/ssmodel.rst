@@ -5,6 +5,7 @@ This page describes the state-space model and observer used for
 the Romi differential-drive robot.
 
 It covers:
+
 * The plant and observer equations that are implemented in the
   :class:`~me405.SSModel.SSModel` class.
 * Measures taken to enable the model to be run in real-time on the
@@ -13,7 +14,11 @@ It covers:
 
 
 State-Space Model and Observer Equations
--------------------------------
+------------------------------------------
+
+.. note::
+    For simplicty, the output of the observer is simply all of it's states.
+    So, :math:`\hat{y} = \hat{x}`
 
 State Vector
 ~~~~~~~~~~~~~~~~~~
@@ -22,7 +27,7 @@ and global position as a 7-dimensional state vector:
 
 .. math::
 
-   \hat{y} =
+   \hat{x} =
    \begin{bmatrix}
    \hat{v}_L \\
    \hat{v}_R \\
@@ -80,7 +85,7 @@ Original Plant Model
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The continuous-time plant model (no observer feedback) describes the predicted
-robot dynamics.
+robot dynamics using a first-order motor model.
 
 Parameters
 ^^^^^^^^^^^^^
@@ -108,7 +113,7 @@ Using linear wheel velocities :math:`v_L, v_R` (in/s) and displacements :math:`s
 Augmented Observer Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The observer uses the same process model plus feedback terms that pull the
+The observer uses the same plant model plus feedback terms that pull the
 estimated states toward sensor measurements.
 
 Observer Gains
@@ -121,40 +126,53 @@ Observer Gains
 Observer State Equations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The observer integrates an estimated state :math:`\hat{y}`:
+The observer produces estimated states :math:`\hat{x}` and 
+outputs :math:`\hat{y}`:
 
 .. math::
 
-   \dot{\hat{v}}_L &=
-      \frac{1}{\tau_L} \left( r K_m u_L - \hat{v}_L \right)
-      + L_{vL} \left( v_{L,\text{ENC}} - \hat{v}_L \right) \\[6pt]
+   \dot{\hat{v}}_L
+   = \frac{1}{\tau_L}\left( rK_m u_L - \hat{v}_L \right)
+     + L_{vL}\left( v_{L,\text{ENC}} - \hat{v}_L \right)
 
-   \dot{\hat{v}}_R &=
-      \frac{1}{\tau_R} \left( r K_m u_R - \hat{v}_R \right)
-      + L_{vR} \left( v_{R,\text{ENC}} - \hat{v}_R \right) \\[6pt]
+.. math::
 
-   \dot{\hat{\psi}} &=
-      \frac{1}{w} \left( \hat{v}_R - \hat{v}_L \right)
-      + L_{\psi} \left( \psi_{\text{IMU}} - \hat{\psi} \right) \\[6pt]
+   \dot{\hat{v}}_R
+   = \frac{1}{\tau_R}\left( rK_m u_R - \hat{v}_R \right)
+     + L_{vR}\left( v_{R,\text{ENC}} - \hat{v}_R \right)
 
-   \dot{\hat{s}}_L &=
-      \hat{v}_L
-      + L_{sL} \left( s_{L,\text{ENC}} - \hat{s}_L \right) \\[6pt]
+.. math::
 
-   \dot{\hat{s}}_R &=
-      \hat{v}_R
-      + L_{sR} \left( s_{R,\text{ENC}} - \hat{s}_R \right) \\[6pt]
+   \dot{\hat{\psi}}
+   = \frac{1}{w}\left( \hat{v}_R - \hat{v}_L \right)
+     + L_{\psi}\left( \psi_{\text{IMU}} - \hat{\psi} \right)
 
-   \dot{\hat{X}} &=
-      \frac{1}{2} \left( \hat{v}_R + \hat{v}_L \right) \cos(\hat{\psi}) \\[6pt]
+.. math::
 
-   \dot{\hat{Y}} &=
-      \frac{1}{2} \left( \hat{v}_R + \hat{v}_L \right) \sin(\hat{\psi})
+   \dot{\hat{s}}_L
+   = \hat{v}_L
+     + L_{sL}\left( s_{L,\text{ENC}} - \hat{s}_L \right)
+
+.. math::
+
+   \dot{\hat{s}}_R
+   = \hat{v}_R
+     + L_{sR}\left( s_{R,\text{ENC}} - \hat{s}_R \right)
+
+.. math::
+
+   \dot{\hat{X}}
+   = \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\cos(\hat{\psi})
+
+.. math::
+
+   \dot{\hat{Y}}
+   = \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\sin(\hat{\psi})
 
 These equations combine:
 
-* The **nominal dynamics** (same structure as the plant), and  
-* **Correction terms** proportional to the innovation (measurement − estimate).
+* The **predicted (or plant) dynamics**, and  
+* **Correction terms** proportional to the error (measurement − estimate).
 
 Real-Time Implementation
 -------------------------
