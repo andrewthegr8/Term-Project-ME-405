@@ -43,10 +43,6 @@ Nucleo-64 in this project.
 Line sensor array (QTR-style reflectance sensors)
 -------------------------------------------------
 
-.. note::
-  If only the Even LED control line is used and the odd line is left
-  floating, all LEDs will be controlled.
-
 .. list-table::
    :header-rows: 1
    :widths: 12 18 13 40
@@ -137,44 +133,44 @@ Wheel encoders (quadrature)
    * - ``A8`` |ENC|
      - Left Encoder Ch A
      - Timer encoder input (TIM1_CH1)
-     - Configured by :class:`Encoder` using ``Timer(1, freq=10000)``.
+     - 
    * - ``A9`` |ENC|
      - Left Encoder Ch B
      - Timer encoder input (TIM1_CH2)
-     - Connected to the left wheel encoder.
+     - 
    * - ``A15`` |ENC|
      - Right Encoder Ch A
      - Timer encoder input (TIM2_CH1, remapped)
-     - Pin is put in alternate (AF) mode before encoder setup to remap TIM2.
+     - Pin is put in alternate function mode ``alt=1`` before encoder setup to remap TIM2.
    * - ``B3`` |ENC|
      - Right Encoder Ch B
      - Timer encoder input (TIM2_CH2, remapped)
-     - Works with ``A15`` for the right wheel encoder.
+     - Pin is put in alternate function mode ``alt=1`` before encoder setup to remap TIM2.
 
 
-IMU (BNO055 over I²C)
+IMU (BNO055 over I2C)
 ---------------------
 
 .. list-table::
    :header-rows: 1
-   :widths: 12 22 26 40
+   :widths: 12 20 26 42
 
    * - Pin
-     - Signal
+     - Channel
      - Mode / peripheral
      - Notes
    * - ``B8`` |IMU|
      - IMU-SCL
-     - ``I2C(1)`` SCL (alternate function)
-     - Shared I²C bus for IMU; configured via ``I2C(1, I2C.CONTROLLER)``.
+     - I2C clock (``I2C(1)`` SCL)
+     - Connected to the BNO055 SCL line on the shared I2C bus.
    * - ``B9`` |IMU|
      - IMU-SDA
-     - ``I2C(1)`` SDA (alternate function)
-     - Data line for the IMU.
+     - I2C data (``I2C(1)`` SDA)
+     - Connected to the BNO055 SDA line on the shared I2C bus.
    * - ``C9`` |IMU|
      - IMU-RST
-     - ``Pin.OUT_PP`` (assumed)
-     - Labeled in the pinout sheet as IMU reset; controlled in hardware, not toggled explicitly in ``main.py``.
+     - Digital output (``Pin.OUT_PP``)
+     - Optional hardware reset for the IMU; available on the header but not actively driven by the current firmware.
 
 
 Obstacle sensor
@@ -191,7 +187,7 @@ Obstacle sensor
    * - ``B7`` |OBS|
      - Obstacle Sensor
      - ``Pin.IN`` with ``Pin.PULL_DOWN``
-     - Digital wall / obstacle detector read via ``obst_sens.value()``.
+     - Simple limit switch. GND when pressed, pulled high otherwise.
 
 
 Bluetooth UART (HC-05 style link)
@@ -207,11 +203,11 @@ Bluetooth UART (HC-05 style link)
      - Notes
    * - ``C12`` |BT|
      - UART5-TX (Bluetooth)
-     - ``UART(5)`` TX (alternate function)
+     - ``UART5`` TX (alternate function)
      - Transmit line from Nucleo to Bluetooth module.
    * - ``D2`` |BT|
      - UART5-RX (Bluetooth)
-     - ``UART(5)`` RX (alternate function)
+     - ``UART)`` RX (alternate function)
      - Receive line from Bluetooth module to Nucleo.
 
 
