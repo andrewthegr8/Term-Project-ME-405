@@ -189,7 +189,7 @@ Obstacle sensor
      - Simple limit switch. GND when pressed, pulled high otherwise.
 
 
-luetooth UART (HC-05 style link)
+Bluetooth UART (HC-05 style link)
 ---------------------------------
 
 .. list-table::
@@ -214,8 +214,8 @@ luetooth UART (HC-05 style link)
   STM32 and the Bluetooth module (TX to RX, RX to TX).
 
 
-Drive motors (H-bridge interface)
---------------------------------
+Drive Motors
+---------------------------------
 
 .. list-table::
    :header-rows: 1
@@ -225,44 +225,30 @@ Drive motors (H-bridge interface)
      - Channel
      - Mode
      - Notes
-
-   #############################################
-   #               LEFT MOTOR                  #
-   #############################################
-
-   * - ``B10`` |MOT|
-     - Left Motor DIR
-     - GPIO Output
-     - No alternate function (GPIO)
-
-   * - ``C8`` |MOT|
-     - Left Motor EN / PWM
-     - ``TIM3_CH1``
-     - Alternate function mode ``AF2``
-
    * - ``B4`` |MOT|
-     - Left Motor Effort (PWM alternative)
-     - ``TIM3_CH1`` (board-routed)
-     - Alternate function mode ``AF2``
-
-   #############################################
-   #              RIGHT MOTOR                  #
-   #############################################
-
-   * - ``B11`` |MOT|
-     - Right Motor DIR
-     - GPIO Output
-     - No alternate function (GPIO)
-
-   * - ``C7`` |MOT|
-     - Right Motor EN / nSLP
-     - GPIO Output
-     - No alternate function (GPIO)
-
+     - Left motor effort (PWM)
+     - ``TIM3_CH1``
+     - 
+   * - ``B10`` |MOT|
+     - Left motor direction
+     - ``Pin.OUT_PP``
+     - 
+   * - ``C8`` |MOT|
+     - Left motor enable (nSLP)
+     - ``Pin.OUT_PP``
+     - 
    * - ``B6`` |MOT|
-     - Right Motor Effort (PWM)
+     - Right motor effort (PWM)
      - ``TIM4_CH1``
-     - Alternate function mode ``AF2``
+     - 
+   * - ``B11`` |MOT|
+     - Right motor direction
+     - ``Pin.OUT_PP``
+     - 
+   * - ``C7`` |MOT|
+     - Right motor enable (nSLP)
+     - ``Pin.OUT_PP``
+     - 
 
 
 
