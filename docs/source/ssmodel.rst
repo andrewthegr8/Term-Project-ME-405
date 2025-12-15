@@ -131,26 +131,18 @@ outputs :math:`\hat{y}`:
 
 .. math::
 
-   \begin{align}
    \dot{\hat{v}}_L &= \frac{1}{\tau_L}\left( rK_m u_L - \hat{v}_L \right)
                      + L_{vL}\left( v_{L,\text{ENC}} - \hat{v}_L \right) \\[6pt]
-
    \dot{\hat{v}}_R &= \frac{1}{\tau_R}\left( rK_m u_R - \hat{v}_R \right)
                      + L_{vR}\left( v_{R,\text{ENC}} - \hat{v}_R \right) \\[6pt]
-
    \dot{\hat{\psi}} &= \frac{1}{w}\left( \hat{v}_R - \hat{v}_L \right)
                       + L_{\psi}\left( \psi_{\text{IMU}} - \hat{\psi} \right) \\[6pt]
-
    \dot{\hat{s}}_L &= \hat{v}_L
-                      + L_{sL}\left( s_{L,\text{ENC}} - \hat{s}_L \right) \\[6pt]
-
+                     + L_{sL}\left( s_{L,\text{ENC}} - \hat{s}_L \right) \\[6pt]
    \dot{\hat{s}}_R &= \hat{v}_R
-                      + L_{sR}\left( s_{R,\text{ENC}} - \hat{s}_R \right) \\[6pt]
-
-   \dot{\hat{X}} &= \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\cos(\hat{\psi}) \\[6pt]
-
-   \dot{\hat{Y}} &= \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\sin(\hat{\psi})
-   \end{align}
+                     + L_{sR}\left( s_{R,\text{ENC}} - \hat{s}_R \right) \\[6pt]
+   \dot{\hat{X}}   &= \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\cos(\hat{\psi}) \\[6pt]
+   \dot{\hat{Y}}   &= \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\sin(\hat{\psi})
 
 These equations combine correct the predicted plant dynamics based  
 on the deviation of the predicted states from observed values.
@@ -175,8 +167,7 @@ to preform fixed-step numerical integration of the state equations at each
 control loop iteration. 
 
 The RK4 integrator requires that 2 assumptions be made:
-1. The time step :math:`\Delta t` is sufficiently small for 
-   the RK4 approximation to be accurate.
+1. The time step :math:`\Delta t` is sufficiently small for the RK4 approximation to be accurate.
 2. The time step :math:`\Delta t` is constant.
 
 (There are other assumptions inherent to RK4, but these are the most relevant here.)

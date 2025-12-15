@@ -5,21 +5,18 @@ Romi Control Architecture
 
   This documentation is a work in progress.
    
-  Last updated: 12/15/2025, 12:05
+  Last updated: 12/15/2025, 12:30 PM
 
   - Background: complete
   - Hardware: complete
-  - Software: mostly complete
-     - Main Program: complete
-     - Helper Classes: complete
-     - Drivers: mostly AI gen, needs to be proofread
-  - PC UI: not started
-  - SS model: Complete, just needs a final proofread
+  - Software: complete (just fixing fromatting errors)
+  - PC UI: Writing in progress
+  - SS model: Complete, (just tweaking display issues)
   - Driving Algorithm: needs images and major adjustments
   - Important Notes: barely started
 
   Charlie, if you're reading this, I'd really appreciate it
-  if you'd grade it later. I should be done sometime Monday afternoon :)
+  if you'd grade it later. I should be done sometime this afternoon :)
 
 
 This website contains hardware and software documentation for a project revolving around

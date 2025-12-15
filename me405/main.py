@@ -122,7 +122,6 @@ def Talker_fun(shares):
     .. figure:: /_static/images/talker_fsm.svg
         :alt: Talker_fun finite state machine
         :align: center
-        :caption: Talker_fun finite state machine
 
     Args:
         shares: Tuple of share/queue objects and configuration values, in
