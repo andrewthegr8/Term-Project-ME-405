@@ -1,17 +1,18 @@
 Helper Classes
 ------------------
 
-To keep main.py from becoming overcrowded,
+To keep ``main.py`` from becoming overcrowded,
 some functionality was bundled into object types.
 This also allows initialization steps to easily happen
 before the scheduler is run; an object of each type is initialized
-beofre it is passed to the appropriate task.
+before it is passed to the appropriate task.
 
 .. tip::
     The ``@micropython.native`` emitter can be used to help code run
     more quickly. However, this emitter cannot be used on generator
     functions, which is what each task is. So, bundling task preformance into
-    the method of an object means that the emitter can be used on that
+    the method of an object and then calling that method in the task means that
+    the emitter can be used on the
     method to optimize the code's preformance. 
 
 The following classes are initialized and passed to tasks, 

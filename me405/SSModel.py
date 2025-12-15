@@ -88,16 +88,7 @@ class SSModel:
 
     @micropython.native
     def x_dot_fcn(self, u, x, y):
-        '''Compute the time derivative of the state vector.
-
-        Args:
-            u: Input vector (e.g. motor voltages) of length 2.
-            x: Current state vector of length 7.
-            y: Measurement vector of length 5.
-
-        Side Effects:
-            Updates :attr:`xd` with the computed state derivatives.
-        '''
+        
         xd = self.xd
 
         xd[v_L] = (
