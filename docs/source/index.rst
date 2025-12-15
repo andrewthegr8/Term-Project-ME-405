@@ -8,6 +8,8 @@ Romi Control Architecture
 
    Charlie, if you are reading this, please grade this later. :)
 
+   Update: 12/14 8pm - Hardware complete, software almost done, other pages not started.
+
 This website contains hardware and software documentation for a project revolving around
 a small differential drive robot (Romi). It was completed as part of a course (ME 405) at
 Cal Poly SLO.

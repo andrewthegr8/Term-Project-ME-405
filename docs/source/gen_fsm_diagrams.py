@@ -20,7 +20,7 @@ def make_talker_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "State 0: \nListen / Transmit")
+    dot.node("S0", "State 0: \nListen / Transmit Packets")
     dot.node("S1", "State 1: \nParse command")
 
     # Transitions
@@ -29,13 +29,8 @@ def make_talker_fsm():
         label="btcomm.check() = True"
     )
     dot.edge(
-        "S0", "S0",
-        label="btcomm.check() = False"
-              "\nSend packtet"
-    )
-    dot.edge(
         "S1", "S0",
-        label="Always"
+        xlabel="Always"
     )
 
     dot.render(os.path.join(OUT_DIR, "talker_fsm"),
@@ -54,7 +49,7 @@ def make_linefollow_fsm():
     # Transitions
     dot.edge(
         "S0", "S1",
-        label="lf_stop.get() == 1\n"
+        label="lf_stop.get() == 1/\n"
               "SENS_LED.value(0)"
     )
 
@@ -68,13 +63,13 @@ def make_pursuer_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "Stat 0: \nLine Follow Mode \n(do nothing)")
+    dot.node("S0", "State 0: \nLine Follow Mode \n(do nothing)")
     dot.node("S1", "State 1: \nPoint Pursuit Mode")
 
     # Transitions
     dot.edge(
         "S0", "S1",
-        label="Past \"Y\" \n/"
+        label="Past \"Y\"/ \n"
               "lf_stop.put(1)"
     )
 
@@ -104,8 +99,8 @@ def make_controller_fsm():
     )
     dot.edge(
         "S2", "S1",
-        label="cmd = velo_set.get() != 0.0\n"
-              "Reset integrator timers \n"
+        xlabel="cmd = velo_set.get() != 0.0\n"
+              "Reset integrators \n"
               "and encoders"
     )
     dot.render(os.path.join(OUT_DIR, "controller_fsm"),

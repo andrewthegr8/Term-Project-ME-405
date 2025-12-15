@@ -123,9 +123,9 @@ and priority (P) is shown as well.
      Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R"];
 
      // State-space simulator outputs
-     SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R"];
-     SS_Simulator -> LineFollow   [label="X_pos"];
-     SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head"];
+     SS_Simulator -> Talker       [xlabel="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R"];
+     SS_Simulator -> LineFollow   [xlabel="X_pos"];
+     SS_Simulator -> Pursuer      [xlabel="X_pos, Y_pos,\np_head"];
 
      // Pursuer adjusting behavior
      Pursuer     -> Talker        [label="velo_set, offset"];
