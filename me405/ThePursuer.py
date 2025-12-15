@@ -49,6 +49,12 @@ class ThePursuer:
       slowdown near each waypoint.
     * Returns a proportional steering offset and the chosen speed.
 
+    .. note::
+        The controller currently raises a ``KeyboardInterrupt`` when all
+        waypoints have been reached. This ensures that the motors stop at the
+        end of the path and that the IMU calibration coeffiecnts are saved after
+        every run.
+    
     Args:
             base_speed: **DEPRECATED** Base speed (in/s) for the robot to travel
                 at. Predetermined per-segment base speeds are now used instead.
