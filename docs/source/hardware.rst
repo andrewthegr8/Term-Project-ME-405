@@ -7,6 +7,15 @@ microcontroller, a custom interface board, multiple Pololu-provided
 modules, and a variety of sensors that enable closed-loop autonomous
 operation.
 
+Fully Assembled Romi
+-----------------------
+
+The labeled image below shows the fully assembled Romi robot used in this project,
+with key components labeled.
+
+.. image:: /images/romilabeled.jpg
+   :alt: Labeled Romi robot
+   :align: center
 
 
 STM32 Nucleo-64 (L476RG)

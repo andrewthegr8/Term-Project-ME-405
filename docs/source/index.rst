@@ -5,15 +5,15 @@ Romi Control Architecture
 
   This documentation is a work in progress.
    
-  Last updated: 12/15/2025, 1:45 PM
+  Last updated: 12/15/2025, 1:30 PM
 
   - Background: **Complete**
   - Hardware: **Complete**
   - Software: **Complete**
   - PC UI: **Complete** (needs final proofread)
   - SS model: **Complete**
-  - Driving Algorithm: needs images and major adjustments
-  - Important Notes: barely started
+  - Driving Algorithm: **Complete** (fixing formatting)**
+  - Important Notes: **Complete** (needs images)
 
   Charlie, if you're reading this, I'd really appreciate it
   if you'd grade it later. I should be done sometime this afternoon :)

@@ -4,7 +4,7 @@ Heading and Speed Control Logic
 Overview
 ---------------
 
-This point seking control algorithm is designed to orient and drive the Romi smoothly
+This control algorithm is designed to orient and drive the Romi smoothly
 and accurately along a predefined sequence of waypoints. At any given moment,
 the controller uses three key pieces of information:
 
@@ -100,12 +100,12 @@ especially during tight turns or when
 approaching closely spaced points. To address this, the controller adjusts
 speed based on two primary factors:
 
-1. **Heading Accuracy**  
+1. **Heading Accuracy** - 
    When :math:`\alpha` is large (i.e., Romi is not well aligned), forward speed
    is reduced so Romi turns rather than drifting off course. As alignment
    improves, speed increases.
 
-2. **Distance to the Target**  
+2. **Distance to the Target** - 
    As Romi approaches a waypoint, speed is gradually reduced. This prevents
    overshooting and allows smoother transitions when the next waypoint becomes
    active.
