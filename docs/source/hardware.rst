@@ -32,6 +32,7 @@ Relevant on-chip peripherals include:
 - **ADC (16-channel)** (Used for reflectance sensor array sampling) 
 
 **See these pages for details on how prepherials were connected to the STM32:**
+
 .. toctree::
    :maxdepth: 2
 
