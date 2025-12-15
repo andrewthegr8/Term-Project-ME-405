@@ -4,51 +4,34 @@ Heading and Speed Control Logic
 Overview
 ---------------
 
-The point seking control algorithm is designed to orient and drive the Romi smoothly
+This point seking control algorithm is designed to orient and drive the Romi smoothly
 and accurately along a predefined sequence of waypoints. At any given moment,
 the controller uses three key pieces of information:
 
-1. Romi’s current position :math:`\mathbf{C}`
-2. The next target waypoint :math:`\mathbf{P}`
-3. Romi’s absolute heading (yaw angle) :math:`\Psi`
+1. Romi’s current position :math:`\mathbf{C}` (X and Y position from state estimation)
+2. The next target waypoint :math:`\mathbf{P}` (from a predefined list)
+3. Romi’s absolute heading (yaw angle) :math:`\Psi` (from state estimation)
 
 Using these, the algorithm computes the *error vector* pointing from Romi
-toward the next waypoint and then determines the angular misalignment between
+to the next waypoint and then determines the angular misalignment between
 Romi’s heading and this vector. This angle, or the *heading error*
 :math:`\alpha`, is the primary quantity used for rotational control.
 
-Vector Definitions
--------------------------
-
-The waypoint and current-position vectors are defined as:
-
-.. math::
-
-   \mathbf{P} =
-   \begin{bmatrix}
-       P_x \\[4pt]
-       P_y
-   \end{bmatrix},
-   \qquad
-   \mathbf{C} =
-   \begin{bmatrix}
-       C_x \\[4pt]
-       C_y
-   \end{bmatrix}
-
-The error vector is simply:
-
-.. math::
-
-   \mathbf{E} =
-   \begin{bmatrix}
-       E_x \\[4pt]
-       E_y
-   \end{bmatrix}
-   = \mathbf{P} - \mathbf{C}
-
 Heading Error Computation
----------------------------
+--------------------------------  
+
+.. figure:: images/drivealgo.png
+   :alt: Live Romi Data GUI
+   :align: center
+
+This diagram illustrates the key vectors and angles involved in the heading error
+calculation:
+
+* Romi’s current position :math:`\mathbf{C}`
+* The waypoint :math:`\mathbf{P}`
+* The error vector :math:`\mathbf{E} = \mathbf{P} - \mathbf{C}`
+* Romi’s heading vector :math:`\hat{\mathbf{h}}`
+* The geometric angle :math:`\alpha` between the two vectors
 
 To determine how far Romi must rotate to point toward the waypoint, the
 algorithm computes the angle between Romi’s heading direction vector and the
@@ -99,34 +82,21 @@ Finally, the signed heading error is computed with:
     :math:`\arcsin` because those functions cannot distinguish among all four
     quadrants; `atan2` preserves both magnitude and sign of the angular offset.
 
-Conceptual Description
----------------------------
-
-The algorithm continually works to minimize the heading error :math:`\alpha`.
-When :math:`\alpha = 0`, Romi is perfectly aligned with the direction to the
-next waypoint. When :math:`\alpha` is nonzero, the controller commands an
-angular velocity that steers Romi back toward alignment.
-
-The field diagrams illustrate:
-
-* Romi’s current position :math:`\mathbf{C}`
-* The waypoint :math:`\mathbf{P}`
-* The error vector :math:`\mathbf{E} = \mathbf{P} - \mathbf{C}`
-* Romi’s heading vector :math:`\hat{\mathbf{h}}`
-* The geometric angle :math:`\alpha` between the two vectors
-
 By iteratively updating the waypoint index once Romi gets within a
 specified distance, the robot smoothly transitions from target to target along
-its path. This method is particularly effective in constrained environments,
-such as navigating between narrow columns or aligning precisely with objects
-to manipulate.
+its path. 
+
+.. tip::
+    Waypoints are spaced more closely in areas requiring high precision (e.g.,
+    narrow corridors) to ensure accurate navigation.
 
 Speed Control Logic
 -------------------------
 
 In addition to controlling heading, the algorithm modulates Romi’s linear
 speed. Early testing showed that constant-speed operation produced undesirable
-behavior: Romi would overshoot waypoints, especially during tight turns or when
+behavior: Romi would overshoot waypoints or miss them all together and try to backtrack,
+especially during tight turns or when
 approaching closely spaced points. To address this, the controller adjusts
 speed based on two primary factors:
 
@@ -169,87 +139,146 @@ from the target, yet decelerates for high heading error or when approaching a
 waypoint. The ``max(…, 0)`` term guarantees speed is never penalized for being
 too close to a target.
 
+.. note::
+    The speed-modulation logic was fine-tuned through empirical testing to
+    balance responsiveness with stability. This alogrithm is likely overcomplicated
+    but was left in its current form due to time constraints.
+
 Performance Graphs
 -------------------------
 
-The following performance graphs were generated from a full end-to-end run of
+The following performance graphs were generated for full end-to-end runs of
 Romi navigating the competition course. They capture detailed velocity behavior,
-controller predictions, waypoint transitions, and the executed trajectory in the
+setpoint behavior and motor responses, along with the executed trajectory in the
 world frame.
 
-These plots provide quantitative insight into how the heading controller and
-speed-modulation logic perform in real conditions.
+They were collected as the heading and speed controller parameters were fine-tuned
+to optimize preformance and show the overall run time decreasing from about 16 seconds to 11 seconds.
 
-Wheel Velocity Tracking
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+At first, only observations about the overall path were used to guide tuning, but as
+eventually velocity setpoint data was also analyzed to identify areas for improvement.
 
-The top-row graphs show the *left* and *right* wheel velocities, both measured
-and predicted, along with the corresponding command signals. Several important
-features are visible:
+.. note::
+    Some of the following graphs have large spikes. This is due to
+    data being corrupted during Bluetooth transmission.
 
-* The predicted wheel velocities closely follow the measured velocities,
-  indicating that the internal kinematic model matches Romi’s physical response.
-* Sharp changes in commanded velocity correspond to turns, waypoint transitions,
-  and alignment corrections.
-* The saturation behavior is evident when Romi requests high torque during major
-  heading changes.
+.. figure:: images/run1.png
+   :align: center
+   :width: 95%
 
-Velocity Setpoint Behavior
+   Initial behavior shows higher variability, resulting in a longer overall runtime.
+
+.. figure:: images/run2.png
+   :align: center
+   :width: 95%
+
+   Improved alignment and smoother transitions reduce the overall runtime.
+
+.. note::
+    The vertical dashed lines in the velocity setpoint and trajectory plots
+    indicate the approximate times Romi crossed each waypoint. These were
+    inferred by matching Romi's X-position to the known waypoint locations.
+
+.. figure:: images/runvelo1.png
+   :align: center
+   :width: 95%
+
+   Early velocity profiles reflect inconsistent acceleration and turning, matching the longer runtime.
+
+.. figure:: images/runvelo2.png
+   :align: center
+   :width: 95%
+
+   Smoother wheel response supports the reduced runtime seen in the improved run.
+
+.. figure:: images/runvelo3.png
+   :align: center
+   :width: 95%
+
+   Further refinement leads to steadier velocities and cleaner waypoint approaches.
+
+.. figure:: images/runvelo4.png
+   :align: center
+   :width: 95%
+
+   Most stable velocity and trajectory behavior, corresponding to the shortest runtime.
+
+Preformance Graph Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The lower-left graph shows the commanded linear velocity setpoint over time.
-Several characteristics of the speed-control algorithm are clearly observable:
-
+On the last few figures, the bottom-left graph shows the commanded linear velocity setpoint over time.
+Key features to note include:
 * **Plateaus in the velocity curve** occur as Romi approaches a waypoint.  
   These plateaus result from the **speed-bonus term dropping to zero** when the
   error distance :math:`\lVert \mathbf{E} \rVert` falls below the braking
-  threshold. At this point Romi is no longer rewarded for moving quickly and
+  threshold. At this point Romi is no longer rewarded for good alignment and
   transitions into a controlled approach phase.
 * Each **red dashed vertical line** indicates the approximate moment Romi passed
   a waypoint. Immediately following these moments, the **heading error jumps**
   because Romi begins targeting the *next* waypoint in the list. This sudden
   change in :math:`\alpha` causes the controller to temporarily reduce the
   commanded speed until alignment is recovered.
-* The magnitude and duration of each plateau correspond closely to waypoint
-  spacing: longer plateaus occur near tightly spaced points, especially in areas
-  requiring high precision (e.g., traversing the narrow column corridor).
 
 Taken together, these features demonstrate that the speed-control logic is
-functioning as intended—accelerating during well-aligned motion and decelerating
-smoothly as Romi prepares for directional changes.
+functioning as intended. Romi accelerates when it is well-aligned and decelerates
+when approaching waypoints.
 
-Executed Trajectory and Waypoint Hits
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Comparison to Pure Pursuit
+----------------------------------------------------------
 
-The lower-right graph shows Romi’s tracked world-frame path mirrored about the
-positive :math:`Y` axis (for visualization) alongside the red circular
-waypoints. Several trends can be seen:
+The heading based waypoint controller with linear velocity speed-modulation
+represent a novel approach to path tracking. A more standard approach is to use
+a Pure Pursuit controller, which continuously tracks a lookahead point along
+a reference path.
 
-* Romi’s trajectory passes very close to each waypoint, confirming correct
-  operation of the heading-error controller and the waypoint-switching logic.
-* The plotted **red dashed vertical time markers** correspond to Romi crossing
-  the horizontal projection of each waypoint. These timestamps match expected
-  transitions in the velocity plots.
-* In confined regions of the course, such as the straight corridor between
-  columns, Romi maintains highly linear motion thanks to the intermediate
-  waypoint placement and the proportional heading correction.
+This section provides a brief comparison between the two methods.
 
-These graphs together indicate that the controller behaves robustly across a
-variety of geometric constraints and that the interplay between heading control,
-speed modulation, and waypoint switching is well balanced.
+Heading-Based Waypoint Controller
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Summary of Observed Performance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Pros**
 
-* The heading-error computation reliably reorients Romi toward each new
-  waypoint with minimal overshoot.
-* Speed modulation prevents overshoot at close-range waypoints and maintains
-  stability during rapid heading transitions.
-* Wheel-velocity prediction and measurement show strong agreement, validating
-  the underlying motion model.
-* The overall path closely follows the intended waypoint sequence, even in
-  regions requiring significant precision.
+* Simple - requires only current pose, next waypoint, and
+  heading angle.
+* Potentially less computationally intensive, as it does not require
+  path interpolation or lookahead point calculation.
+* Well suited for discrete, task-driven waypoint sequences (e.g., hitting objects
+  or avoiding obstacles).
+* Provides intuitive control over speed near critical regions;
+  the speed law clearly modulates velocity based on heading error and proximity.
 
-Although additional optimization is possible—particularly in reducing speed
-fluctuation during rapid waypoint transitions—the collected data illustrates
-consistent, reliable, and competition-ready behavior.
+**Cons**
+
+* Heading error exhibits discontinuities at waypoint switches, as seen in the
+  plots where :math:`\alpha` jumps and velocity plateaus form.
+* Path smoothness is not guaranteed; transitions between
+  waypoints can cause the controller to call for dramatic rotational acceleration.
+* Performance depends strongly on waypoint placement, as the controller does not
+  consider a continuous reference path.
+
+Pure Pursuit Controller
+------------------------------------------
+
+**Pros**
+
+* Produces smoother geometric paths by following a continuous curve with a
+  sliding lookahead point.
+* Reduces discontinuities at transitions - leading to smoother wheel
+  velocities profiles.
+* Offers more predictable path behavior.
+
+**Cons**
+
+* Less naturally aligned with discrete task-centric waypoints, may require
+  additional logic to ensure precise stopping or alignment at specific points.
+* More computationally intensive due to path interpolation and lookahead calculations.
+* Potentially requires more RAM to store many path points depending on the path complexity.
+
+Summary
+-------------------------
+
+For this project, the heading-based controller offered a practical and reliable
+solution, as reflected in the progressively decreasing runtimes observed in testing.
+With additional tuning and refinement,
+this approach could be further optimized for even better performance.
+
