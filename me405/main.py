@@ -79,9 +79,12 @@ def Talker_fun(shares):
     """Bluetooth communication task.
 
     This task is responsible for sending and receiving data over the
-    Bluetooth link. It uses the :class:`BTComm` helper class to parse
-    incoming commands and to ship telemetry packets containing motor
-    states, kinematic estimates, and controller variables.
+    Bluetooth link. It uses the :class:`BTComm` helper class to cooperatively parse
+    incoming commands and to build and ship telemetry packets.
+
+    .. note::
+        Telemetry packets are sent in a structured binary format using
+        :mod:`ustruct` to minimize bandwidth usage.
 
     The task operates as a small state machine:
 
@@ -94,6 +97,23 @@ def Talker_fun(shares):
       supports a ``$SPDxx.x`` command to change the requested wheel
       speed. After processing, transitions back to state 0.
 
+    .. tip::
+        Only every other packet is sent to cut down on taks run time
+        But, all available telemetry samples are still packed into a
+        packet each time to avoid queue overflows.
+
+    .. tip::
+        This task only checks certain queues for available samples
+        before trying to build a telemetry packet. This is because
+        several groups of quues are filled by the same task, so checking
+        every single queue is redundant.
+
+    .. warning::
+        Since the IMU yaw rate is currently not implemented, this task
+        publishes the velocity setpoint (``velo_set``) in its place.
+        The PC side code expects this, but this packet modification
+        is not well documented.
+
     Args:
         shares: Tuple of share/queue objects and configuration values, in
             the following order:
@@ -102,26 +122,24 @@ def Talker_fun(shares):
             * ``packet_fmt`` (:class:`str`): ``ustruct`` format string.
             * ``btcomm`` (:class:`BTComm`): Bluetooth communications object.
             * ``velo_set`` (:class:`task_share.Share`): Requested wheel speed.
-            * ``kp_lf``, ``ki_lf`` (:class:`float`): Line-follow controller gains.
+            * ``kp_lf``, ``ki_lf`` (:class:`float`): Line-follow controller gains. **DEPRACTATED**
             * ``time_L``, ``pos_L``, ``velo_L`` (:class:`task_share.Queue`):
               Left wheel time, position, and velocity.
             * ``time_R``, ``pos_R``, ``velo_R`` (:class:`task_share.Queue`):
               Right wheel time, position, and velocity.
             * ``cmd_L``, ``cmd_R`` (:class:`task_share.Queue`):
               Commanded efforts for left and right motors.
-            * ``offset`` (:class:`task_share.Share`): Line-follow speed offset.
+            * ``offset`` (:class:`task_share.Share`): Line-follow/point tracking speed offset.
             * ``Eul_head`` (:class:`task_share.Queue`): Euler heading from IMU.
-            * ``yaw_rate`` (:class:`task_share.Queue`): Yaw rate from IMU.
-            * ``X_pos``, ``Y_pos`` (:class:`task_share.Queue`): Estimated X/Y.
+            * ``yaw_rate`` (:class:`task_share.Queue`): Yaw rate from IMU. **Currently always 0**
+            * ``X_pos``, ``Y_pos`` (:class:`task_share.Queue`): Estimated X/Y position.
             * ``p_v_R``, ``p_v_L`` (:class:`task_share.Queue`):
               State-space path length and velocity.
             * ``p_head``, ``p_yaw`` (:class:`task_share.Queue`):
               State-space heading and yaw rate.
             * ``p_pos_L``, ``p_pos_R`` (:class:`task_share.Queue`):
-              Path length per wheel from the state-space model.
+              State-space - path length per wheel.
 
-    Yields:
-        int: The current internal state (0 or 1) at each scheduler step.
     """
     # Unpack shares and queues
     (packet, packet_fmt, btcomm, velo_set, kp_lf, ki_lf, time_L, pos_L,
