@@ -120,9 +120,9 @@ def Talker_fun(shares):
     -------------------------
 
     .. figure:: /_static/images/talker_fsm.svg
-    :alt: Talker_fun finite state machine
-    :align: center
-    :caption: Talker_fun finite state machine
+        :alt: Talker_fun finite state machine
+        :align: center
+        :caption: Talker_fun finite state machine
 
     Args:
         shares: Tuple of share/queue objects and configuration values, in
@@ -357,8 +357,8 @@ def LineFollow_fun(shares):
     ---------------------------
 
     .. figure:: /_static/images/linefollow_fsm.svg
-    :alt: LineFollow_fun finite state machine
-    :align: center
+        :alt: LineFollow_fun finite state machine
+        :align: center
 
     :param shares: Tuple in the following order:
 
@@ -465,8 +465,8 @@ def Pursuer_fun(shares):
     --------------------------
 
     .. figure:: /_static/images/pursuer_fsm.svg
-    :alt: Pursuer_fun finite state machine
-    :align: center
+        :alt: Pursuer_fun finite state machine
+        :align: center
 
 
     
@@ -558,12 +558,12 @@ def Controller_fun(shares):
     ------------------------------
 
     .. figure:: /_static/images/controller_fsm.svg
-    :alt: Controller_fun finite state machine
-    :align: center
+        :alt: Controller_fun finite state machine
+        :align: center
 
-    Finite state machine for :func:`me405.main.Controller_fun`, showing the
-    initialization, active PI speed control, and stopped hold states used
-    to command the motors.
+        Finite state machine for :func:`me405.main.Controller_fun`, showing the
+        initialization, active PI speed control, and stopped states used
+        to control the motors.
 
 
 

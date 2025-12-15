@@ -120,9 +120,9 @@ class SSModel:
         """Return the current estimated output vector.
 
         .. tip::
-        Since the model is configured so that the output vector
-        matches the state vector, this method simply returns the last
-        state vector.
+            Since the model is configured so that the output vector
+            matches the state vector, this method simply returns the last
+            state vector.
 
         Returns:
             array('f'): Estimated state/output vector.

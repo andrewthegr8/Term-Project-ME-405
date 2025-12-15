@@ -9,9 +9,8 @@ Each sensor reading is calibrated so that:
 * **1000** corresponds to pure black.
 
 .. tip::
-All scaling and conversions in this class are
-done with integer arithmetic for efficiency on
-MicroPython.
+    All scaling and conversions in this class are
+    done with integer arithmetic for maximum efficiency.
 """
 
 import micropython

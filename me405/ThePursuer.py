@@ -187,9 +187,6 @@ class ThePursuer:
             NextPoint: If ``True``, force advancing to the next waypoint
                 (for example, when a wall is detected).
         
-        .. note::
-
-
         Returns:
             tuple[float, float]: ``(offset, speed)`` where
 

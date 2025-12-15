@@ -59,11 +59,12 @@ class BTComm:
           buffer, and return ``True``.
         * ``\\n`` (line feed, ASCII 10) → ignored.
         * Backspace (ASCII 8) → remove the last character from the buffer.
-        * Any other character → appended to the buffer until ``\r`` is recieved.
+        * Any other character → appended to the buffer until ``\\r`` is recieved.
 
         Returns:
             bool: ``True`` if a complete line has just been received,
             ``False`` otherwise.
+
         """
         if self.serial_device.any():
             b = self.serial_device.read(1)[0]
@@ -93,6 +94,7 @@ class BTComm:
     @micropython.native
     def ship(self, packet):
         """Send a pre-built packet over the serial link.
+        
         .. note::
             This method will block until the packet hase been
             fully tansmitted (or at least until is is fully
