@@ -41,6 +41,11 @@ queue before exiting.
     Many of the task implementations use finite state machines (FSMs) to
     manage their internal operation. Diagrams for each FSM are included.
 
+.. note::
+    Many of the tasks have persistent variables/buffers that are allocated
+    outside of the task function on startup and passed in the ``share``
+    tuple to minimize heap churn.
+
 """
 
 import gc
@@ -238,7 +243,7 @@ def SS_Simulator_fun(shares):
 
             * ``RUN_LED`` (:class:`pyb.Pin`): Toggles each run to show activity.
             * ``imu_off`` (:class:`task_share.Share`): Flag to disable IMU
-              feedback when a wall is detected.
+              feedback
             * ``ssmodel`` (:class:`SSModel`): State-space model instance.
             * ``mainperiod`` (:class:`float`): Simulation step period (s).
             * ``y`` (:class:`array`): Measurement vector buffer.
@@ -447,7 +452,7 @@ def Pursuer_fun(shares):
     an obstacle sensor to detect walls; when a wall is detected, it
     immediately advances to the next waypoint.
 
-    .. tip::
+    .. note::
         The task only monitors the obstacle sensor when the robot is
         near the "wall" obstacle to avoid having the sensor triggered
         on the solo cups. Once a wall is detected, it sets a flag
