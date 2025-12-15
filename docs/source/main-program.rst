@@ -49,8 +49,7 @@ The diagram below shows how the cooperative tasks interact
 and pass data via shares and queues. Each tasks' period (T) in ms
 and priority (P) is shown as well.
 
-.. tip::
-    Click on the diagram to open a zoomable version in a new tab.
+..  Click on the diagram to open a zoomable version in a new tab.
 
 .. graphviz::
    :align: center

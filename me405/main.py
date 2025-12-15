@@ -37,6 +37,10 @@ calibration coefficents are saved to flash memory, and the program prints
 debugging statistics from the scheduler as well as the final state of each
 queue before exiting.
 
+.. note::
+    Many of the task implementations use finite state machines (FSMs) to
+    manage their internal operation. Diagrams for each FSM are included.
+
 """
 
 import gc
@@ -193,7 +197,7 @@ def IMU_Interface_fun(shares):
         The current implementation only reads the heading angle. The initial
         itertion also read the yaw rate, but to minimize exceuption time,
         this feature was removed. A zero value is currently published for yaw
-        rate so an empty queue doen't block data transmission.
+        rate so an empty queue doesn't block data transmission.
 
     Args:
         shares: Tuple ``(imu, Eul_head, yaw_rate, SENS_LED)`` where:
@@ -214,11 +218,20 @@ def IMU_Interface_fun(shares):
 def SS_Simulator_fun(shares):
     """State-space simulation task.
 
-    This task runs a discrete-time state-space model of the Romi robot
+    This task runs a continous-time state-space model of the Romi robot
     in parallel with the real hardware. It uses the latest measured
-    velocities, positions, and IMU heading to run one step of a Runge–Kutta
-    (RK4) integration and publishes the estimated state to a set of
+    velocities, positions, and IMU heading to feed back into the model,
+    uses the motor commands as inputs, and publishes the estimated state to a set of
     queues.
+
+    .. note::
+        The IMU feedback can be disabled by setting the ``imu_off``
+        share to 1. This feature was added becuase the IMU readings
+        were being corrupted when the robot was close to the "wall."
+
+    .. tip::
+        This task also toggles ``RUN_LED`` each iteration to show
+        that the scheduler is active.
 
     Args:
         shares: Tuple of objects in the following order:
@@ -305,6 +318,41 @@ def LineFollow_fun(shares):
         The line follower implements anti-windup by resetting the integral
         error sum when the requested speed is zero.
 
+    .. graphviz::
+        :caption: LineFollow_fun finite state machine
+
+        digraph LineFollowFSM {
+            rankdir=LR;
+            node [shape=circle];
+
+            S0 [label="Active follow"];
+            S1 [label="Follower stopped"];
+
+            // Active -> Stopped
+            S0 -> S1 [
+            label="lf_stop.get() == 1\n"
+                    "SENS_LED.value(0)"
+            ];
+
+            // Active -> Active (normal line following)
+            S0 -> S0 [
+            label="Line_sensor.read()\n"
+                    "Aixi_sum,Ai_sum,error\n"
+                    "kp_lf,ki_lf,esum\n"
+                    "velo_set,offset\n"
+                    "X_pos.view() bias\n"
+                    "SENS_LED.value(1)"
+            ];
+
+            // Stopped -> Stopped (no exit in code)
+            S1 -> S1 [
+            label="lf_stop.get() == 1\n"
+                    "SENS_LED.value(0)"
+            ];
+        }
+
+    
+    
     Args:
         shares: Tuple in the following order:
 
@@ -391,9 +439,19 @@ def Pursuer_fun(shares):
     """Point seeking autonomous driving task.
 
     This task uses a simple controller to guide the robot
-    along a sequence of target points. It coordinates with the line
-    follower and obstacle sensor to switch modes once the "Y" intersection
-    has been reached and if a wall is detected.
+    along a sequence of target points. It controls both the 
+    rotational velocity (via ``offset``) and forward speed (via ``velo_set``).
+
+    When the robot passes a certain X position, it disables
+    the line follower and begins pursuing waypoints. It also monitors
+    an obstacle sensor to detect walls; when a wall is detected, it
+    immediately advances to the next waypoint.
+
+    .. tip::
+        The task only monitors the obstacle sensor when the robot is
+        near the "wall" obstacle to avoid having the sensor triggered
+        on the solo cups. Once a wall is detected, it sets a flag
+        to ignore further detections to prevent repeated triggering.
 
     Args:
         shares: Tuple in the following order:
@@ -458,18 +516,24 @@ def Pursuer_fun(shares):
 def Controller_fun(shares):
     """Motor controller task (PI control for both wheels).
 
-    This task implements a PI controller for each motor, uses encoder
-    feedback to estimate wheel speed, and saturates the duty cycle
-    changes to avoid sudden jumps.
-
-    It limits the rate of change of the control signal to ``MAXDELTA``
-    (a customizable constant) per control period to prevent
-    sudden jumps in motor effort and avoid wheel slippage.
+    This task implements a closed-loop velocity PI controller for each motor
+    using encoder feedback. It uses :class:`PIController` instances to compute
+    the control signals based on the requested speed (from ``velo_set`` share).
 
     When ``velo_set`` is zero, the task enters a "stopped" state where both
     motors are held at zero effort. Upon receiving a non-zero speed command,
     the encoders and controllers are re-initialized before resuming normal  
     operation.
+
+    .. note::
+        It limits the rate of change of the control signal to ``MAXDELTA``
+        (a customizable constant) per control period to prevent
+        sudden jumps in motor effort and avoid wheel slippage.
+    
+    .. note::
+        ``offset`` is used to adjust the left/right wheel velocities
+        differentially to control rotational velocity. A positive offset
+        increases the left wheel velocity and decreases the right wheel velocity.
     
     .. image:: controllerfsm.png
         :alt: Finite state machine diagram for the motor controller task.
