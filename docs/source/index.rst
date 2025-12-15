@@ -14,7 +14,7 @@ Romi Control Architecture
      - Helper Classes: complete
      - Drivers: mostly AI gen, needs to be proofread
   - PC UI: not started
-  - SS model: Needs fine tuning and formatting
+  - SS model: Complete, just needs a final proofread
   - Driving Algorithm: needs images and major adjustments
   - Important Notes: barely started
 
