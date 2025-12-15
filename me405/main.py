@@ -9,7 +9,7 @@ implement the robot's behavior.
 Overview
 --------
 
-On startup, the ``__main__`` block performs the following steps:
+On startup, the script performs the following steps:
 
 * Configure timers, pins, and peripherals for:
   - Motor drivers and encoders
@@ -57,11 +57,9 @@ from PIController import PIController
 from ThePursuer import ThePursuer
 
 # Tunable parameters
-#: Maximum change in motor duty cycle per control tick.
-MAXDELTA = const(25)
-#: Distance threshold (inches) used by the pure-pursuit path planner to
-#: decide when a waypoint has been "arrived" at.
-ARRIVED = const(2.5)
+MAXDELTA = const(25) #Maximum change in motor duty cycle per control tick.
+ARRIVED = const(2.5) #Distance threshold (inches) used by the pure-pursuit path planner to
+#decide when a waypoint has been "arrived" at.
 
 
 def Talker_fun(shares):

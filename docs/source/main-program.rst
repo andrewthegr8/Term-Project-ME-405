@@ -55,10 +55,17 @@ and priority (P) is shown as well.
    digraph firmware_arch {
      rankdir=LR;
      fontsize=10;
-     node [shape=box, style="rounded,filled", fillcolor="#f8f8f8", fontname="Helvetica"];
+     size="8,10!";      // widen + enforce tall output
+     ratio=fill;        // fill the given size
+     ranksep="1.5 equally";   // vertical spacing
+     nodesep="0.6";           // horizontal spacing between nodes
+
+     node [shape=box, style="rounded,filled",
+           fillcolor="#f8f8f8",
+           fontname="Helvetica"];
 
      // =========================
-     // Task nodes (with P/T)
+     // Task nodes
      // =========================
      subgraph cluster_tasks {
        label = "Tasks (priority P, period T)";
@@ -74,42 +81,31 @@ and priority (P) is shown as well.
        Garbage       [label="GarbageCollector\nP=0, T=30 ms"];
      }
 
-     // Common edge style
      edge [fontname="Helvetica", fontsize=9];
 
-     // =========================
-     // Shares / queues as labeled data flows
-     // =========================
-
-     // Speed setpoint share
+     // Shares / queues (unchanged)
      Talker      -> Controller    [label="velo_set (Share)\n$SPD commands"];
      Pursuer     -> Controller    [label="velo_set (Share)"];
      Controller  -> Talker        [label="cmd_L/R (Queues)\nfor telemetry"];
 
-     // Line-follow & pursuit offset
      LineFollow  -> Controller    [label="offset (Share)\nline follower"];
      Pursuer     -> Controller    [label="offset (Share)\npure pursuit"];
 
-     // Line-follower enable flag
      Pursuer     -> LineFollow    [label="lf_stop (Share)\nstop line follow"];
 
-     // IMU interface to others
      IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate\n(Queues)"];
      IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate (Queues)"];
 
-     // Wheel logs from controller
      Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R (Queues)"];
      Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R (Queues)"];
 
-     // State-space outputs
      SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R (Queues)"];
      SS_Simulator -> LineFollow   [label="X_pos (Queue)"];
      SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head (Queues)"];
 
-     // Pursuer adjusts commands
-     Pursuer     -> Talker        [label="velo_set/offset"];
-
+     Pursuer     -> Talker        [label="indirectly affects\ntelemetry via\nvelo_set/offset"];
    }
+
 
 
 Inter-task communication variables

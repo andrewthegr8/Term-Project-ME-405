@@ -293,14 +293,14 @@ top (nearest the USB connector).
     The USB port and the ST-link MCU are pointed away from the user in
     this left/right orientation.
 
-Left Header
-~~~~~~~~~~~~~~~~~~~~
+Left header
+~~~~~~~~~~~~~
 
 Outer row is closest to the board edge, inner row is the row closer to the MCU.
 
 .. list-table:: Left header (outer / inner rows)
    :header-rows: 1
-   :widths: 18 12 12 18
+   :widths: 20 10 10 20
 
    * - Left function label
      - Outer pin
@@ -317,100 +317,100 @@ Outer row is closest to the board edge, inner row is the row closer to the MCU.
      - ``D2`` |BT|
      - UART5 - RX (Bluetooth)
 
-   * - 
+   * -
      - ``VDD``
      - ``E5V``
-     - 
+     -
 
-   * - 
+   * -
      - ``BOOT0``
      - ``GND``
-     - 
+     -
 
-   * - 
+   * -
      - ``NC``
      - ``NC``
-     - 
+     -
 
-   * - 
+   * -
      - ``NC``
      - ``IOREF``
-     - 
+     -
 
    * - SWD programming
      - ``A13``
      - ``RESET``
-     - 
+     -
 
    * - SWD programming
      - ``A14``
      - ``3V3``
-     - 
+     -
 
-   * - Right Encoder – Ch A
+   * - Right Encoder - Ch A
      - ``A15`` |ENC|
      - ``5V``
-     - 
+     -
 
-   * - 
+   * -
      - ``GND``
      - ``GND``
-     - 
+     -
 
    * - Obstacle Sensor
      - ``B7`` |OBS|
      - ``GND``
-     - 
+     -
 
    * - Blue button
      - ``C13`` |UI|
      - ``VIN``
-     - 
+     -
 
-   * - 
+   * - RTC (32 kHz crystal)
      - ``C14``
      - ``NC``
-     - 
+     -
 
-   * -
+   * - RTC (32 kHz crystal)
      - ``C15``
      - ``A0`` |LINE|
-     - Line Sensor – 9
+     - Line Sensor - 9
 
-   * - Line Sensor – Even
+   * - Line Sensor - Even
      - ``H0`` |LINE|
      - ``A1`` |LINE|
-     - Line Sensor – 8
+     - Line Sensor - 8
 
-   * - Line Sensor – Odd
+   * - Line Sensor - Odd
      - ``H1`` |LINE|
      - ``A4`` |LINE|
-     - Line Sensor – 7
+     - Line Sensor - 7
 
-   * - 
+   * -
      - ``VBAT``
      - ``B0`` |LINE|
-     - Line Sensor – 6
+     - Line Sensor - 6
 
-   * - Line Sensor – 2
+   * - Line Sensor - 2
      - ``C2`` |LINE|
      - ``C1`` |LINE|
-     - Line Sensor – 5
+     - Line Sensor - 5
 
-   * - Line Sensor – 3
+   * - Line Sensor - 3
      - ``C3`` |LINE|
      - ``C0`` |LINE|
-     - Line Sensor – 4
+     - Line Sensor - 4
 
 
-Right Reader
-~~~~~~~~~~~~~
+Right header
+~~~~~~~~~~~~~~~~
 
 Inner row is closer to the MCU, outer row is closer to the board edge.
 
 .. list-table:: Right header (inner / outer rows)
    :header-rows: 1
-   :widths: 18 12 12 18
+   :widths: 20 10 10 20
 
    * - Left function label
      - Inner pin
@@ -432,15 +432,15 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
      - ``C5`` |LINE|
      - Line Sensor - 14
 
-   * - 
+   * -
      - ``AVDD``
      - ``U5V``
-     - 
+     -
 
    * - Calibration LED
      - ``GND``
      - ``NC``
-     - 
+     -
 
    * - ADC (on-board LED)
      - ``A5``
@@ -455,7 +455,7 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
    * - Line Sensor - 11
      - ``A7`` |LINE|
      - ``B12``
-     - 
+     -
 
    * - Right Motor - PWM
      - ``B6`` |MOT|
@@ -465,12 +465,12 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
    * - Right Motor - nSLP
      - ``C7`` |MOT|
      - ``GND``
-     - 
+     -
 
    * - Left Encoder - Ch B
      - ``A9`` |ENC|
      - ``B2``
-     - 
+     -
 
    * - Left Encoder - Ch A
      - ``A8`` |ENC|
@@ -480,29 +480,29 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
    * - Left Motor - DIR
      - ``B10`` |MOT|
      - ``B15``
-     - 
+     -
 
    * - Left Motor - PWM
      - ``B4`` |MOT|
      - ``B14``
-     - 
+     -
 
    * - Right Encoder - Ch B
      - ``B3`` |ENC|
      - ``B13``
-     - 
+     -
 
-   * - 
+   * -
      - ``A10``
      - ``C4`` |LINE|
      - Line Sensor - 12
 
-   * - ADC (UART2 to ST-link MCU)
+   * - UART2 to ST-link MCU
      - ``A2`` |LINE|
      - ``NC``
-     - 
+     -
 
-   * - ADC (UART2 to ST-link MCU)
+   * - UART2 to ST-link MCU
      - ``A3`` |LINE|
      - ``NC``
-     - 
+     -
