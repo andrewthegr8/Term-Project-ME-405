@@ -294,6 +294,17 @@ def LineFollow_fun(shares):
     sensor array. It computes the centroid of the sensor readings to form
     an error signal and writes a speed offset into the ``offset`` share.
 
+    It also monitors the ``lf_stop`` share to enter a disabled state when
+    :func:`Pursuer_fun` requests the line follower to stop.
+
+    .. Note::
+        For this implementation, a small forward speed bias is added so that 
+        Romi starts to turn when it approach the "Y" intersection.
+
+    .. Tip::
+        The line follower implements anti-windup by resetting the integral
+        error sum when the requested speed is zero.
+
     Args:
         shares: Tuple in the following order:
 
@@ -377,12 +388,12 @@ def LineFollow_fun(shares):
 
 
 def Pursuer_fun(shares):
-    """Pure-pursuit path tracking task.
+    """Point seeking autonomous driving task.
 
-    This task uses a simple pure-pursuit controller to guide the robot
+    This task uses a simple controller to guide the robot
     along a sequence of target points. It coordinates with the line
-    follower and obstacle sensor to switch modes once the intersection
-    has been reached and a wall is detected.
+    follower and obstacle sensor to switch modes once the "Y" intersection
+    has been reached and if a wall is detected.
 
     Args:
         shares: Tuple in the following order:
@@ -461,9 +472,9 @@ def Controller_fun(shares):
     operation.
     
     .. image:: controllerfsm.png
-    :alt: Finite state machine diagram for the motor controller task.
-    :width: 400px
-    :align: center
+        :alt: Finite state machine diagram for the motor controller task.
+        :width: 400px
+        :align: center
 
 
     Args:
