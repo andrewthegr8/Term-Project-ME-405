@@ -17,8 +17,8 @@ State-Space Model and Observer Equations
 ------------------------------------------
 
 .. note::
-    For simplicty, the output of the observer is simply all of it's states.
-    So, :math:`\hat{y} = \hat{x}`
+    For simplicty, the output of the observer is simply all of its states.
+    So, :math:`\hat{y} = \hat{x}`.
 
 State Vector
 ~~~~~~~~~~~~~~~~~~
@@ -131,48 +131,37 @@ outputs :math:`\hat{y}`:
 
 .. math::
 
-   \dot{\hat{v}}_L
-   = \frac{1}{\tau_L}\left( rK_m u_L - \hat{v}_L \right)
-     + L_{vL}\left( v_{L,\text{ENC}} - \hat{v}_L \right)
+   \begin{aligned}
+   \dot{\hat{v}}_L \;&= \frac{1}{\tau_L}\left( rK_m u_L - \hat{v}_L \right)
+                       + L_{vL}\left( v_{L,\text{ENC}} - \hat{v}_L \right) \\[8pt]
 
-.. math::
+   \dot{\hat{v}}_R \;&= \frac{1}{\tau_R}\left( rK_m u_R - \hat{v}_R \right)
+                       + L_{vR}\left( v_{R,\text{ENC}} - \hat{v}_R \right) \\[8pt]
 
-   \dot{\hat{v}}_R
-   = \frac{1}{\tau_R}\left( rK_m u_R - \hat{v}_R \right)
-     + L_{vR}\left( v_{R,\text{ENC}} - \hat{v}_R \right)
+   \dot{\hat{\psi}} \;&= \frac{1}{w}\left( \hat{v}_R - \hat{v}_L \right)
+                        + L_{\psi}\left( \psi_{\text{IMU}} - \hat{\psi} \right) \\[8pt]
 
-.. math::
+   \dot{\hat{s}}_L \;&= \hat{v}_L
+                        + L_{sL}\left( s_{L,\text{ENC}} - \hat{s}_L \right) \\[8pt]
 
-   \dot{\hat{\psi}}
-   = \frac{1}{w}\left( \hat{v}_R - \hat{v}_L \right)
-     + L_{\psi}\left( \psi_{\text{IMU}} - \hat{\psi} \right)
+   \dot{\hat{s}}_R \;&= \hat{v}_R
+                        + L_{sR}\left( s_{R,\text{ENC}} - \hat{s}_R \right) \\[8pt]
 
-.. math::
+   \dot{\hat{X}} \;&= \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\cos(\hat{\psi}) \\[8pt]
 
-   \dot{\hat{s}}_L
-   = \hat{v}_L
-     + L_{sL}\left( s_{L,\text{ENC}} - \hat{s}_L \right)
+   \dot{\hat{Y}} \;&= \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\sin(\hat{\psi})
+   \end{aligned}
 
-.. math::
+These equations combine correct the predicted plant dynamics based  
+on the deviation of the predicted states from observed values.
 
-   \dot{\hat{s}}_R
-   = \hat{v}_R
-     + L_{sR}\left( s_{R,\text{ENC}} - \hat{s}_R \right)
-
-.. math::
-
-   \dot{\hat{X}}
-   = \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\cos(\hat{\psi})
-
-.. math::
-
-   \dot{\hat{Y}}
-   = \frac{1}{2}\left( \hat{v}_R + \hat{v}_L \right)\sin(\hat{\psi})
-
-These equations combine:
-
-* The **predicted (or plant) dynamics**, and  
-* **Correction terms** proportional to the error (measurement − estimate).
+.. note:: 
+    The global position states :math:`\hat{X}, \hat{Y}` are hard to directly
+    measured, especially because they represent the position of Romi's center of gravity.
+    And that's just when Romi's at a stand still. In real time, we have no way of measuring
+    Romi's absolute position. In other words the position states are not **observable**.
+    So instead we feedback on the observable states,
+    wheel velocities and heading, in the hopes of accurately predicting position.
 
 Real-Time Implementation
 -------------------------
@@ -249,14 +238,12 @@ parameters (motor gain and time constant). However, by tuning the motor gains :m
 and observer feedback gains :math:`L` the observer’s predicted response was brought to closely match
 Romi’s actual response as measured by the motor encoders and IMU.
 
-.. note:: 
-    The global position states :math:`\hat{X}, \hat{Y}` are hard to directly
-    measured, especially becuase they represent to posiong of Romi's center of gravity.
-    However, since they are
-    computed using the estimated wheel velocities and heading, which were
-    observed to closely match the measured values, it is reasonable to assume
-    that the position estimates are also accurate. This is really the whole reason
-    we need an observer. If Romi had a GPS, we wouldn't need to estimate position.
+.. note::
+    As previously mentioned, Romi's gloabl position is hard to measure,
+    hence the need for the observer in the first place. So it was hard to
+    quantify the amount of error in the predicted position states. However,
+    Romi successfully completing the track with heading control based on the
+    predicted position is proof that the state estimator works well enough.
 
 .. note::
     Very agressive observer gains, :math:`L`, were needed to get the observer to
