@@ -15,32 +15,32 @@ beofre it is passed to the appropriate task.
     method to optimize the code's preformance. 
 
 The following classes are initialized and passed to tasks, 
-except, of course, :mod:`me405.cotask` which schedules and runs the tasks.
+except, of course, :mod:`cotask` which schedules and runs the tasks.
 
-* :class:`me405.SSModel.SSModel` –
+* :class:`SSModel.SSModel` –
   Continuous-time state-space model and observer with RK4 integration for
   estimating pose, heading, and wheel states.
 
-* :class:`me405.PIController.PIController` –
+* :class:`PIController.PIController` –
   Closed-loop PI controller for regulating wheel velocity using encoder
   feedback.
 
-* :class:`me405.ThePursuer.ThePursuer` –
+* :class:`ThePursuer.ThePursuer` –
   Point seeking navigation controller that selects waypoints and computes
   steering and speed commands for high-level path following.
 
-* :mod:`me405.cotask` –
+* :mod:`cotask` –
   Cooperative task scheduler providing Task objects, profiling support,
   and a priority-based dispatcher for multitasking under MicroPython.
 
-* :mod:`me405.task_share` –
+* :mod:`task_share` –
   Shared variable and FIFO queue system used to safely exchange data
   between tasks.
 
 PI Speed Controller
 ~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: me405.PIController
+.. automodule:: PIController
    :members:
    :undoc-members:
    :show-inheritance:
@@ -51,7 +51,7 @@ State-Space Model
 See the :doc:`ssmodel` page for more detailed information about
 the model. This section focuses primarily on program functionality.
 
-.. automodule:: me405.SSModel
+.. automodule:: SSModel
    :members:
    :undoc-members:
    :show-inheritance:
@@ -63,7 +63,7 @@ See the :doc:`drivingalgorithm` for more detailed infomation
 about the course navigation design. This section focuses primarily
 on program functionality.
 
-.. automodule:: me405.ThePursuer
+.. automodule:: ThePursuer
    :members:
    :undoc-members:
    :show-inheritance:
@@ -71,7 +71,7 @@ on program functionality.
 Task Scheduler
 ~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: me405.cotask
+.. automodule:: cotask
    :members:
    :undoc-members:
    :show-inheritance:
@@ -79,7 +79,7 @@ Task Scheduler
 Shared Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: me405.task_share
+.. automodule:: task_share
    :members:
    :undoc-members:
    :show-inheritance:

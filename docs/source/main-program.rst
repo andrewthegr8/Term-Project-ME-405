@@ -12,37 +12,37 @@ Task List
 ~~~~~~~~~~~~~~~~~
 
 The following cooperative tasks and helper function are defined in
-:mod:`me405.main`:
+:mod:`main`:
 
-* :func:`me405.main.Talker_fun` –
+* :func:`main.Talker_fun` –
   Handles Bluetooth communication: receives text commands, updates shares, and
   streams telemetry packets over the serial link.
 
-* :func:`me405.main.IMU_Interface_fun` –
+* :func:`main.IMU_Interface_fun` –
   Periodically reads the BNO055 IMU and pushes heading (and optional yaw rate)
   measurements into shared queues.
 
-* :func:`me405.main.SS_Simulator_fun` –
+* :func:`main.SS_Simulator_fun` –
   Runs the state-space model to estimate robot position, heading, and related
   states from encoder and IMU data, then logs them to queues.
 
-* :func:`me405.main.LineFollow_fun` –
+* :func:`main.LineFollow_fun` –
   Uses the reflectance sensor array to follow the black line and computes a
   lateral offset command for the controller.
 
-* :func:`me405.main.Pursuer_fun` –
+* :func:`main.Pursuer_fun` –
   Implements pure-pursuit path following, generating speed and turning
   commands based on the estimated pose and obstacle flags.
 
-* :func:`me405.main.Controller_fun` –
+* :func:`main.Controller_fun` –
   Performs PI wheel-speed control, reading setpoints and encoder feedback to
   compute motor efforts and log wheel data.
 
-* :func:`me405.main.GarbageCollector_fun` –
+* :func:`main.GarbageCollector_fun` –
   Low-priority background task that periodically runs :func:`gc.collect` to
   manage heap usage on the microcontroller.
 
-* :func:`me405.main.Cali_test` –
+* :func:`main.Cali_test` –
   Blocking calibration routine that guides the user through black/white
   calibration of the line sensor using the pushbutton and status LED.
 
@@ -314,7 +314,7 @@ Main Script
 ~~~~~~~~~~~~~~~~~~~~
 All task generator functions are contained in ``main.py``.
 
-.. automodule:: me405.main
+.. automodule:: main
    :members:
    :undoc-members:
    :show-inheritance:
