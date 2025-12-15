@@ -19,7 +19,8 @@ except, of course, :mod:`~me405.cotask` which schedules and runs the tasks.
 
 * :class:`~me405.SSModel.SSModel` –
   Continuous-time state-space model and observer with RK4 integration for
-  estimating pose, heading, and wheel states.
+  estimating pose, heading, and wheel states. See the :doc:`ssmodel` page
+  for details regarding the model structure and preformance.
 
 * :class:`~me405.PIController.PIController` –
   Closed-loop PI controller for regulating wheel velocity using encoder
@@ -27,7 +28,8 @@ except, of course, :mod:`~me405.cotask` which schedules and runs the tasks.
 
 * :class:`~me405.ThePursuer.ThePursuer` –
   Point seeking navigation controller that selects waypoints and computes
-  steering and speed commands for high-level path following.
+  steering and speed commands for high-level path following. See the
+  :doc:`drivingalgorithm` page detials regarding the algorithm design.
 
 * :mod:`~me405.cotask` –
   Cooperative task scheduler providing Task objects, profiling support,

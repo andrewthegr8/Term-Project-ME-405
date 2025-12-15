@@ -333,69 +333,66 @@ def LineFollow_fun(shares):
     It also monitors the ``lf_stop`` share to enter a disabled state when
     :func:`Pursuer_fun` requests the line follower to stop.
 
-    .. Note::
-        For this implementation, a small forward speed bias is added so that 
-        Romi starts to turn when it approach the "Y" intersection.
+    .. note::
+       For this implementation, a small forward speed bias is added so that
+       Romi starts to turn when it approaches the ``Y`` intersection.
 
-    .. Tip::
-        The line follower implements anti-windup by resetting the integral
-        error sum when the requested speed is zero.
+    .. tip::
+       The line follower implements anti-windup by resetting the integral
+       error sum when the requested speed is zero.
 
     .. graphviz::
-        :caption: LineFollow_fun finite state machine
+       :caption: LineFollow_fun finite state machine
 
-        digraph LineFollowFSM {
-            rankdir=LR;
-            node [shape=circle];
+       digraph LineFollowFSM {
+         rankdir=LR;
+         node [shape=circle];
 
-            S0 [label="Active follow"];
-            S1 [label="Follower stopped"];
+         S0 [label="Active follow"];
+         S1 [label="Follower stopped"];
 
-            // Active -> Stopped
-            S0 -> S1 [
-            label="lf_stop.get() == 1\n"
-                    "SENS_LED.value(0)"
-            ];
+         // Active -> Stopped
+         S0 -> S1 [
+           label="lf_stop.get() == 1\\n"
+                 "SENS_LED.value(0)"
+         ];
 
-            // Active -> Active (normal line following)
-            S0 -> S0 [
-            label="Line_sensor.read()\n"
-                    "Aixi_sum,Ai_sum,error\n"
-                    "kp_lf,ki_lf,esum\n"
-                    "velo_set,offset\n"
-                    "X_pos.view() bias\n"
-                    "SENS_LED.value(1)"
-            ];
+         // Active -> Active (normal line following)
+         S0 -> S0 [
+           label="Line_sensor.read()\\n"
+                 "Aixi_sum,Ai_sum,error\\n"
+                 "kp_lf,ki_lf,esum\\n"
+                 "velo_set,offset\\n"
+                 "X_pos.view() bias\\n"
+                 "SENS_LED.value(1)"
+         ];
 
-            // Stopped -> Stopped (no exit in code)
-            S1 -> S1 [
-            label="lf_stop.get() == 1\n"
-                    "SENS_LED.value(0)"
-            ];
-        }
+         // Stopped -> Stopped (no exit in code)
+         S1 -> S1 [
+           label="lf_stop.get() == 1\\n"
+                 "SENS_LED.value(0)"
+         ];
+       }
 
-    
-    
-    Args:
-        shares: Tuple in the following order:
+    :param shares: Tuple in the following order:
 
-            * ``SENS_LED`` (:class:`pyb.Pin`): LED indicating line follower
-              activity.
-            * ``length`` (:class:`float`): Half-width of the sensor index
-              range used in centroid computation.
-            * ``Aixi_sum`` (:class:`float`): Working variable for centroid
-              numerator (unused outside).
-            * ``Ai_sum`` (:class:`float`): Working variable for centroid
-              denominator (unused outside).
-            * ``X_pos`` (:class:`task_share.Queue`): Estimated X position.
-            * ``velo_set`` (:class:`task_share.Share`): Requested average speed.
-            * ``lf_stop`` (:class:`task_share.Share`): Flag to disable the
-              line follower.
-            * ``kp_lf``, ``ki_lf`` (:class:`float`): PI gains for line following.
-            * ``offset`` (:class:`task_share.Share`): Speed offset written
-              to the motor controller task.
-            * ``Line_sensor`` (:class:`LineSensor`): Calibrated line sensor
-              driver instance.
+        * ``SENS_LED`` (:class:`pyb.Pin`): LED indicating line follower
+          activity.
+        * ``length`` (:class:`float`): Half-width of the sensor index
+          range used in centroid computation.
+        * ``Aixi_sum`` (:class:`float`): Working variable for centroid
+          numerator (unused outside).
+        * ``Ai_sum`` (:class:`float`): Working variable for centroid
+          denominator (unused outside).
+        * ``X_pos`` (:class:`task_share.Queue`): Estimated X position.
+        * ``velo_set`` (:class:`task_share.Share`): Requested average speed.
+        * ``lf_stop`` (:class:`task_share.Share`): Flag to disable the
+          line follower.
+        * ``kp_lf``, ``ki_lf`` (:class:`float`): PI gains for line following.
+        * ``offset`` (:class:`task_share.Share`): Speed offset written
+          to the motor controller task.
+        * ``Line_sensor`` (:class:`LineSensor`): Calibrated line sensor
+          driver instance.
     """
     (SENS_LED, length, Aixi_sum, Ai_sum, X_pos, velo_set, lf_stop, kp_lf,
      ki_lf, offset, Line_sensor) = shares
