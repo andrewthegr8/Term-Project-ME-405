@@ -58,7 +58,6 @@ autodoc_mock_imports = ["pyb", "micropython", "ucollections"]
 pyb = types.ModuleType("pyb")
 
 class Pin:
-    """Stub for pyb.Pin used only for documentation."""
     OUT_PP = 0
 
     def __init__(self, *args, **kwargs):
@@ -72,7 +71,6 @@ class Pin:
 
 
 class Timer:
-    """Stub for pyb.Timer used only for documentation."""
     PWM = 0
     ENC_AB = 1
 
@@ -91,7 +89,6 @@ class Timer:
 
 # Stub ADC used by LineSensor
 class ADC:
-    """Stub for pyb.ADC used only during docs build."""
     def __init__(self, *args, **kwargs):
         pass
 
@@ -118,7 +115,6 @@ builtins.pyb = pyb
 micropython = types.ModuleType("micropython")
 
 def native(func):
-    """Decorator stub that just returns the function unchanged."""
     return func
 
 micropython.native = native
@@ -138,7 +134,6 @@ def ticks_us():
     return int(_time.perf_counter() * 1_000_000)
 
 def ticks_ms():
-    """Monotonic millisecond ticks (stub for MicroPython)."""
     return int(_time.perf_counter() * 1_000)
 
 def ticks_diff(new, old):
@@ -160,23 +155,18 @@ if not hasattr(_time, "ticks_diff"):
 utime = types.ModuleType("utime")
 
 def _ticks_us():
-    """Return a monotonically increasing time in microseconds (stub)."""
     return int(_time.perf_counter() * 1_000_000)
 
 def _ticks_ms():
-    """Return a monotonically increasing time in milliseconds (stub)."""
     return int(_time.perf_counter() * 1_000)
 
 def _ticks_diff(new, old):
-    """Return signed difference between two tick readings (stub)."""
     return new - old
 
 def _sleep_ms(ms):
-    """Sleep for the given number of milliseconds (stub)."""
     _time.sleep(ms / 1000.0)
 
 def _sleep_us(us):
-    """Sleep for the given number of microseconds (stub)."""
     _time.sleep(us / 1_000_000.0)
 
 # Wire these into the fake utime module
@@ -225,7 +215,6 @@ if not hasattr(_time, "ticks_us"):
 # --- Extra pyb stubs for docs build (UART, I2C, IRQ helpers) ---
 
 class UART:
-    """Stub for pyb.UART used only for documentation."""
     def __init__(self, *args, **kwargs):
         pass
 
@@ -236,7 +225,6 @@ class UART:
         return 0
 
 class I2C:
-    """Stub for pyb.I2C used only for documentation."""
     CONTROLLER = 0
 
     def __init__(self, *args, **kwargs):
