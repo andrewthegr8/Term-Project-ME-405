@@ -20,33 +20,22 @@ def make_talker_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "Listen / TX")
-    dot.node("S1", "Parse command")
+    dot.node("S0", "State 0: \nListen / Transmit")
+    dot.node("S1", "State 1: \nParse command")
 
     # Transitions
     dot.edge(
         "S0", "S1",
-        label="btcomm.check()"
+        label="btcomm.check() = True"
     )
     dot.edge(
         "S0", "S0",
-        label="no command\n"
-              "time_L,time_R\n"
-              "pos_L,pos_R\n"
-              "velo_L,velo_R\n"
-              "cmd_L,cmd_R\n"
-              "Eul_head,yaw_rate\n"
-              "offset,X_pos,Y_pos\n"
-              "p_v_R,p_v_L\n"
-              "p_head,velo_set\n"
-              "p_pos_L,p_pos_R"
+        label="btcomm.check() = False"
+              "\nSend packtet"
     )
     dot.edge(
         "S1", "S0",
-        label="rawcmd = btcomm.get_command()\n"
-              "\"$SPD\"→velo_set\n"
-              "\"$PNT\"→p_X,p_Y,p_head\n"
-              "\"$WLL\"→wall"
+        label="Always"
     )
 
     dot.render(os.path.join(OUT_DIR, "talker_fsm"),
@@ -59,26 +48,12 @@ def make_linefollow_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "Active follow")
-    dot.node("S1", "Follower stopped")
+    dot.node("S0", "State 0: \nLine Follower Active")
+    dot.node("S1", "State 1: \nLine Follower Stopped")
 
     # Transitions
     dot.edge(
         "S0", "S1",
-        label="lf_stop.get() == 1\n"
-              "SENS_LED.value(0)"
-    )
-    dot.edge(
-        "S0", "S0",
-        label="Line_sensor.read()\n"
-              "Aixi_sum,Ai_sum,error\n"
-              "kp_lf,ki_lf,esum\n"
-              "velo_set,offset\n"
-              "X_pos.view() bias\n"
-              "SENS_LED.value(1)"
-    )
-    dot.edge(
-        "S1", "S1",
         label="lf_stop.get() == 1\n"
               "SENS_LED.value(0)"
     )
@@ -93,27 +68,14 @@ def make_pursuer_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "Line mode")
-    dot.node("S1", "Pursue path")
+    dot.node("S0", "Stat 0: \nLine Follow Mode \n(do nothing)")
+    dot.node("S1", "State 1: \nPoint Pursuit Mode")
 
     # Transitions
     dot.edge(
         "S0", "S1",
-        label="p_X.view() >= 31.25\n"
+        label="Past \"Y\" \n/"
               "lf_stop.put(1)"
-    )
-    dot.edge(
-        "S0", "S0",
-        label="p_X.view() < 31.25"
-    )
-    dot.edge(
-        "S1", "S1",
-        label="X_pos.view(),Y_pos.view()\n"
-              "obst_sens,WALL_LED\n"
-              "wall,wall_hit\n"
-              "thepursuer.get_offset(\n"
-              "  p_X,p_Y,p_head,wall)\n"
-              "velo_set,offset"
     )
 
     dot.render(os.path.join(OUT_DIR, "pursuer_fsm"),
@@ -126,47 +88,26 @@ def make_controller_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "Init timing")
-    dot.node("S1", "Speed control")
-    dot.node("S2", "Stopped hold")
+    dot.node("S0", "State 0: \n Initalize Timing \n(for integrators)")
+    dot.node("S1", "State 1: \n Run Controllers")
+    dot.node("S2", "State 2: \n Stop Robot")
 
     # Transitions
     dot.edge(
         "S0", "S1",
-        label="l_ctrl.last_time = t_L\n"
-              "r_ctrl.last_time = t_R"
+        label="Always"
     )
     dot.edge(
         "S1", "S2",
-        label="cmd = velo_set.get() == 0.0\n"
-              "leftmotor,rightmotor = 0\n"
+        label="velo_set.get() == 0.0\n/"
               "cmd_L,cmd_R = 0"
-    )
-    dot.edge(
-        "S1", "S1",
-        label="cmd = velo_set.get() != 0.0\n"
-              "off = offset.get()\n"
-              "l_ctrl.get_ctrl_sig(\n"
-              "  cmd+off,v_L,t_L)\n"
-              "r_ctrl.get_ctrl_sig(\n"
-              "  cmd-off,v_R,t_R)\n"
-              "lastsig_L,lastsig_R\n"
-              "MAXDELTA,cmd_L,cmd_R"
     )
     dot.edge(
         "S2", "S1",
         label="cmd = velo_set.get() != 0.0\n"
-              "leftencoder.zero()\n"
-              "rightencoder.zero()\n"
-              "l_ctrl.reset(t_L)\n"
-              "r_ctrl.reset(t_R)"
+              "Reset integrator timers \n"
+              "and encoders"
     )
-    dot.edge(
-        "S2", "S2",
-        label="cmd = velo_set.get() == 0.0\n"
-              "cmd_L,cmd_R = 0"
-    )
-
     dot.render(os.path.join(OUT_DIR, "controller_fsm"),
                format="svg", cleanup=True)
 
