@@ -61,7 +61,8 @@ Inputs and Measurements
    u_R
    \end{bmatrix}
 
-* :math:`u_L, u_R` – left/right motor control inputs (e.g., scaled voltage commands)
+* :math:`u_L, u_R` – left/right motor control inputs. That is scaled voltage commands
+scaled based on commanded duty cycle.
 
 **Measurements (sensors):**
 
@@ -151,7 +152,7 @@ on the deviation of the predicted states from observed values.
     The global position states :math:`\hat{X}, \hat{Y}` are hard to directly
     measured, especially because they represent the position of Romi's center of gravity.
     And that's just when Romi's at a stand still. In real time, we have no way of measuring
-    Romi's absolute position. In other words the position states are not **observable**.
+    Romi's absolute position. In other words the position states are **not observable**.
     So instead we feedback on the observable states,
     wheel velocities and heading, in the hopes of accurately predicting position.
 
@@ -184,7 +185,7 @@ as quickly as possible, and with as little heap allocation as possible.
     violate the second RK4 assumption above.
 
 It was dicovered that the key to making sure that the state estimator ran 
-on time and was to ensure that the garbage collector task `~me405.gc_task`
+on time and was to ensure that the garbage collector task :func:`~me405.gc_task`
 was able to run at its scheduled frequency, or once every "main loop."
 
 .. Note::
@@ -194,7 +195,7 @@ was able to run at its scheduled frequency, or once every "main loop."
     and to simplify scheduling.
 
 So, all tasks were optimized to run as quickly as possible, and the
-provided timing profiler provided in `~me405.cotask` was used
+provided timing profiler provided in :class:`~me405.cotask` was used
 to verify that all tasks were running on time. Then, the main task period was
 decreased to the lowest value that still allowed all tasks
 to run on time, so that that the first RK4 assumption was satisfied.

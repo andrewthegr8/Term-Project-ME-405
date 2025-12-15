@@ -429,3 +429,61 @@ Two persistent artifacts are saved:
 
 * **CSV file** in ``test_data/romi_data_<timestamp>.csv``
 * **PNG figure** in ``plots/<timestamp>.png`` (high-resolution)
+
+
+Usage Guide
+-----------
+
+Prerequisites
+~~~~~~~~~~~~~
+
+* Robot firmware using :class:`BTComm` for UART/Bluetooth I/O.
+* PC with:
+
+  - Python 3.
+  - ``pyserial``, ``numpy``, ``matplotlib``.
+  - Tkinter (typically bundled on many platforms).
+  - ``mpremote`` on PATH (for firmware updates).
+  - PuTTY installed (if you want to use the built–in **Update Code**
+    button).
+
+Running the host
+~~~~~~~~~~~~~~~~
+
+1. Pair the robot over Bluetooth and determine the virtual COM port.
+2. Update the port string in ``Talker.py`` if different from
+   ``'COM13'``.
+3. Start the host script:
+
+   .. code-block:: bash
+
+      python Talker.py
+
+4. You should see:
+
+   * A console message like ``"Connected to COM13"``.
+   * The Tkinter window **“Live Romi Data”**.
+
+5. Use the GUI to:
+
+   * Enter a speed and press **“Update”** to start motion and,
+     optionally, logging.
+   * Press **“STOP”** to halt the robot; if logging is enabled, the
+     plotting thread will be triggered.
+   * Toggle **“Record Data”** to control whether runs are logged.
+   * Press **“Plot”** to manually trigger plotting of the current
+     dataset.
+
+Firmware update workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Press the **“Update Code”** button in the GUI.
+
+   * Serial I/O threads pause using ``read_stop`` and ``write_stop``.
+   * ``mpremote`` copies the contents of ``./src/`` to the robot.
+
+2. A PuTTY session is launched using the *“Default Settings”* profile to
+   interact with the robot's REPL.
+
+3. Once update is complete, the serial reader/writer threads resume.
+
