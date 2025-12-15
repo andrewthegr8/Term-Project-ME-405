@@ -49,7 +49,7 @@ Line sensor array (QTR-style reflectance sensors)
 
    * - Pin
      - Channel
-     - Mode / peripheral
+     - Mode
      - Notes
    * - ``C5`` |LINE|
      - Line Sensor 14
@@ -128,24 +128,24 @@ Wheel encoders (quadrature)
 
    * - Pin
      - Channel
-     - Mode / peripheral
+     - Mode
      - Notes
    * - ``A8`` |ENC|
      - Left Encoder Ch A
-     - Timer encoder input (TIM1_CH1)
+     - TIM1_CH1
      - 
    * - ``A9`` |ENC|
      - Left Encoder Ch B
-     - Timer encoder input (TIM1_CH2)
+     - TIM1_CH2
      - 
    * - ``A15`` |ENC|
      - Right Encoder Ch A
-     - Timer encoder input (TIM2_CH1, remapped)
-     - Pin is put in alternate function mode ``alt=1`` before encoder setup to remap TIM2.
+     - TIM2_CH1
+     - Alternate function mode ``AF1``.
    * - ``B3`` |ENC|
      - Right Encoder Ch B
-     - Timer encoder input (TIM2_CH2, remapped)
-     - Pin is put in alternate function mode ``alt=1`` before encoder setup to remap TIM2.
+     - TIM2_CH2
+     - Alternate function mode ``AF1``.
 
 
 IMU (BNO055 over I2C)
@@ -157,21 +157,20 @@ IMU (BNO055 over I2C)
 
    * - Pin
      - Channel
-     - Mode / peripheral
+     - Mode
      - Notes
    * - ``B8`` |IMU|
-     - IMU-SCL
-     - I2C clock (``I2C(1)`` SCL)
-     - Connected to the BNO055 SCL line on the shared I2C bus.
+     - I2C clock
+     -  ``I2C1 SCL``
+     - Alternate function mode ``AF4``
    * - ``B9`` |IMU|
-     - IMU-SDA
-     - I2C data (``I2C(1)`` SDA)
-     - Connected to the BNO055 SDA line on the shared I2C bus.
+     - I2C data 
+     - ``I2C1 SDA``
+     - Alternate function mode ``AF4``
    * - ``C9`` |IMU|
-     - IMU-RST
-     - Digital output (``Pin.OUT_PP``)
-     - Optional hardware reset for the IMU; available on the header but not actively driven by the current firmware.
-
+     - IMU Reset
+     - ``Pin.OUT_PP``
+     - Optional hardware reset for the IMU; available on the header but not actively driven in the current firmware.
 
 Obstacle sensor
 ---------------
@@ -182,7 +181,7 @@ Obstacle sensor
 
    * - Pin
      - Signal
-     - Mode / peripheral
+     - Mode
      - Notes
    * - ``B7`` |OBS|
      - Obstacle Sensor
@@ -190,62 +189,81 @@ Obstacle sensor
      - Simple limit switch. GND when pressed, pulled high otherwise.
 
 
-Bluetooth UART (HC-05 style link)
+luetooth UART (HC-05 style link)
 ---------------------------------
 
 .. list-table::
    :header-rows: 1
-   :widths: 12 22 26 40
+   :widths: 12 20 26 42
 
    * - Pin
-     - Signal
-     - Mode / peripheral
+     - Channel
+     - Mode
      - Notes
    * - ``C12`` |BT|
-     - UART5-TX (Bluetooth)
-     - ``UART5`` TX (alternate function)
-     - Transmit line from Nucleo to Bluetooth module.
+     - UART TX
+     - ``UART5_TX``
+     - Alternate function mode ``AF8``
    * - ``D2`` |BT|
-     - UART5-RX (Bluetooth)
-     - ``UART)`` RX (alternate function)
-     - Receive line from Bluetooth module to Nucleo.
+     - UART RX
+     - ``UART5_RX``
+     - Alternate function mode ``AF8``
+
+.. Note::
+  Ensure that the TX/RX lines are connected correctly between the
+  STM32 and the Bluetooth module (TX to RX, RX to TX).
 
 
 Drive motors (H-bridge interface)
----------------------------------
+--------------------------------
 
 .. list-table::
    :header-rows: 1
-   :widths: 12 24 26 38
+   :widths: 12 20 26 42
 
    * - Pin
-     - Role
-     - Mode / peripheral
+     - Channel
+     - Mode
      - Notes
-   * - ``B4`` |MOT|
-     - Left Motor IN1
-     - GPIO output
-     - Direction / drive input to left motor driver.
+
+   #############################################
+   #               LEFT MOTOR                  #
+   #############################################
+
    * - ``B10`` |MOT|
-     - Left Motor IN2 / DIR
-     - GPIO output
-     - Second direction input for left motor driver.
+     - Left Motor DIR
+     - GPIO Output
+     - No alternate function (GPIO)
+
    * - ``C8`` |MOT|
-     - Left Motor PWM
-     - Timer PWM output (TIM3_CH1)
-     - Speed control for left motor (``Timer(3, freq=10000)``).
-   * - ``B6`` |MOT|
-     - Right Motor IN1 / PWM
-     - GPIO / timer output
-     - Direction and/or PWM drive input to right motor driver, paired with ``B11``.
+     - Left Motor EN / PWM
+     - ``TIM3_CH1``
+     - Alternate function mode ``AF2``
+
+   * - ``B4`` |MOT|
+     - Left Motor Effort (PWM alternative)
+     - ``TIM3_CH1`` (board-routed)
+     - Alternate function mode ``AF2``
+
+   #############################################
+   #              RIGHT MOTOR                  #
+   #############################################
+
    * - ``B11`` |MOT|
      - Right Motor DIR
-     - GPIO output
-     - Second direction input for right motor driver.
+     - GPIO Output
+     - No alternate function (GPIO)
+
    * - ``C7`` |MOT|
-     - Right Motor PWM
-     - Timer PWM output (TIM4_CH1)
-     - Speed control for right motor (``Timer(4, freq=10000)``).
+     - Right Motor EN / nSLP
+     - GPIO Output
+     - No alternate function (GPIO)
+
+   * - ``B6`` |MOT|
+     - Right Motor Effort (PWM)
+     - ``TIM4_CH1``
+     - Alternate function mode ``AF2``
+
 
 
 User interface: button and LEDs
@@ -264,7 +282,7 @@ User interface: button and LEDs
      - ``Pin.IN`` with ``Pin.PULL_UP``
      - Used both for general interaction and line-sensor calibration.
    * - ``C6`` |UI| |LINE|
-     - SENS_LED (Calibration / Line follower)
+     - SENS_LED
      - ``Pin.OUT_PP``
      - Status LED for line sensor activity and calibration.
    * - ``C10`` |UI|
