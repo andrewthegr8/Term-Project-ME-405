@@ -300,7 +300,7 @@ Outer row is closest to the board edge, inner row is the row closer to the MCU.
 
 .. list-table:: Left header (outer / inner rows)
    :header-rows: 1
-   :widths: 20 10 10 20
+   :widths: 20 15 15 20
 
    * - Left function label
      - Outer pin
@@ -410,7 +410,7 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
 
 .. list-table:: Right header (inner / outer rows)
    :header-rows: 1
-   :widths: 20 10 10 20
+   :widths: 20 15 15 20
 
    * - Left function label
      - Inner pin
@@ -437,12 +437,12 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
      - ``U5V``
      -
 
-   * - Calibration LED
+   * - 
      - ``GND``
      - ``NC``
      -
 
-   * - ADC (on-board LED)
+   * -
      - ``A5``
      - ``A12``
      - USB communication through Shoe of Brian

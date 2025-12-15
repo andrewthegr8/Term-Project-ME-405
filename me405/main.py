@@ -28,11 +28,14 @@ On startup, the script performs the following steps:
   - State-space model simulation (:func:`SS_Simulator_fun`)
   - Periodic garbage collection (:func:`GarbageCollector_fun`)
 * Register those tasks with :mod:`cotask` and run the priority scheduler
-  in a loop until a keyboard interrupt is received.
+  in a loop until a *keyboard interrupt* is received.
 
-This module is intended to run on a MicroPython-enabled Romi robot. When
-used with Sphinx/ReadTheDocs, the task functions are imported so that
-their docstrings can be rendered in the firmware documentation.
+When a keyboard interrupt occurs (typically from a user pressing Ctrl-C
+via the REPL), the scheduler is halted, all motors are stopped, the IMU
+calibration coefficents are saved to flash memory, and the program prints
+debugging statistics from the scheduler as well as the final state of each
+queue before exiting.
+
 """
 
 import gc
