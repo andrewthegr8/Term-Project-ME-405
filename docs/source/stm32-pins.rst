@@ -43,9 +43,13 @@ Nucleo-64 in this project.
 Line sensor array (QTR-style reflectance sensors)
 -------------------------------------------------
 
+.. note::
+  If only the Even LED control line is used and the odd line is left
+  floating, all LEDs will be controlled.
+
 .. list-table::
    :header-rows: 1
-   :widths: 12 18 22 48
+   :widths: 12 18 13 40
 
    * - Pin
      - Channel
@@ -54,11 +58,11 @@ Line sensor array (QTR-style reflectance sensors)
    * - ``C5`` |LINE|
      - Line Sensor 14
      - Analog input
-     - Right header; shared row with IMU SDA in the pinout sheet.
+     - Right header
    * - ``B1`` |LINE|
      - Line Sensor 13
      - Analog input
-     - Right header; same pad can be used as *Left Encoder Ch A* in hardware, but is used as line sensor in this firmware.
+     - Right header
    * - ``C4`` |LINE|
      - Line Sensor 12
      - Analog input
@@ -90,11 +94,11 @@ Line sensor array (QTR-style reflectance sensors)
    * - ``C1`` |LINE|
      - Line Sensor 5
      - Analog input
-     - Left header; pairs with ADC channel on ``A2`` in the hardware sheet.
+     - Left header
    * - ``C0`` |LINE|
      - Line Sensor 4
      - Analog input
-     - Left header; pairs with ADC channel on ``A3`` in the hardware sheet.
+     - Left header
    * - ``C3`` |LINE|
      - Line Sensor 3
      - Analog input
@@ -103,35 +107,20 @@ Line sensor array (QTR-style reflectance sensors)
      - Line Sensor 2
      - Analog input
      - Left header.
-
-
-Line sensor drivers and reference lines
----------------------------------------
-
-.. list-table::
-   :header-rows: 1
-   :widths: 12 25 22 41
-
-   * - Pin
-     - Signal
-     - Mode / peripheral
-     - Notes
    * - ``H0`` |LINE|
      - Line Sensor Even Control
      - ``Pin.OUT_PP``
-     - ``evenctrl`` line for multiplexing or powering even-indexed sensors.
+     - Line for toggling even-indexed sensor LEDs.
    * - ``H1`` |LINE|
      - Line Sensor Odd Control
      - ``Pin.OUT_PP``
-     - ``oddctrl`` line for multiplexing or powering odd-indexed sensors.
-   * - ``A2`` |LINE|
-     - Line Sensor ADC A
-     - ADC input (to on-board ST-Link MCU)
-     - Labeled *ADC (UART2 to ST-link MCU)* in the sheet, used with Line Sensor 5.
-   * - ``A3`` |LINE|
-     - Line Sensor ADC B
-     - ADC input (to on-board ST-Link MCU)
-     - Labeled *ADC (UART2 to ST-link MCU)*, used with Line Sensor 4.
+     - Line for toggling odd-indexed sensor LEDs.
+
+.. note::
+  If only the Even LED control line is used and the odd line is left
+  floating, all LEDs will be controlled. This is how the sensor was used
+  in this project.
+
 
 
 Wheel encoders (quadrature)
