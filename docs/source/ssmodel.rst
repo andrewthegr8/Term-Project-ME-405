@@ -83,7 +83,7 @@ The continuous-time plant model (no observer feedback) describes the predicted
 robot dynamics.
 
 Parameters
-----------
+^^^^^^^^^^^^^
 
 * :math:`r` – wheel radius (in)
 * :math:`w` – wheel base / track width (in)
@@ -91,8 +91,7 @@ Parameters
 * :math:`\tau_L, \tau_R` – left/right motor time constants (s)
 
 State Equations
----------------
-
+^^^^^^^^^^^^^^^^^
 Using linear wheel velocities :math:`v_L, v_R` (in/s) and displacements :math:`s_L, s_R` (in):
 
 .. math::
@@ -107,20 +106,20 @@ Using linear wheel velocities :math:`v_L, v_R` (in/s) and displacements :math:`s
 
 
 Augmented Observer Model
-========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The observer uses the same process model plus feedback terms that pull the
 estimated states toward sensor measurements.
 
 Observer Gains
---------------
+^^^^^^^^^^^^^^^^^^
 
 * :math:`L_{vL}, L_{vR}` – wheel velocity gains
 * :math:`L_{\psi}` – heading gain
 * :math:`L_{sL}, L_{sR}` – wheel displacement gains
 
 Observer State Equations
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The observer integrates an estimated state :math:`\hat{y}`:
 
@@ -283,6 +282,9 @@ are the same color as the true values in the other graphs.
    :width: 90%
 
    Observer preformance for Romi pivoting in place.
+
+IMU Feedback Importance
+-------------------------   
 
 Finally, a question that arose during testing was, how important is the IMU
 heading measurement to the observer performance? Afterall, if there's feedback
