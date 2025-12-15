@@ -31,10 +31,9 @@ Relevant on-chip peripherals include:
 - **GPIO** (Used for motor control, status LEDS, and bump sensing)
 - **ADC (16-channel)** (Used for reflectance sensor array sampling) 
 
-**See these pages for details on how prepherials were connected to the STM32:**
-
 .. toctree::
    :maxdepth: 2
+   :caption: STM32 Peripheral Connections:
 
    stm32-pins
 
