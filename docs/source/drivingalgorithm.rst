@@ -14,7 +14,7 @@ the controller uses three key pieces of information:
 
 Using these, the algorithm computes the *error vector* pointing from Romi
 toward the next waypoint and then determines the angular misalignment between
-Romi’s heading and this vector. This angle, called the *heading error*
+Romi’s heading and this vector. This angle, or the *heading error*
 :math:`\alpha`, is the primary quantity used for rotational control.
 
 Vector Definitions
@@ -85,7 +85,7 @@ The cross and dot products expand to:
    \hat{\mathbf{h}} \cdot \mathbf{E}
    = (\cos\Psi)E_x \;+\; (\sin\Psi)E_y
 
-Finally, the correctly signed heading error is computed with:
+Finally, the signed heading error is computed with:
 
 .. math::
 
@@ -94,9 +94,10 @@ Finally, the correctly signed heading error is computed with:
                                        \hat{\mathbf{h}} \cdot \mathbf{E}\right)
    }
 
-We use :math:`\operatorname{atan2}` instead of :math:`\arccos` or
-:math:`\arcsin` because those functions cannot distinguish among all four
-quadrants; `atan2` preserves both magnitude and sign of the angular offset.
+.. note:: 
+    We use :math:`\operatorname{atan2}` instead of :math:`\arccos` or
+    :math:`\arcsin` because those functions cannot distinguish among all four
+    quadrants; `atan2` preserves both magnitude and sign of the angular offset.
 
 Conceptual Description
 ---------------------------
