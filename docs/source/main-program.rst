@@ -62,6 +62,7 @@ and priority (P) is shown as well.
      fontsize=16;
      nodesep="0.6";
      ranksep="1.0 equally";
+     splines=polyline;          // straighter edges = easier labels
 
      node [
        shape=box,
@@ -73,7 +74,8 @@ and priority (P) is shown as well.
 
      edge [
        fontname="Helvetica",
-       fontsize=12
+       fontsize=12,
+       labelfloat=true          // let labels float off the edge a bit
      ];
 
      // =========================
@@ -103,34 +105,37 @@ and priority (P) is shown as well.
      // Shares / queues between tasks
      // =========================
 
-     // Speed commands
-     Talker      -> Controller    [label="velo_set"];
-     Pursuer     -> Controller    [label="velo_set"];
-     Controller  -> Talker        [label="cmd_L/R"];
+     // Speed commands (two different angles so labels don't overlap)
+     Talker      -> Controller    [label="velo_set", labeldistance=3, labelangle=25];
 
-     // Offsets
-     LineFollow  -> Controller    [label="offset"];
-     Pursuer     -> Controller    [label="offset"];
+     // Offsets (again, split angles)
+     LineFollow  -> Controller    [label="offset", labeldistance=3, labelangle=25];
+     Pursuer     -> Controller    [label="offset, velo_set", labeldistance=3, labelangle=-25];
 
      // Line follower enable/disable
-     Pursuer     -> LineFollow    [label="lf_stop"];
+     Pursuer     -> LineFollow    [label="lf_stop", labeldistance=2.5, labelangle=-20];
 
      // IMU to simulator & talker
-     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate"];
-     IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate"];
+     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate", labeldistance=2.5, labelangle=20];
+     IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate", labeldistance=2.5, labelangle=-20];
 
-     // Controller → others
-     Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R"];
-     Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R"];
+     // Controller → Talker (two parallel edges, labels on opposite sides)
+     Controller  -> Talker        [label="cmd_L/R", labeldistance=3.2, labelangle=25];
+     Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R", labeldistance=3.2, labelangle=-25];
+
+     // Controller → simulator
+     Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R", labeldistance=2.8, labelangle=-25];
 
      // State-space simulator outputs
-     SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R"];
-     SS_Simulator -> LineFollow   [label="X_pos"];
-     SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head"];
+     SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R",
+                                   labeldistance=3, labelangle=-25];
+     SS_Simulator -> LineFollow   [label="X_pos", labeldistance=2.4, labelangle=20];
+     SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head", labeldistance=2.6, labelangle=-20];
 
      // Pursuer adjusting behavior
-     Pursuer     -> Talker        [label="velo_set, offset"];
+     Pursuer     -> Talker        [label="velo_set, offset", labeldistance=2.6, labelangle=20];
    }
+
 
 
 Inter-task communication variables
