@@ -23,7 +23,7 @@ the robot successfully completing the course.
 In the video, the robot uses an IR line sensor to follow the line until the "Y"
 at which point it targets checkpoints and solo cups on the course.
 
-Access the full code repository on GitHub `here <https://github.com/andrewthegr8/Term-Project-ME-405/tree/main>`.
+Access the full code repositry on GitHub `here <https://github.com/andrewthegr8/Term-Project-ME-405/tree/main>`.
 
 .. raw:: html
 
