@@ -62,8 +62,8 @@ the model. This section focuses primarily on program functionality.
 Point Targeting Algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See the :doc:`drivingalgorithm` for more detailed infomation
-about the course navigation design. This section focuses primarily
+See the :doc:`drivingalgorithm` page for more detailed infomation
+about the course navigation algorithm design. This section focuses primarily
 on program functionality.
 
 .. automodule:: me405.ThePursuer

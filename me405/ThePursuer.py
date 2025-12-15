@@ -48,20 +48,21 @@ class ThePursuer:
     * Chooses a linear speed based on distance and headings, with
       slowdown near each waypoint.
     * Returns a proportional steering offset and the chosen speed.
+
+    Args:
+            base_speed: **DEPRECATED** Base speed (in/s) for the robot to travel
+                at. Predetermined per-segment base speeds are now used instead.
+            success_dist: Distance threshold (inches) below which the next
+                waypoint will be targeted.
+            kp: Heading proportional gain. **DEPRECATED** Per-segment gains are now used
+                instead.
+            ki: Integral gain for heading. **DEPRECATED** Not currently used.
     """
 
     def __init__(self, base_speed, success_dist, kp, ki):
         """Initialize pure-pursuit controller and waypoint list.
 
-        Args:
-            base_speed: Default linear speed (unused directly; per-segment
-                base speeds are encoded in :attr:`base_speed` array).
-            success_dist: Distance threshold (inches) below which the next
-                waypoint will be targeted.
-            kp: Heading proportional gain (kept for compatibility; per-
-                segment gains are stored in :attr:`kp_head`).
-            ki: Integral gain (currently unused but retained for possible
-                PI control extensions).
+        
         """
         # Predefined waypoint coordinates (inches)
         self.x_coords = array(
@@ -173,8 +174,7 @@ class ThePursuer:
 
             * ``offset`` is a differential speed term added/subtracted from
               the base speed on each wheel to create a turn.
-            * ``speed`` is the desired linear speed (same sign and units
-              as your velocity setpoint).
+            * ``speed`` is the desired linear speed 
         """
         Psi = -Psi  # Coordinate system adjustment
 
