@@ -15,25 +15,25 @@ beofre it is passed to the appropriate task.
     method to optimize the code's preformance. 
 
 The following classes are initialized and passed to tasks, 
-except, of course, :mod:`me405.cotask` which schedules and runs the tasks.
+except, of course, :mod:`~me405.cotask` which schedules and runs the tasks.
 
-* :class:`me405.SSModel.SSModel` –
+* :class:`~me405.SSModel.SSModel` –
   Continuous-time state-space model and observer with RK4 integration for
   estimating pose, heading, and wheel states.
 
-* :class:`me405.PIController.PIController` –
+* :class:`~me405.PIController.PIController` –
   Closed-loop PI controller for regulating wheel velocity using encoder
   feedback.
 
-* :class:`me405.ThePursuer.ThePursuer` –
+* :class:`~me405.ThePursuer.ThePursuer` –
   Point seeking navigation controller that selects waypoints and computes
   steering and speed commands for high-level path following.
 
-* :mod:`me405.cotask` –
+* :mod:`~me405.cotask` –
   Cooperative task scheduler providing Task objects, profiling support,
   and a priority-based dispatcher for multitasking under MicroPython.
 
-* :mod:`me405.task_share` –
+* :mod:`~me405.task_share` –
   Shared variable and FIFO queue system used to safely exchange data
   between tasks.
 

@@ -207,3 +207,21 @@ Communicates with the STM32 via **I²C**.
 .. note::
    The BNO055 requires calibration for accurate measurements. Calibration
    data was stored on program exit and loaded on program startup.
+
+Bluetooth Module (HC-05)
+----------------------
+
+`Product page <https://www.pololu.com/product/2510>`_
+
+.. image:: images/bluetooth.jpg
+   :alt: HC-05 Bluetooth module
+   :width: 400px
+   :align: center
+
+The HC-05 is a popular Bluetooth SPP (Serial Port Profile) module that
+enables wireless serial communication between the robot and a PC. The 
+module interfaces with the STM32 via a UART connection and must configured
+and paired with the PC prior to use.
+
+See :ref:`pcui` for details on the PC-side application used to interface
+with the robot via Bluetooth.

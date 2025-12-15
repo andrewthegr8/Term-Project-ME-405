@@ -4,7 +4,7 @@ STM32 Pin Configuration
 This page documents the pin configuration used for the STM32L476RG
 Nucleo-64 in this project.
 
-..note::
+.. note::
     The **CPU pin** naming convention is used here, rather than the **Board Pin**
     convention.
 
