@@ -498,11 +498,11 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
      - Line Sensor - 12
 
    * - UART2 to ST-link MCU
-     - ``A2`` |LINE|
+     - ``A2``
      - ``NC``
      -
 
    * - UART2 to ST-link MCU
-     - ``A3`` |LINE|
+     - ``A3``
      - ``NC``
      -

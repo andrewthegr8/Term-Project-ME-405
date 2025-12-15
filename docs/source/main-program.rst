@@ -105,32 +105,32 @@ and priority (P) is shown as well.
      // =========================
 
      // Speed commands
-     Talker      -> Controller    [label="velo_set (Share)\n$SPD commands"];
-     Pursuer     -> Controller    [label="velo_set (Share)"];
-     Controller  -> Talker        [label="cmd_L/R (Queues)\ntelemetry"];
+     Talker      -> Controller    [label="velo_set"];
+     Pursuer     -> Controller    [label="velo_set"];
+     Controller  -> Talker        [label="cmd_L/R"];
 
      // Offsets
-     LineFollow  -> Controller    [label="offset (Share)\nline follower"];
-     Pursuer     -> Controller    [label="offset (Share)\npure pursuit"];
+     LineFollow  -> Controller    [label="offset"];
+     Pursuer     -> Controller    [label="offset"];
 
      // Line follower enable/disable
-     Pursuer     -> LineFollow    [label="lf_stop (Share)"];
+     Pursuer     -> LineFollow    [label="lf_stop"];
 
      // IMU to simulator & talker
-     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate\n(Queues)"];
-     IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate (Queues)"];
+     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate"];
+     IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate"];
 
      // Controller → others
-     Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R (Queues)"];
-     Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R (Queues)"];
+     Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R"];
+     Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R"];
 
      // State-space simulator outputs
-     SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R (Queues)"];
-     SS_Simulator -> LineFollow   [label="X_pos (Queue)"];
-     SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head (Queues)"];
+     SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R"];
+     SS_Simulator -> LineFollow   [label="X_pos"];
+     SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head"];
 
      // Pursuer adjusting behavior
-     Pursuer     -> Talker        [label="indirect effect via\nvelo_set/offset"];
+     Pursuer     -> Talker        [label="velo_set, offset"];
    }
 
 
