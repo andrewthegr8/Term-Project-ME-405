@@ -207,8 +207,3 @@ Communicates with the STM32 via **I²C**.
 .. note::
    The BNO055 requires calibration for accurate measurements. Calibration
    data was stored on program exit and loaded on program startup.
-
-
-Bluetooth module
------------------
-
