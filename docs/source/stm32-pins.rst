@@ -292,156 +292,191 @@ User interface: button and LEDs
      - Turned on when a wall or obstacle is detected.
 
 
-Physical pinout diagram (modeled after spreadsheet)
+Physical pinout diagrams
 ---------------------------------------------------
 
 Top-view of the Nucleo Morpho headers as used by this project.
 
 Each row corresponds to one “step down” the headers, starting at the
-top (nearest the USB connector).  The table shows both rows for the left
-header and both rows for the right header, along with the primary
-function / sensor on each pin.
+top (nearest the USB connector).
 
-.. list-table:: Romi Nucleo Morpho headers (top view)
+Left header
+^^^^^^^^^^^
+
+Outer row is closest to the board edge, inner row is the row closer
+to the MCU.
+
+.. list-table:: Left header (outer / inner rows)
    :header-rows: 1
-   :widths: 8 14 14 14 14 36
+   :widths: 40 15 15
 
-   * - Row
-     - Left header (outer)
-     - Left header (inner)
-     - Right header (inner)
-     - Right header (outer)
-     - Functions / sensors (per pin)
+   * - Function / sensor (left of header)
+     - Outer pin
+     - Inner pin
 
-   * - 1
+   * - Status LEDs (RUN_LED, WALL_LED)
      - ``C10`` |UI|
      - ``C11`` |UI|
-     - ``C9`` |IMU|
-     - ``C8`` |MOT|
-     - ``C10`` RUN_LED (UI); ``C11`` WALL_LED (UI); ``C9`` IMU-RST; ``C8`` Left motor PWM / nSLP (used as PWM in code).
 
-   * - 2
+   * - UART5 – Bluetooth link (TX/RX)
      - ``C12`` |BT|
      - ``D2`` |BT|
-     - ``B8`` |IMU|
-     - ``C6`` |UI| |LINE|
-     - ``C12`` UART5-TX (Bluetooth); ``D2`` UART5-RX (Bluetooth); ``B8`` IMU-SCL; ``C6`` SENS_LED (calibration / line-sensor LED).
 
-   * - 3
+   * - Board power rails
      - ``VDD``
      - ``E5V``
-     - ``B9`` |IMU|
-     - ``C5`` |LINE|
-     - Power pins (``VDD``, ``E5V``); ``B9`` IMU-SDA; ``C5`` Line Sensor 14.
 
-   * - 4
+   * - Boot configuration and ground
      - ``BOOT0``
      - ``GND``
-     - ``AVDD``
-     - ``U5V``
-     - Boot and supply pins (no direct sensor use in this firmware).
 
-   * - 5
+   * - Not connected
      - ``NC``
      - ``NC``
-     - ``GND``
-     - ``NC``
-     - Unused / ground pins.
 
-   * - 6
+   * - IO reference (unused by code)
      - ``NC``
      - ``IOREF``
-     - ``A5``
-     - ``A12``
-     - On-board ADC / USB-communication pads (not used by the provided MicroPython code).
 
-   * - 7
+   * - SWD programming and reset
      - ``A13``
      - ``RESET``
-     - ``A6`` |LINE|
-     - ``A11``
-     - ``A13`` SWD programming; ``RESET`` line; ``A6`` Line Sensor 10; ``A11`` USB communication through shoe (unused in code).
 
-   * - 8
+   * - SWD programming / 3.3 V supply
      - ``A14``
      - ``3V3``
-     - ``A7`` |LINE|
-     - ``B12``
-     - ``A14`` SWD programming; ``3V3`` supply; ``A7`` Line Sensor 11; ``B12`` spare.
 
-   * - 9
+   * - Right Encoder Ch A (TIM2_CH1) + 5 V
      - ``A15`` |ENC|
      - ``5V``
-     - ``B6`` |MOT|
-     - ``B11`` |MOT|
-     - ``A15`` Right Encoder Ch A (TIM2_CH1); ``5V`` supply; ``B6`` Right Motor PWM; ``B11`` Right Motor DIR.
 
-   * - 10
+   * - Ground row
      - ``GND``
      - ``GND``
-     - ``C7`` |MOT|
-     - ``GND``
-     - Ground pins; ``C7`` Right Motor nSLP / enable.
 
-   * - 11
+   * - Obstacle sensor and ground
      - ``B7`` |OBS|
      - ``GND``
-     - ``A9`` |ENC|
-     - ``B2``
-     - ``B7`` Obstacle sensor (digital input); ``A9`` Left Encoder Ch B (TIM1_CH2); ``B2`` spare.
 
-   * - 12
+   * - User button and VIN power in
      - ``C13`` |UI|
      - ``VIN``
-     - ``A8`` |ENC|
-     - ``B1`` |LINE|
-     - ``C13`` Blue user button; ``VIN`` power in; ``A8`` Left Encoder Ch A (TIM1_CH1); ``B1`` Line Sensor 13.
 
-   * - 13
+   * - RTC 32 kHz crystal (hardware only)
      - ``C14``
      - ``NC``
-     - ``B10`` |MOT|
-     - ``B15``
-     - ``C14`` 32 kHz RTC crystal; ``B10`` Left Motor DIR; ``B15`` spare.
 
-   * - 14
+   * - RTC 32 kHz crystal and Line Sensor 9
      - ``C15``
      - ``A0`` |LINE|
-     - ``B4`` |MOT|
-     - ``B14``
-     - ``C15`` 32 kHz RTC crystal; ``A0`` Line Sensor 9; ``B4`` Left Motor PWM (TIM3_CH1); ``B14`` spare.
 
-   * - 15
+   * - Line Sensor Even control / Line Sensor 8
      - ``H0`` |LINE|
      - ``A1`` |LINE|
-     - ``B5``
-     - ``B13``
-     - ``H0`` Line Sensor Even control; ``A1`` Line Sensor 8; ``B5`` spare; ``B13`` spare.
 
-   * - 16
+   * - Line Sensor Odd control / Line Sensor 7
      - ``H1`` |LINE|
      - ``A4`` |LINE|
-     - ``B3`` |ENC|
-     - ``AGND``
-     - ``H1`` Line Sensor Odd control; ``A4`` Line Sensor 7; ``B3`` Right Encoder Ch B (TIM2_CH2); ``AGND`` analog ground.
 
-   * - 17
+   * - VBAT and Line Sensor 6
      - ``VBAT``
      - ``B0`` |LINE|
-     - ``A10``
-     - ``C4`` |LINE|
-     - ``VBAT`` battery input; ``B0`` Line Sensor 6; ``A10`` general I/O (not used in code); ``C4`` Line Sensor 12.
 
-   * - 18
+   * - Line Sensors 2 and 5
      - ``C2`` |LINE|
      - ``C1`` |LINE|
-     - ``A2`` |LINE|
-     - ``NC``
-     - ``C2`` Line Sensor 2; ``C1`` Line Sensor 5; ``A2`` ADC (UART2 to ST-Link MCU, used with the line array); other pin NC.
 
-   * - 19
+   * - Line Sensors 3 and 4
      - ``C3`` |LINE|
      - ``C0`` |LINE|
-     - ``A3`` |LINE|
+
+
+Right header
+^^^^^^^^^^^^
+
+Top view; inner row is the one nearer the MCU, outer row is nearer the board
+edge.
+
+.. list-table:: Right header (inner / outer rows)
+   :header-rows: 1
+   :widths: 15 15 40
+
+   * - Inner pin
+     - Outer pin
+     - Function / sensor (right of header)
+
+   * - ``C9`` |IMU|
+     - ``C8`` |MOT|
+     - ``C9`` IMU-RST; ``C8`` Left motor enable / PWM (nSLP / PWM, used as motor control).
+
+   * - ``B8`` |IMU|
+     - ``C6`` |UI| |LINE|
+     - ``B8`` IMU-SCL; ``C6`` SENS_LED (line-sensor / calibration LED).
+
+   * - ``B9`` |IMU|
+     - ``C5`` |LINE|
+     - ``B9`` IMU-SDA; ``C5`` Line Sensor 14.
+
+   * - ``AVDD``
+     - ``U5V``
+     - Analog VDD and USB 5 V (no direct sensor in this firmware).
+
+   * - ``GND``
      - ``NC``
-     - ``C3`` Line Sensor 3; ``C0`` Line Sensor 4; ``A3`` ADC (UART2 to ST-Link MCU, used with the line array); other pin NC.
+     - Ground / not connected.
+
+   * - ``A5``
+     - ``A12``
+     - On-board ADC / USB communication through shoe (unused in the MicroPython code).
+
+   * - ``A6`` |LINE|
+     - ``A11``
+     - ``A6`` Line Sensor 10; ``A11`` USB communication through shoe (unused by code).
+
+   * - ``A7`` |LINE|
+     - ``B12``
+     - ``A7`` Line Sensor 11; ``B12`` spare.
+
+   * - ``B6`` |MOT|
+     - ``B11`` |MOT|
+     - Right motor drive: ``B6`` PWM / IN1; ``B11`` DIR / IN2.
+
+   * - ``C7`` |MOT|
+     - ``GND``
+     - ``C7`` Right Motor nSLP / enable; outer pin ground.
+
+   * - ``A9`` |ENC|
+     - ``B2``
+     - ``A9`` Left Encoder Ch B (TIM1_CH2); ``B2`` spare.
+
+   * - ``A8`` |ENC|
+     - ``B1`` |LINE|
+     - ``A8`` Left Encoder Ch A (TIM1_CH1); ``B1`` Line Sensor 13.
+
+   * - ``B10`` |MOT|
+     - ``B15``
+     - ``B10`` Left Motor DIR; ``B15`` spare.
+
+   * - ``B4`` |MOT|
+     - ``B14``
+     - ``B4`` Left Motor PWM (TIM3_CH1); ``B14`` spare.
+
+   * - ``B5``
+     - ``B13``
+     - Both pins currently spare in the code.
+
+   * - ``B3`` |ENC|
+     - ``AGND``
+     - ``B3`` Right Encoder Ch B (TIM2_CH2); ``AGND`` analog ground.
+
+   * - ``A10``
+     - ``C4`` |LINE|
+     - ``A10`` general I/O (unused in code); ``C4`` Line Sensor 12.
+
+   * - ``A2`` |LINE|
+     - ``NC``
+     - ``A2`` ADC (UART2 to ST-Link MCU, used with line-sensor group); outer pin NC.
+
+   * - ``A3`` |LINE|
+     - ``NC``
+     - ``A3`` ADC (UART2 to ST-Link MCU, used with line-sensor group); outer pin NC.
