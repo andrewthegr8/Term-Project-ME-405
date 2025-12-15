@@ -34,12 +34,12 @@ Together these scripts let the user:
 Component Details
 -----------------
 
-ost application: ``Talker.py``
+Main application: ``Talker.py``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The host script orchestrates the PC side of the telemetry system. :contentReference[oaicite:7]{index=7}
+This main script orchestrates the PC side of the telemetry system.
 
-Serial configuration
+Serial Configuration
 ^^^^^^^^^^^^^^^^^^^^
 
 * Opens the Bluetooth COM port:
@@ -51,11 +51,15 @@ Serial configuration
 * Uses a shared ``serial_lock`` (a :class:`threading.Lock`) to ensure
   safe concurrent access from reader and writer threads.
 
-Telemetry reader thread
+.. warning::
+    ``'COM13'`` must match the host system's Bluetooth serial port.
+    Additionally, the baud rate must match the Bluetooth module's configuration.
+
+Telemetry Reader Thread
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``SerialReader`` function runs in its own daemon thread and is
-responsible for decoding the robot's binary telemetry stream. :contentReference[oaicite:8]{index=8}
+responsible for decoding the robot's binary telemetry stream.
 
 * **Framing**
 
@@ -66,6 +70,9 @@ responsible for decoding the robot's binary telemetry stream. :contentReference[
 
       * ``0x00`` – standard telemetry packet.
       * ``0xFF`` – handshake or special information.
+    
+    .. tip::
+        The handshake packet type is currently not implemented.
 
   * ``SerialReader`` maintains a rolling ``bytearray`` buffer:
 
@@ -75,6 +82,11 @@ responsible for decoding the robot's binary telemetry stream. :contentReference[
       attempting to unpack.
 
 * **Payload format**
+
+.. warning::
+    The general packet format as well as the order and
+    types of specific fields must exactly match the
+    robot-side :func:`Talker_fun` implementation.
 
   * Telemetry payload is defined by:
 
@@ -96,14 +108,14 @@ responsible for decoding the robot's binary telemetry stream. :contentReference[
     ==========  ===============================
     0           ``time_L`` (uint32)
     1           ``time_R`` (uint32)
-    2           ``pos_L`` (float)
-    3           ``velo_L``
-    4           ``velo_R``
-    5           ``pos_R``
-    6           ``cmd_L``
-    7           ``cmd_R``
-    8           ``Eul_head`` (Euler heading)
-    9           ``yaw_rate``
+    2           ``pos_L`` (actual left wheel path)
+    3           ``velo_L`` (actual left velocity)
+    4           ``velo_R`` (actual right velocity)
+    5           ``pos_R`` (actual right wheel path)
+    6           ``cmd_L`` (commanded left % duty cycle)
+    7           ``cmd_R`` (commanded right % duty cycle)
+    8           ``Eul_head`` (actual Euler heading)
+    9           ``yaw_rate`` (actual yaw rate)
     10          ``offset`` (line–follower offset)
     11          ``X_pos``
     12          ``Y_pos``
@@ -115,100 +127,130 @@ responsible for decoding the robot's binary telemetry stream. :contentReference[
     18          ``p_pos_R`` (predicted right position)
     ==========  ===============================
 
+.. warning::
+    The yaw rate is currently not read from the IMU so its field
+    is used to transmit the velocity setpoint. This chnage is not well-documented
+    and is recongized in
+    the plotting engine (:mod:`GoatedPlotter`) but not the GUI display
+    (:mod:`RomiDisplay`).
+
 * **Thread coordination**
 
   * Respects a global event ``read_stop``:
 
     - If set, the reader temporarily sleeps and skips serial I/O.
-    - Used during firmware update so that the port is not actively read.
+    - Used during firmware update so that the serial port is not actively read.
 
 * **Data logging**
 
-  * When the ``record_data`` event is set, each decoded sample is also
+  * When the ``record_data`` event is set by the user, each decoded sample is also
     appended to a shared ``recorded_data`` dictionary of lists keyed by
     the field names above.
 
-Serial writer thread
+Serial Writer Thread
 ^^^^^^^^^^^^^^^^^^^^
 
 The ``SerialWriter`` function runs in a second daemon thread and is
-responsible for sending commands to the robot. :contentReference[oaicite:9]{index=9}
+responsible for sending commands to the robot.
 
 * Watches a :class:`queue.Queue` named ``Ser_cmds``.
 * When a command string is available, it:
 
   - Acquires ``serial_lock``.
-  - Writes the command followed by ``"\r\n"`` to the serial port.
-  - Calls ``ser.flush()``.
+  - Writes the command followed by ``"\\r\\n"`` to the serial port.
+  - Calls ``ser.flush()`` to make sure the command is sent immediately.
 
 * Respects the ``write_stop`` event in the same way that the reader
   respects ``read_stop`` (for firmware update operations).
+
+  
+
 
 Tkinter GUI: ``RomiDisplay``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :class:`RomiDisplay` is the main user–facing interface for monitoring
-the robot and driving experiments. :contentReference[oaicite:10]{index=10}
+and operating the robot.
+
+.. image:: images/romidisplay.png
+   :alt: Live Romi Data GUI
+   :align: center
+
+   Tkinter GUI for real-time Romi telemetry display and control.
 
 Layout and displayed telemetry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The GUI window titled **“Live Romi Data”** displays a unified table
-of:
+The **“Live Romi Data”** window shows a unified table with the columns
+*State*, *Predicted*, *Actual*, and *Units*.
 
-* **Left motor**
+* **Left/Right Motor**
 
-  - Control signal (commanded duty, in %).
-  - Predicted velocity vs. actual velocity (in/s).
-  - Predicted displacement vs. actual displacement (in).
-
-* **Right motor**
-
-  - Control signal (commanded duty, in %).
-  - Predicted vs. actual velocity (in/s).
-  - Predicted vs. actual displacement (in).
+  - *Control Signal* row: displays the actual duty cycle in percent.
+  - *Velocity* row: predicted vs. actual wheel velocity (in/s).
+  - *Displacement* row: predicted vs. actual wheel displacement (in).
 
 * **Pose**
 
-  - Predicted heading ``p_head`` vs. estimated Euler heading
+  - *Psi* row: predicted heading ``p_head`` vs. estimated heading
     ``Eul_head`` (deg).
-  - ``X`` and ``Y`` position (inches).
-  - Line follower offset (in/s).
-  - Yaw rate (deg/s).
+  - *X* and *Y* rows: current position in inches
+  .. note::
+      The X and Y positions displayed are the predicted values.
+      Romi's doesn't know its true position.
 
-All of these are backed by :class:`queue.Queue` instances created in
-``Talker.py`` and passed into :class:`RomiDisplay` at construction time.
-The display logic periodically calls ``update_display()`` via
-``root.after(5, ...)``:
+* **Auxiliary readouts**
 
-* Each queue is checked for new data.
-* Numeric values are rounded to two decimal places.
-* Relevant units conversions are applied (e.g. radians → degrees by
-  multiplying with ~57.297). :contentReference[oaicite:11]{index=11}
+  - A label on the right shows **Line Follower Offset (in/s)** and its
+    current value.
+
+.. warning::
+    The yaw rate is currently not read from the IMU so its field
+    is used to transmit the velocity setpoint. This means that the GUI 
+    displays the velocity setpoint in place of the yaw rate.
+
+All displayed values are backed by :class:`queue.Queue` instances
+created in ``Talker.py`` and passed into :class:`RomiDisplay`. The GUI
+calls ``update_display()`` every 5 ms to:
+
+* Drain each queue if new data are present.
+* Round numeric values to two decimal places.
+* Convert radians to degrees for heading fields.
 
 Control widgets
 ^^^^^^^^^^^^^^^
+
+.. warning::
+    The GUI controls are designed for developer use and
+    are not robust. For examples, hitting **"Plot"** (or
+    **"STOP"** when data logging is enabled) without
+    any recorded data can cause the plottng thread to
+    raise an exception and crash.
+    Additionally, the frimware sequence triggered by the
+    **"Update Code"** button is blocking and will freeze
+    the GUI window until it completes.
+
 
 The GUI also provides several controls:
 
 * **Speed control**
 
-  - An entry field for target speed (``SPD``).
-  - An **“Update”** button that:
+  - Speed entry field labelled **Speed**.
+  - **“Update”** button:
 
-    * Optionally starts data recording (see below).
-    * Enqueues the command string ``"$SPD<value>"`` into ``Ser_cmds``.
+    * Optionally starts data recording (if data logging is enabled).
+    * Puts the command string ``"$SPD<value>"`` into ``Ser_cmds``.
 
-  - A **“STOP”** button that:
+  - **“STOP”** button:
 
     * Sends ``"$SPD0"`` to the robot.
-    * If data logging is enabled, triggers the plotting workflow.
+    * If data logging is enabled, triggers the plotting engine :mod:(`GoatedPlotter`).
 
 * **Recording control**
 
-  - A status label showing either *“Data Logging On”* or
-    *“Data Logging Off”*.
-  - A **“Record Data”** toggle button (``toggle_record``):
+  - A status label to the right of the table shows *“Data Logging On”*
+    or *“Data Logging Off”*.
+  - **“Record Data”** toggle button (``toggle_record``):
 
     * When turned on:
 
@@ -218,113 +260,65 @@ The GUI also provides several controls:
 
     * When turned off:
 
-      - Clears ``record_enable`` and updates the status label only.
+      - Clears ``record_enable`` and updates only the status label.
 
-  - Actual sample–by–sample logging is driven by the ``record_data``
-    event inside :mod:`Talker`; :meth:`RomiDisplay.speed` starts
-    logging for a run and :meth:`start_plotter` stops it.
+  - Sample-by-sample logging is controlled by the ``record_data`` event;
+    :meth:`RomiDisplay.speed` starts logging for a run and
+    :meth:`start_plotter` stops it.
 
 * **Plotting**
 
-  - A **“Plot”** button calls :meth:`start_plotter`, which:
+  - **“Plot”** button calls :meth:`start_plotter`, which:
+
     - Clears ``record_data`` (stops logging).
-    - Sets the ``go_plot`` event to wake the plotting thread.
+    - Sets the ``go_plot`` event so :mod:`GoatedPlotter` can:
 
-  - The :mod:`GoatedPlotter` module (imported but not included here)
-    is expected to:
-
-    * Wait until ``go_plot`` is set.
-    * Consume the ``recorded_data`` dictionary.
-    * Produce plots (via :mod:`matplotlib`) for analysis. :contentReference[oaicite:12]{index=12}
+      * Consume ``recorded_data`` and
+      * Generate plots and CSV exports.
 
 * **Firmware update**
 
-  - The (unattached) **“Update Code”** button handler
-    :meth:`update`:
+  - Bottom-left **“Update Code”** button calls :meth:`update`:
 
-    * Uses ``read_stop`` and ``write_stop`` events to temporarily halt
-      serial I/O.
-    * Runs an ``mpremote`` command such as:
-
-      .. code-block:: bash
+    * Uses ``read_stop`` and ``write_stop`` to pause serial I/O.
+    * Runs an ``mpremote`` command such as::
 
          mpremote connect COM9 cp -r ./src/. :
 
-      to copy MicroPython source files from the local ``./src/`` folder
-      to the robot. :contentReference[oaicite:13]{index=13}
+      to copy MicroPython source files from ``./src/`` to the robot.
     * Restarts a PuTTY session using the preconfigured *“Default
       Settings”* profile for interactive debugging.
 
-Threading and Synchronisation
------------------------------
+.. note::
+    The COM port in the ``mpremote`` command must match the Romi's
+    USB serial port accessed through the Shoe of Brian.
 
-The system uses standard :mod:`threading` primitives for coordination
-between the GUI and background workers. :contentReference[oaicite:14]{index=14}
+.. note::
+    If a PuTTY session is already open, pressing **“Update Code”**
+    will cause the mpremote command to fail since the serial port
+    is already in use. Make sure to close any existing PuTTY windows
+    before updating.
 
-Events
-~~~~~~
+.. tip::
+    When a PuTTY session is launched by the **“Update Code”** button,
+    the script reatains the process handle. It will try to kill the process
+    the next time the button is pressed. So, you don't need to worry about
+    closing PuTTY windows opened by the script before hitting the button again.
 
-* ``record_data``
-
-  - When set: :func:`SerialReader` logs each sample into
-    ``recorded_data``.
-  - When cleared: incoming data is still displayed live, but not written
-    to the log.
-
-* ``read_stop`` and ``write_stop``
-
-  - When set: suspend serial reads / writes, respectively.
-  - Used by :meth:`RomiDisplay.update` to safely perform firmware
-    updates without racing the I/O threads.
-
-* ``go_plot``
-
-  - When set: plotting thread (``GoatedPlotter``) should generate
-    plots from the current snapshot of ``recorded_data``.
-  - Cleared before starting a new logging run.
-
-Queues
-~~~~~~
-
-Each telemetry field has its own :class:`queue.Queue`, ensuring
-thread–safe communication from ``SerialReader`` to :class:`RomiDisplay`:
-
-* ``time_L``, ``time_R``
-* ``pos_L``, ``pos_R``
-* ``velo_L``, ``velo_R``
-* ``cmd_L``, ``cmd_R``
-* ``Eul_head``, ``yaw_rate``, ``offset``
-* ``X_pos``, ``Y_pos``
-* ``p_v_R``, ``p_v_L``, ``p_head``
-* ``velo_set``, ``p_pos_L``, ``p_pos_R``
-
-Commands from the GUI to the serial writer are funneled through the
-``Ser_cmds`` queue.
-
-
-    
-    .. figure:: /images/pcui_gui.png
-       :align: center
-       :width: 600px
-
-       The Tkinter GUI displaying real-time telemetry from the Romi robot.
-    
-    Type a speed command (inches per second) into the text box
-    and click "Set Speed" to command the robot to move. Click "Stop"
-    to halt the robot. Enable "Data Log" to record telemetry for later
-    analysis. After stopping the robot, click "Plot Data" to generate
-    plots and CSV exports from the recorded run.
-
-    .. note::
-        If data logging is enabled, the plotting engine
-        (:mod:`GoatedPlotter`) will automatically run after
-        clicking "Stop".
 
 Plotting Engine: ``GoatedPlotter.py``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :func:`GoatedPlotter` function is the **central analysis tool** that
+The :func:`GoatedPlotter` function is a data-analysis and plotting engine
+that
 runs asynchronously in its own loop and is activated by the main GUI.
+
+.. note::
+    The :func:`GoatedPlotter` function used :mod:`matplotlib` for plotting
+    which uses :mod:`Tkinter` as its default backend. Since a Tkinter
+    window is already open for the main GUI, the
+    plotting thread will throw warnings when ever it opens a plot window.
+    These can be safely ignored.
 
 State machine
 ^^^^^^^^^^^^^
@@ -428,8 +422,83 @@ Saving outputs
 Two persistent artifacts are saved:
 
 * **CSV file** in ``test_data/romi_data_<timestamp>.csv``
-* **PNG figure** in ``plots/<timestamp>.png`` (high-resolution)
+* **PNG figure** in ``plots/<timestamp>.png``
 
+Example plots
+^^^^^^^^^^^^^^^ 
+
+.. tip::
+    Click on each image to view a larger version.
+
+The following images show example outputs from different logged runs.
+Over time, the plotting script was modified to present different outputs,
+depending on what functionality was being developed.
+
+.. figure:: images/ActualCircle.png
+   :alt: Initial circular path plots with displacement and heading
+   :align: center
+   :width: 90%
+
+   Early version of the plotting engine showing six subplots: left/right
+   wheel velocity and command, integrated displacement, heading, and robot path.  
+
+.. figure:: images/plotheadnodisp.png
+   :alt: Four-panel plot with velocities, heading, and mirrored path with setpoints
+   :align: center
+   :width: 90%
+
+   Intermediate version that removes the displacement subplots and
+   focuses on left/right velocity tracking, heading, and the robot path
+   mirrored about the +Y axis to align with the obstacle course layout.
+   Reference path setpoints are overlaid as
+   red markers.
+
+.. figure:: images/plotveloset.png
+   :alt: Four-panel plot with velocities, velocity setpoint vs time, and mirrored path with setpoints
+   :align: center
+   :width: 90%
+
+   Current plotting engine output: left/right velocity tracking as
+   before, plus a dedicated “Velocity Setpoint vs Time” panel with
+   vertical lines and labels at automatically detected checkpoints.
+
+
+Threading and Synchronisation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The system uses standard :mod:`threading` primitives for coordination
+between the GUI and background workers.
+
+Events
+^^^^^^^^^^^
+
+* ``record_data``
+
+  - When set: :func:`SerialReader` logs each sample into
+    ``recorded_data``.
+  - When cleared: incoming data is still displayed live, but not written
+    to the log.
+
+* ``read_stop`` and ``write_stop``
+
+  - When set: suspend serial reads / writes, respectively.
+  - Used by :meth:`RomiDisplay.update` to safely perform firmware
+    updates without racing the I/O threads.
+
+* ``go_plot``
+
+  - When set: plotting thread (``GoatedPlotter``) should generate
+    plots from the current snapshot of ``recorded_data``.
+  - Cleared before starting a new logging run.
+
+Queues
+^^^^^^^^^^^^^^
+
+Each telemetry field has its own :class:`queue.Queue`, ensuring
+thread–safe communication from ``SerialReader`` to :class:`RomiDisplay`.
+
+Commands from the GUI to the serial writer are funneled through the
+``Ser_cmds`` queue.
 
 Usage Guide
 -----------
@@ -437,22 +506,37 @@ Usage Guide
 Prerequisites
 ~~~~~~~~~~~~~
 
-* Robot firmware using :class:`BTComm` for UART/Bluetooth I/O.
+* Robot firmware using :class:`BTComm` and :func:`Talker_fun` to send/recieve telemetry
+  packets over Bluetooth.
 * PC with:
 
-  - Python 3.
-  - ``pyserial``, ``numpy``, ``matplotlib``.
-  - Tkinter (typically bundled on many platforms).
-  - ``mpremote`` on PATH (for firmware updates).
-  - PuTTY installed (if you want to use the built–in **Update Code**
-    button).
+  - Python 3+
+  - ``pyserial``, ``numpy``, ``matplotlib``, ``tkinter``
+  - ``mpremote`` on PATH (for Romi firmware updates).
+  - PuTTY installed (with a *“Default Settings”* profile
+    configured for the Romi's USB serial port).
 
 Running the host
 ~~~~~~~~~~~~~~~~
 
-1. Pair the robot over Bluetooth and determine the virtual COM port.
-2. Update the port string in ``Talker.py`` if different from
-   ``'COM13'``.
+.. warning::
+    Sometimes the Bluetooth module will silently disconnect from the PC.
+    You can tell this happens when telemetry is not updating in the GUI.
+    Even though the code on Romi is active. If this happens,
+    completing the following steps in this order.
+
+    1. Stop the host script ``Talker.py`` (Ctrl+C in terminal).
+    2. Power cycle the Romi robot.
+    3. Wait for the Bluetooth module to pair with the PC. (This looks like the
+       module's blue LED turning off.)
+    4. Restart the host script.
+
+
+1. Pair the Bluetooth module with the host PC and determine the virtual COM port.
+   This link has useful information regarding pair the HC-05 Bluetooth module with
+   windows PCs: 
+2. Update the Bluetooth and USB serial port strings in ``Talker.py`` if different from
+   ``'COM13'`` and ``'COM9'``, respectively.
 3. Start the host script:
 
    .. code-block:: bash
@@ -476,6 +560,12 @@ Running the host
 
 Firmware update workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+    Ensure that any existing PuTTY sessions connected to Romi
+    are closed before starting this process, unless these sessions
+    were opened by the **“Update Code”** button itself.
+    Otherwise, **“Update Code”** will fail quietly.
 
 1. Press the **“Update Code”** button in the GUI.
 

@@ -7,11 +7,11 @@ Romi Control Architecture
    
   Last updated: 12/15/2025, 12:30 PM
 
-  - Background: complete
-  - Hardware: complete
-  - Software: complete (just fixing fromatting errors)
+  - Background: **Complete**
+  - Hardware: **Complete**
+  - Software: **Complete**
   - PC UI: Writing in progress
-  - SS model: Complete, (just tweaking display issues)
+  - SS model: **Complete**
   - Driving Algorithm: needs images and major adjustments
   - Important Notes: barely started
 
