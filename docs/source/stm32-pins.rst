@@ -290,94 +290,113 @@ Each row corresponds to one “step down” the headers, starting at the
 top (nearest the USB connector).
 
 Left header
-^^^^^^^^^^^
+-----------
 
-Outer row is closest to the board edge, inner row is the row closer
-to the MCU.
+Outer row is closest to the board edge, inner row is the row closer to the MCU.
 
 .. list-table:: Left header (outer / inner rows)
    :header-rows: 1
-   :widths: 40 15 15
+   :widths: 18 12 12 18
 
-   * - Function / sensor (left of header)
+   * - Left function label
      - Outer pin
      - Inner pin
+     - Right function label
 
-   * - Status LEDs (RUN_LED, WALL_LED)
+   * - RUN_LED
      - ``C10`` |UI|
      - ``C11`` |UI|
+     - WALL_LED
 
-   * - UART5 – Bluetooth link (TX/RX)
+   * - UART5–TX
      - ``C12`` |BT|
      - ``D2`` |BT|
+     - UART5–RX
 
-   * - Board power rails
+   * - VDD
      - ``VDD``
      - ``E5V``
+     - 5V Rail
 
-   * - Boot configuration and ground
+   * - BOOT0
      - ``BOOT0``
      - ``GND``
+     - Ground
 
-   * - Not connected
+   * - NC
      - ``NC``
      - ``NC``
+     - NC
 
-   * - IO reference (unused by code)
+   * - NC
      - ``NC``
      - ``IOREF``
+     - IOREF
 
-   * - SWD programming and reset
+   * - SWD
      - ``A13``
      - ``RESET``
+     - RESET
 
-   * - SWD programming / 3.3 V supply
+   * - SWD
      - ``A14``
      - ``3V3``
+     - 3V3
 
-   * - Right Encoder Ch A (TIM2_CH1) + 5 V
+   * - Right Encoder – Ch A
      - ``A15`` |ENC|
      - ``5V``
+     - 5V
 
-   * - Ground row
+   * - GND
      - ``GND``
      - ``GND``
+     - GND
 
-   * - Obstacle sensor and ground
+   * - Obstacle Sensor
      - ``B7`` |OBS|
      - ``GND``
+     - Ground
 
-   * - User button and VIN power in
+   * - Blue Button
      - ``C13`` |UI|
      - ``VIN``
+     - VIN
 
-   * - RTC 32 kHz crystal (hardware only)
+   * - RTC
      - ``C14``
      - ``NC``
+     - NC
 
-   * - RTC 32 kHz crystal and Line Sensor 9
+   * - RTC
      - ``C15``
      - ``A0`` |LINE|
+     - Line Sensor 9
 
-   * - Line Sensor Even control / Line Sensor 8
+   * - Line Sensor – Even
      - ``H0`` |LINE|
      - ``A1`` |LINE|
+     - Line Sensor 8
 
-   * - Line Sensor Odd control / Line Sensor 7
+   * - Line Sensor – Odd
      - ``H1`` |LINE|
      - ``A4`` |LINE|
+     - Line Sensor 7
 
-   * - VBAT and Line Sensor 6
+   * - VBAT
      - ``VBAT``
      - ``B0`` |LINE|
+     - Line Sensor 6
 
-   * - Line Sensors 2 and 5
+   * - Line Sensors 2 / 5
      - ``C2`` |LINE|
      - ``C1`` |LINE|
+     - Line Sensor 5
 
-   * - Line Sensors 3 and 4
+   * - Line Sensors 3 / 4
      - ``C3`` |LINE|
      - ``C0`` |LINE|
+     - Line Sensor 4
 
 
 Right header
