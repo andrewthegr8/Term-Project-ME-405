@@ -54,6 +54,18 @@ class ThePursuer:
         waypoiint has been reached. This ensures that the motors stop at the
         end of the path and that the IMU calibration coeffiecnts are saved after
         every run.
+
+    .. note::
+        When the wall is detected, the speed setpoint is temporarily set to
+        near zero to allow Romi to re-orient itself before proceeding to the next waypoint.
+        Otherwise, Romi would try to continue moving forward while turning, causing its
+        wheels to slip as it continues to hit the wall.
+
+    .. warning::
+        Setting the the velocity setpoint to exactly zero will cause the controller to
+        enter the "stopped" state and reset the encoder distances,
+        so it is imperative that an exactly zero speed
+        is never commanded.
     
     Args:
             base_speed: **DEPRECATED** Base speed (in/s) for the robot to travel
@@ -174,6 +186,9 @@ class ThePursuer:
             Psi: Current heading angle (radians).
             NextPoint: If ``True``, force advancing to the next waypoint
                 (for example, when a wall is detected).
+        
+        .. note::
+
 
         Returns:
             tuple[float, float]: ``(offset, speed)`` where

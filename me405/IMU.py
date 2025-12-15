@@ -54,6 +54,7 @@ class IMU:
       radians.
     * :meth:`get_heading` uses a wrap/un-wrap scheme to provide a
       continuous heading (`psi_continuous`) across multiple revolutions.
+
     """
 
     def __init__(self, i2c_controller: I2C):
@@ -100,7 +101,7 @@ class IMU:
         """Put the IMU into configuration mode.
 
         In config mode, the IMU stops running sensor fusion but allows
-        certain configuration operations such as writing calibration data.
+        certain configuration operations such as reading & writing calibration data.
         """
         buff = self.i2c.mem_read(1, IMU_ADDR, OPR_MODE)
         write = buff[0] & MODE_MSK
@@ -109,6 +110,11 @@ class IMU:
 
     def cal_status(self) -> bool:
         """Check whether the IMU is fully calibrated.
+
+        .. warning::
+            The calibration status check is only vaid when the IMU
+            is in Fusion mode. Make sure to call :meth:`set_fusion` at some point
+            before using this method.
 
         Returns:
             bool: ``True`` if all calibration subsystems (accelerometer,
@@ -120,6 +126,13 @@ class IMU:
 
     def read_cal_data(self, cali_file: str):
         """Read calibration data from the IMU and store it to a file.
+        
+        .. warning::
+            The calibration coeffiecients are only valid when the IMU is
+            in CONFIG mode. Do not attempt to read or write the calibration
+            coefficients when the IMU is in FUSION mode. Make sure to call
+            :meth:`set_config` at some point before using this method.
+
 
         Args:
             cali_file: Path to a file on the MicroPython filesystem where
@@ -132,6 +145,12 @@ class IMU:
 
     def write_cal_data(self, cali_file: str):
         """Write calibration data from a file back into the IMU.
+
+        .. warning::
+            The calibration coeffiecients are only valid when the IMU is
+            in CONFIG mode. Do not attempt to read or write the calibration
+            coefficients when the IMU is in FUSION mode. Make sure to call
+            :meth:`set_config` at some point before using this method.
 
         Args:
             cali_file: Path to a file containing a previously stored 22-byte
@@ -156,7 +175,7 @@ class IMU:
         """Return the continuous heading estimate in radians.
 
         The heading is read from the IMU, converted to radians, adjusted by
-        :attr:`head_offset`, mapped into the range [-π, π), and then
+        :attr:`head_offset`, mapped into the range [-π, π], and then
         unwrapped to form a continuous signal over multiple revolutions.
 
         Returns:

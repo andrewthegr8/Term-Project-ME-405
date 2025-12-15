@@ -8,7 +8,9 @@ Each sensor reading is calibrated so that:
 * **0** corresponds to pure white.
 * **1000** corresponds to pure black.
 
-All scaling is done with integer arithmetic for efficiency on
+.. tip::
+All scaling and conversions in this class are
+done with integer arithmetic for efficiency on
 MicroPython.
 """
 
@@ -32,7 +34,7 @@ class LineSensor:
             """Initialize an IR sensor on the given ADC pin.
 
             Args:
-                Pin: Pin object that will be passed to :class:`pyb.ADC`.
+                Pin: :class:`pyb.Pin` object that will be passed to :class:`pyb.ADC`.
             """
             self.Sensor = ADC(Pin)
             # Default calibration values, overridden by cal_black/cal_white
@@ -66,7 +68,8 @@ class LineSensor:
 
             The raw ADC reading is mapped linearly between the stored
             ``white`` and ``black`` values. The result is clamped to be at
-            least 10 to avoid zeros that can break downstream math.
+            least 10 for debugging purposes, but should really be between
+            0 and 1000.
 
             Returns:
                 int: Calibrated reflectance value between 0 and 1000.
@@ -88,8 +91,15 @@ class LineSensor:
         Notes:
             * Each element of ``Sensor_pins`` is used to construct an
               :class:`IRSensor`.
-            * The even/odd control pins are currently kept high; they can be
-              toggled if you wish to strobe the emitters.
+        
+        .. tip::
+            Since the odd and even pins are toggled together, only the even
+            pin is connected in the hardware setup.
+        
+        ..warning::
+            Toggling the even/odd control pins before each reading caused the LEDs to not 
+            be fully turn on before the first ADC values were read. So, the LED control pins
+            are simply set high during initialization and left that way.
         """
         self.Sensors_range = range(len(Sensor_pins))
         self.SensorArray = []

@@ -166,7 +166,7 @@ class Encoder:
         """Return the most recent position estimate in inches.
 
         The underlying timer counts down when the motors move forward
-        with this hardware configuration, so the internal tick count is
+        with this configuration, so the internal tick count is
         negated before conversion.
 
         Returns:

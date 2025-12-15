@@ -93,6 +93,11 @@ class BTComm:
     @micropython.native
     def ship(self, packet):
         """Send a pre-built packet over the serial link.
+        .. note::
+            This method will block until the packet hase been
+            fully tansmitted (or at least until is is fully
+            loaded into the TX ring buffer). So, be careful
+            using it to transmit very large packets.
 
         Args:
             packet: A :class:`bytearray` object

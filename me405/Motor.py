@@ -44,6 +44,13 @@ class Motor:
         left_motor.set_effort(-30)            # 30% reverse
         left_motor.disable()
 
+    .. warning::
+        Setting the effort to 0% does not disable the motor driver; it
+        commands a 0% duty cycle which places the motor in brake mode. To
+        fully disable the driver and put it into sleep mode, call :meth:`disable`.
+        Note that this puts the motor into coast mode, so calling :meth:`disable`
+        while the motor is running will cause Romi to coast to a stop.
+    
     Args:
         PWM: Pin used for the timer PWM output.
         DIR: Pin used to control the direction of rotation.
@@ -77,7 +84,7 @@ class Motor:
 
         * Positive values drive the motor in the "forward" direction.
         * Negative values drive the motor in the "reverse" direction.
-        * Zero commands 0% duty cycle (no drive).
+        * Zero commands 0% duty cycle (brake mode).
 
         Args:
             effort: Requested effort as a percentage of full drive,
@@ -103,7 +110,7 @@ class Motor:
         """Disable the motor driver.
 
         Sets the PWM duty cycle to 0% and pulls nSLP low, putting the driver
-        into sleep mode.
+        into sleep mode and the motor into coast mode.
         """
         self.timch.pulse_width_percent(0)
         self.nSLP_pin.low()
