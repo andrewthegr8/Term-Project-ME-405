@@ -168,6 +168,7 @@ to preform fixed-step numerical integration of the state equations at each
 control loop iteration. 
 
 The RK4 integrator requires that 2 assumptions be made:
+
 1. The time step :math:`\Delta t` is sufficiently small for the RK4 approximation to be accurate.
 2. The time step :math:`\Delta t` is constant.
 
@@ -231,7 +232,7 @@ and observer feedback gains :math:`L` the observer’s predicted response was br
 Romi’s actual response as measured by the motor encoders and IMU.
 
 .. note::
-    As previously mentioned, Romi's gloabl position is hard to measure,
+    As previously mentioned, Romi's global position is hard to measure,
     hence the need for the observer in the first place. So it was hard to
     quantify the amount of error in the predicted position states. However,
     Romi successfully completing the track with heading control based on the
@@ -316,5 +317,5 @@ which would cause small errors in the heading integration to accumulate over tim
 
 Fortunately, the wall was near the end of the course, so the heading error didn't
 have time to grow too large before Romi reached the finish line. Also, as the IMU became
-more calibrated over time (it's calibration data is updated after each run), the glitches
+more calibrated over time (its calibration data is updated after each run), the glitches
 became less frequent and feedback from the IMU was re-enabled.
