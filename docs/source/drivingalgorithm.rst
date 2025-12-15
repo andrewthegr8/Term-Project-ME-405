@@ -115,16 +115,15 @@ The final commanded speed is computed as:
 .. math::
 
    \text{speed}
-   = \text{base\_speed}_i + 
-     \frac{
+   = \text{base\_speed}_{i}
+     + \frac{
          \max\!\left(
-             \text{FULLTHROTTLE}
-             +
-             (\text{SLOWDOWN\_ON\_APPROACH} \cdot (E - \text{brake\_dist}_i)),
-             0
+            \text{FULLTHROTTLE}
+            + \text{SLOWDOWN\_ON\_APPROACH}\,(E - \text{brake\_dist}_{i}),
+            0
          \right)
-     }
-     {1 + \text{head\_weight}\,|\alpha|}
+       }
+       {1 + \text{head\_weight}\,|\alpha|}
 
 Here:
 
