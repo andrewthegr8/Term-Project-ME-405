@@ -19,6 +19,7 @@ On startup, the script performs the following steps:
   - Obstacle sensor and status LEDs
 * Create :class:`task_share.Share` and :class:`task_share.Queue` instances
   used to exchange data between tasks.
+* Optionally runs :func:`Cali_test` to calibrate the line sensor array.
 * Construct cooperative tasks for:
   - Bluetooth communication (:func:`Talker_fun`)
   - IMU interface (:func:`IMU_Interface_fun`)
@@ -443,9 +444,22 @@ def Controller_fun(shares):
 
     This task implements a PI controller for each motor, uses encoder
     feedback to estimate wheel speed, and saturates the duty cycle
-    changes to avoid sudden jumps. It also supports a "stopped" state
-    where both motors are held at zero and encoders/controllers are
-    re-initialized on exit.
+    changes to avoid sudden jumps.
+
+    It limits the rate of change of the control signal to ``MAXDELTA``
+    (a customizable constant) per control period to prevent
+    sudden jumps in motor effort and avoid wheel slippage.
+
+    When ``velo_set`` is zero, the task enters a "stopped" state where both
+    motors are held at zero effort. Upon receiving a non-zero speed command,
+    the encoders and controllers are re-initialized before resuming normal  
+    operation.
+    
+    .. image:: controllerfsm.png
+    :alt: Finite state machine diagram for the motor controller task.
+    :width: 400px
+    :align: center
+
 
     Args:
         shares: Tuple in the following order:
@@ -466,7 +480,7 @@ def Controller_fun(shares):
               Timestamp logging queues.
             * ``velo_set`` (:class:`task_share.Share`): Requested speed.
             * ``cmd_L``, ``cmd_R`` (:class:`task_share.Queue`):
-              Commanded efforts written for logging/telemetry.
+              Commanded efforts written for logging/state space model.
     """
     (offset, leftencoder, leftmotor, pos_L, rightencoder, rightmotor, pos_R,
      t_L, v_L, t_R, v_R, r_ctrl, l_ctrl, velo_L, velo_R, time_L, time_R,

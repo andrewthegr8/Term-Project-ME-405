@@ -54,15 +54,22 @@ and priority (P) is shown as well.
 
    digraph firmware_arch {
      rankdir=LR;
-     fontsize=10;
-     size="8,10!";      // widen + enforce tall output
-     ratio=fill;        // fill the given size
-     ranksep="1.5 equally";   // vertical spacing
-     nodesep="0.6";           // horizontal spacing between nodes
+     fontsize=16;                 // global font size (bigger!)
+     nodesep="0.5";               // moderate spacing
+     ranksep="1.0 equally";       // modest vertical spread
 
-     node [shape=box, style="rounded,filled",
-           fillcolor="#f8f8f8",
-           fontname="Helvetica"];
+     node [
+       shape=box,
+       style="rounded,filled",
+       fillcolor="#f8f8f8",
+       fontname="Helvetica",
+       fontsize=16                // bigger node labels
+     ];
+
+     edge [
+       fontname="Helvetica",
+       fontsize=12                // bigger edge text
+     ];
 
      // =========================
      // Task nodes
@@ -81,9 +88,10 @@ and priority (P) is shown as well.
        Garbage       [label="GarbageCollector\nP=0, T=30 ms"];
      }
 
-     edge [fontname="Helvetica", fontsize=9];
+     // =========================
+     // Shares / queues
+     // =========================
 
-     // Shares / queues (unchanged)
      Talker      -> Controller    [label="velo_set (Share)\n$SPD commands"];
      Pursuer     -> Controller    [label="velo_set (Share)"];
      Controller  -> Talker        [label="cmd_L/R (Queues)\nfor telemetry"];
@@ -104,6 +112,7 @@ and priority (P) is shown as well.
      SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head (Queues)"];
 
      Pursuer     -> Talker        [label="indirectly affects\ntelemetry via\nvelo_set/offset"];
+
    }
 
 
