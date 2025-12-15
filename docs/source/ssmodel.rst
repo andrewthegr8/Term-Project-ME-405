@@ -303,13 +303,13 @@ nonsensical after a certain point in time.
 
    Graph showing the IMU glitching when Romi is near a wall.
 
- To work around this, feedback from the IMU was disabled after Romi approached the wall.
- (This is also shown in the graph above.) The observer was then predicting 
- Romi's heading using only the wheel velocity measurements.
- There were some runs when the IMU didn't glitch, and these showed that the observer heading
- quickly deviated from the IMU heading after feedback was disabled. This is likely due to the
- true and predicted velocity measurements not being exactly the same (this can also be seen in the graphs),
- which would cause small errors in the heading integration to accumulate over time.
+To work around this, feedback from the IMU was disabled after Romi approached the wall.
+(This is also shown in the graph above.) The observer was then predicting 
+Romi's heading using only the wheel velocity measurements.
+There were some runs when the IMU didn't glitch, and these showed that the observer heading
+quickly deviated from the IMU heading after feedback was disabled. This is likely due to the
+true and predicted velocity measurements not being exactly the same (this can also be seen in the graphs),
+which would cause small errors in the heading integration to accumulate over time.
 
 .. figure:: images/noimu.png
    :align: center
