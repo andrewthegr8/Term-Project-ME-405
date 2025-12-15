@@ -334,6 +334,9 @@ intersphinx_mapping = {
 }
 intersphinx_disabled_domains = ['std']
 
+add_module_names = False
+
+
 templates_path = ['_templates']
 
 # -- Options for HTML output
