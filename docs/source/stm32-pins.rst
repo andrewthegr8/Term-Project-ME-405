@@ -445,12 +445,12 @@ Inner row is closer to the MCU, outer row is closer to the board edge.
    * - ADC (on-board LED)
      - ``A5``
      - ``A12``
-     - USB communication through shoe
+     - USB communication through Shoe of Brian
 
    * - Line Sensor - 10
      - ``A6`` |LINE|
      - ``A11``
-     - USB communication through shoe
+     - USB communication through Shoe of Brian
 
    * - Line Sensor - 11
      - ``A7`` |LINE|

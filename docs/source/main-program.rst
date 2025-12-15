@@ -45,9 +45,9 @@ The following cooperative tasks and helper function are defined in
 Task diagram
 ~~~~~~~~~~~~~~~~
 
-The diagram below shows how the cooperative tasks interact with drivers
-and pass data via shares and queues. Each tasks' period (T) in ms and priority
-(P) is shown as well
+The diagram below shows how the cooperative tasks interact
+and pass data via shares and queues. Each tasks' period (T) in ms
+and priority (P) is shown as well.
 
 .. graphviz::
    :align: center
@@ -65,55 +65,17 @@ and pass data via shares and queues. Each tasks' period (T) in ms and priority
        style = "rounded";
        color = "#cccccc";
 
-       Talker       [label="Talker\nP=1, T=10 ms"];
-       IMU_Interface[label="IMU_Interface\nP=4, T=30 ms"];
-       Controller   [label="Controller\nP=5, T=30 ms"];
-       LineFollow   [label="LineFollow\nP=2, T=30 ms"];
-       Pursuer      [label="Pursuer\nP=3, T=30 ms"];
-       SS_Simulator [label="SS_Simulator\nP=3, T=30 ms"];
-       Garbage      [label="GarbageCollector\nP=0, T=30 ms"];
-     }
-
-     // =========================
-     // Drivers / hardware
-     // =========================
-     subgraph cluster_drivers {
-       label = "Drivers / Hardware";
-       style = "rounded";
-       color = "#cccccc";
-
-       MotorDrv   [label="Motors\n(Motor left/right)"];
-       EncoderDrv [label="Encoders\n(Encoder left/right)"];
-       IMUDrv     [label="IMU\n(BNO055)"];
-       LineSens   [label="LineSensor\n(array)"];
-       BTDrv      [label="BTComm\n(UART)"];
-       ObstSens   [label="Obstacle sensor"];
+       Talker        [label="Talker\nP=1, T=10 ms"];
+       IMU_Interface [label="IMU_Interface\nP=4, T=30 ms"];
+       Controller    [label="Controller\nP=5, T=30 ms"];
+       LineFollow    [label="LineFollow\nP=2, T=30 ms"];
+       Pursuer       [label="Pursuer\nP=3, T=30 ms"];
+       SS_Simulator  [label="SS_Simulator\nP=3, T=30 ms"];
+       Garbage       [label="GarbageCollector\nP=0, T=30 ms"];
      }
 
      // Common edge style
      edge [fontname="Helvetica", fontsize=9];
-
-     // =========================
-     // Task <-> Driver interactions
-     // =========================
-
-     // Talker <-> Bluetooth
-     BTDrv   -> Talker      [label="rx bytes"];
-     Talker  -> BTDrv       [label="telemetry packets"];
-
-     // IMU interface
-     IMUDrv      -> IMU_Interface [label="sensor data"];
-     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate\n(Queues)"];
-
-     // Controller <-> motors/encoders
-     EncoderDrv  -> Controller    [label="wheel pos/vel\n(Encoder APIs)"];
-     Controller  -> MotorDrv      [label="set_effort()"];
-
-     // Line sensor
-     LineSens    -> LineFollow    [label="line readings"];
-
-     // Obstacle sensor
-     ObstSens    -> Pursuer       [label="wall hit?"];
 
      // =========================
      // Shares / queues as labeled data flows
@@ -131,15 +93,13 @@ and pass data via shares and queues. Each tasks' period (T) in ms and priority
      // Line-follower enable flag
      Pursuer     -> LineFollow    [label="lf_stop (Share)\nstop line follow"];
 
-     // IMU disable flag to SS model
-     Pursuer     -> SS_Simulator  [label="imu_off (Share)\nIMU disable flag"];
+     // IMU interface to others
+     IMU_Interface -> SS_Simulator [label="Eul_head, yaw_rate\n(Queues)"];
+     IMU_Interface -> Talker       [label="Eul_head,\nyaw_rate (Queues)"];
 
      // Wheel logs from controller
      Controller  -> Talker        [label="time_L/R, pos_L/R,\nvelo_L/R (Queues)"];
      Controller  -> SS_Simulator  [label="pos_L/R, velo_L/R,\ncmd_L/R (Queues)"];
-
-     // IMU heading / yaw to others
-     IMU_Interface -> Talker      [label="Eul_head,\nyaw_rate (Queues)"];
 
      // State-space outputs
      SS_Simulator -> Talker       [label="X_pos, Y_pos,\np_v_L/R, p_head,\np_yaw, p_pos_L/R (Queues)"];
@@ -147,10 +107,8 @@ and pass data via shares and queues. Each tasks' period (T) in ms and priority
      SS_Simulator -> Pursuer      [label="X_pos, Y_pos,\np_head (Queues)"];
 
      // Pursuer adjusts commands
-     Pursuer     -> Talker        [label="indirectly affects\ntelemetry via\nvelo_set/offset"];
+     Pursuer     -> Talker        [label="velo_set/offset"];
 
-     // Garbage collector (background)
-     Garbage     -> Garbage       [style=dotted, label="gc.collect()"];
    }
 
 
@@ -307,7 +265,8 @@ rather than hardware.
 
 Main Script
 ~~~~~~~~~~~~~~~~~~~~
-All task generator functions are contained in ``main.py``.
+All task generator functions are contained in ``main.py``. The
+documentation for this script is shown below.
 
 .. automodule:: me405.main
    :members:
