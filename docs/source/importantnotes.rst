@@ -75,12 +75,49 @@ properites that make LiPo batteries advatageous for this project.
     circuitry and programming would have been required to measure
     battery voltage in real-time to ensure accurate state estimation.
 
-:class:`task_share` Improvments
+``Queue`` Improvments
 ----------------------------------
+ 
+ The ``task_share`` class used for inter-task communication was
+ modified from its original form to include a few new methods that
+ improved usability:
 
-* View get many methods to task_share class addition
+1. :meth:`~me405.task_share.Queue.view` allows a task to view the most recent
+    value without removing it from the queue. This was incredibly useful as many values
+    are streamed to the `Talker_fun`` task for telemetry, but still need to be
+    available for other tasks to read. Enabling these tasks to view the value
+    without removing it from the queue eliminates the need for duplicate queues
+    for each value.
+2. :meth:`~me405.task_share.Queue.many` allows a task to see if there are
+    *at least 2* items in a queue. This was implemented so that the ``Talker_fun``
+    task didn't drain queues faster than other tasks could produce data. Otherwise,
+    tasks that depend on reading from these queues would fail.
+3. ``ValueError`` exception added to handle cases where a task attempts to read
+    from an empty queue. This was useful for debugging. Otherwise, the task would block
+    indefinitely, making it hard to determine the source of the issue.
+
 Known Issues
 --------------------------
 
-* Motor controllers tuned better
-* IMU sometimes jump on init
+This project is still a work in progress, and there are a few known issues
+that should be addressed to further improve performance:
+
+1. **Motor Controller Tuning** - Due to the fast paced nature of this project
+    The PI controller gains for the motor controller were not fully optimized.
+    Further tuning could improve speed regulation and responsiveness.
+2. **Path Planning Optimization** - The current path planning algorithm
+    is functional but could be optimized for smoother trajectories and
+    faster run times.
+3. **Code Optimization** - As previously mentioned, the State Space Observer
+    depends on the code running fast enough to produce accurate estimates.
+    Further optimizations to the code and the use of measures like pre-compiling
+    could improve the preformance of the observer.
+4. **State Space Model Tuning** - The state space model motor parameters
+    were derived from theoretical calculations and basic testing.
+    More extensive system identification and tuning could enhance
+    estimation accuracy.
+5. **Wheel Slip Detection** - The current implementation does not account for
+    wheel slip, which leads to inaccuracies in state estimation. To avoi this issues
+    The current code limits Romi's maximum acceleration and deceleration rate.
+    Implementing slip detection and compensation could allow the Romi to traverse 
+    the course more aggressively.
