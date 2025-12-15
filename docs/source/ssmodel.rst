@@ -61,8 +61,7 @@ Inputs and Measurements
    u_R
    \end{bmatrix}
 
-* :math:`u_L, u_R` – left/right motor control inputs. That is scaled voltage commands
-scaled based on commanded duty cycle.
+* :math:`u_L, u_R` – left/right motor control inputs. That is, scaled voltage values based on commanded duty cycle.
 
 **Measurements (sensors):**
 

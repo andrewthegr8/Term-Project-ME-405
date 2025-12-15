@@ -83,10 +83,10 @@ responsible for decoding the robot's binary telemetry stream.
 
 * **Payload format**
 
-.. warning::
-    The general packet format as well as the order and
-    types of specific fields must exactly match the
-    robot-side :func:`Talker_fun` implementation.
+  .. warning::
+      The general packet format as well as the order and
+      types of specific fields must exactly match the
+      robot-side :func:`Talker_fun` implementation.
 
   * Telemetry payload is defined by:
 
@@ -172,7 +172,7 @@ Tkinter GUI: ``RomiDisplay``
 :class:`RomiDisplay` is the main user–facing interface for monitoring
 and operating the robot.
 
-.. image:: images/romidisplay.png
+.. figure:: images/romidisplay.png
    :alt: Live Romi Data GUI
    :align: center
 
@@ -195,6 +195,7 @@ The **“Live Romi Data”** window shows a unified table with the columns
   - *Psi* row: predicted heading ``p_head`` vs. estimated heading
     ``Eul_head`` (deg).
   - *X* and *Y* rows: current position in inches
+
   .. note::
       The X and Y positions displayed are the predicted values.
       Romi's doesn't know its true position.
@@ -385,8 +386,7 @@ A figure is created which contains four subplots:
 
 3. **Velocity Setpoint vs Time with Checkpoints**
    - Setpoint trace over time
-   - Vertical dashed lines marking inferred checkpoint times  
-     (determined by matching X-position to path setpoints)
+   - Vertical dashed lines marking inferred checkpoint times (determined by matching X-position to path setpoints)
    - A textbox labeling the end time of the run
 
 .. note::
