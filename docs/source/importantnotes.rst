@@ -30,7 +30,7 @@ but here is a summary of what each LED indicates:
 * Blue LED: Indicates when the robot is in line following mode.
   It is controlled by the :func:`linefollow_fun` task.
 
-..image:: /images/romiled.jpg
+.. figure:: /images/romiled.jpg
    :alt: Romi with LEDs on
    :align: center
 
@@ -53,12 +53,12 @@ compatible with the Romi chassis.
 The presence of a 3.7V cell with a voltage regulator provided several advantages:
 
 * **Consistent Voltage Output**: Alkaline batteries drop in voltage as they discharge,
-    leading to inconsistent motor performance. The voltage regulator in the LiPo batteries
-    ensured a stable voltage output until the battery was nearly depleted.
- **Higher Nominal Voltage**: NiMH rechargable batteries (used by many groups in
-    the class) provide around a fairly steady 1.2V each, for a total of 7.2V with 6 cells.
-    Using LiPo batteries allowed a nominal voltage of 9V (6 x 1.5V), allowing for faster motor speeds,
-    while retaining rechagability and consistent voltage output.
+  leading to inconsistent motor performance. The voltage regulator in the LiPo batteries
+  ensured a stable voltage output until the battery was nearly depleted.
+* **Higher Nominal Voltage**: NiMH rechargable batteries (used by many groups in
+  the class) provide around a fairly steady 1.2V each, for a total of 7.2V with 6 cells.
+  Using LiPo batteries allowed a nominal voltage of 9V (6 x 1.5V), allowing for faster motor speeds,
+  while retaining rechagability and consistent voltage output.
 
 .. figure:: /images/batterygraph.jpg
    :alt: 

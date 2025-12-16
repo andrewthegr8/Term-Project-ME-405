@@ -324,10 +324,18 @@ def generate_fsm_diagrams(app):
     # Use the same Python that runs Sphinx
     subprocess.run([sys.executable, script], check=True)
 
+def generate_speed_eqn(app):
+    """Run the FSM diagram generator so SVGs exist before pages are built."""
+    here = os.path.dirname(__file__)
+    script = os.path.join(here, "generate_speed_law_svg.py")
+    # Use the same Python that runs Sphinx
+    subprocess.run([sys.executable, script], check=True)
+
 
 def setup(app):
     # If you already had a setup(app), keep its existing contents
     app.connect("builder-inited", generate_fsm_diagrams)
+    app.connect("builder-inited", generate_speed_eqn)
 
 
 intersphinx_mapping = {

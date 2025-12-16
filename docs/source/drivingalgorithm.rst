@@ -112,18 +112,9 @@ speed based on two primary factors:
 
 The final commanded speed is computed as:
 
-.. math::
-
-   \text{speed}
-   = \text{base\_speed}_{i}
-     + \frac{
-         \max\!\left(
-            \text{FULLTHROTTLE}
-            + \text{SLOWDOWN\_ON\_APPROACH}\,(E - \text{brake\_dist}_{i}),
-            0
-         \right)
-       }
-       {1 + \text{head\_weight}\,|\alpha|}
+.. figure:: images/speed_law.svg
+   :align: center
+   :width: 100%
 
 Here:
 
@@ -256,7 +247,7 @@ Heading-Based Waypoint Controller
   consider a continuous reference path.
 
 Pure Pursuit Controller
-------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Pros**
 
