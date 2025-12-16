@@ -34,7 +34,7 @@ but here is a summary of what each LED indicates:
    :alt: Romi with LEDs on
    :align: center
 
-    Romi with Blue (line follow) and Red (SS model running) LEDs on.
+   Romi with Blue (line follow) and Red (SS model running) LEDs on.
 
 Lipo Batteries versus Alkaline Batteries
 ------------------------------------------  

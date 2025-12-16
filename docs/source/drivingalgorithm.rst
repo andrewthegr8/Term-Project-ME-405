@@ -198,11 +198,13 @@ Preformance Graph Analysis
 
 On the last few figures, the bottom-left graph shows the commanded linear velocity setpoint over time.
 Key features to note include:
+
 * **Plateaus in the velocity curve** occur as Romi approaches a waypoint.  
   These plateaus result from the **speed-bonus term dropping to zero** when the
   error distance :math:`\lVert \mathbf{E} \rVert` falls below the braking
   threshold. At this point Romi is no longer rewarded for good alignment and
   transitions into a controlled approach phase.
+
 * Each **red dashed vertical line** indicates the approximate moment Romi passed
   a waypoint. Immediately following these moments, the **heading error jumps**
   because Romi begins targeting the *next* waypoint in the list. This sudden
