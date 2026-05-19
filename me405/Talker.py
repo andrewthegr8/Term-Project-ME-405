@@ -17,7 +17,7 @@ from GoatedPlotter import GoatedPlotter
 
 
 #Class definition for threaded serial reader.
-#This should alwasy be recieving serial input even while the script is doing other stuff
+#This should always be receiving serial input even while the script is doing other stuff
 
 class StupidError(Exception):
     def __init__(self, message="I couldn't be bothered to be more specific."):
@@ -31,7 +31,7 @@ class CommError(Exception):
 
 def SerialReader(ser, record_data, recorded_data, time_L, time_R, pos_L, velo_L, velo_R, pos_R, cmd_L, cmd_R, Eul_head, yaw_rate, offset, X_pos, Y_pos, p_v_R, p_v_L, p_head, velo_set, p_pos_L, p_pos_R):
 #Serial Reader Thread! 
-#Constantly recieves and decodes serial data
+#Constantly receives and decodes serial data
     sync = b'\xAA\x55'
     format = '<IIfffffffffffffffff'
     packet_length = struct.calcsize(format) + 3

@@ -6,7 +6,7 @@ from time import sleep
 import subprocess
 
 class RomiDisplay():
-    #Tkinter display so we cna see what Romi's doing in real time
+    #Tkinter display so we can see what Romi's doing in real time
     def __init__(self, ser, serial_lock, go_plot, read_stop, write_stop, record_data, recorded_data, Ser_cmds, time_L, time_R, pos_L, velo_L, velo_R, pos_R, cmd_L, cmd_R, Eul_head, yaw_rate, offset, X_pos, Y_pos, p_v_R, p_v_L, p_head, velo_set, p_pos_L, p_pos_R, root):
         
         self.root = root

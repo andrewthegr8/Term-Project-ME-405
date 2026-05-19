@@ -1,7 +1,7 @@
 Main Program
 --------------------
 As previously mentioned, the software architecture consists of several cooperatively run tasks,
-all contained in ``main.py``. This page has information about how the tasks communication,
+all contained in ``main.py``. This page has information about how the tasks communicate,
 as well as detailed documentation for ``main.py``.
 
 .. note::
@@ -11,7 +11,7 @@ as well as detailed documentation for ``main.py``.
 Task List
 ~~~~~~~~~~~~~~~~~
 
-The following cooperative tasks and helper function are defined in
+The following cooperative tasks and helper functions are defined in
 :mod:`~me405.main`:
 
 * :func:`~me405.main.Talker_fun` –
@@ -46,7 +46,7 @@ Task diagram
 ~~~~~~~~~~~~~~~~
 
 The diagram below shows how the cooperative tasks interact
-and pass data via shares and queues. Each tasks' period (T) in ms
+and pass data via shares and queues. Each task's period (T) in ms
 and priority (P) is shown as well.
 
 ..  Click on the diagram to open a zoomable version in a new tab.
@@ -295,4 +295,3 @@ documentation for this script is shown below.
    :members:
    :undoc-members:
    :show-inheritance:
-

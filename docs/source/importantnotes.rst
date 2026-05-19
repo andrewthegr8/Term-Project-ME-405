@@ -19,7 +19,7 @@ LED Interpretation
 --------------------------
 
 This Romi had a few LEDs installed to provide information 
-about sensor and code preformance. These are referenced elsewhere in this documentation,
+about sensor and code performance. These are referenced elsewhere in this documentation,
 but here is a summary of what each LED indicates:
 
 * Red LED: Toggled by the :func:`ssmodel_fun` every time the state space model updates.
@@ -55,10 +55,10 @@ The presence of a 3.7V cell with a voltage regulator provided several advantages
 * **Consistent Voltage Output**: Alkaline batteries drop in voltage as they discharge,
   leading to inconsistent motor performance. The voltage regulator in the LiPo batteries
   ensured a stable voltage output until the battery was nearly depleted.
-* **Higher Nominal Voltage**: NiMH rechargable batteries (used by many groups in
+* **Higher Nominal Voltage**: NiMH rechargeable batteries (used by many groups in
   the class) provide around a fairly steady 1.2V each, for a total of 7.2V with 6 cells.
   Using LiPo batteries allowed a nominal voltage of 9V (6 x 1.5V), allowing for faster motor speeds,
-  while retaining rechagability and consistent voltage output.
+  while retaining rechargeability and consistent voltage output.
 
 .. figure:: /images/batterygraph.jpg
    :alt: 
@@ -69,7 +69,7 @@ The presence of a 3.7V cell with a voltage regulator provided several advantages
 
 The above graph compares the voltage discharge curves of
 alkaline, NiMH, and LiPo batteries and demonstrates the aforementioned
-properites that make LiPo batteries advatageous for this project.
+properties that make LiPo batteries advantageous for this project.
 
 .. note::
     The State Space Observer takes motor input voltages as an input.
@@ -77,7 +77,7 @@ properites that make LiPo batteries advatageous for this project.
     circuitry and programming would have been required to measure
     battery voltage in real-time to ensure accurate state estimation.
 
-``Queue`` Improvments
+``Queue`` Improvements
 ----------------------------------
  
  The ``task_share`` class used for inter-task communication was
@@ -113,13 +113,13 @@ that should be addressed to further improve performance:
 3.  **Code Optimization** - As previously mentioned, the State Space Observer
     depends on the code running fast enough to produce accurate estimates.
     Further optimizations to the code and the use of measures like pre-compiling
-    could improve the preformance of the observer.
+    could improve the performance of the observer.
 4.  **State Space Model Tuning** - The state space model motor parameters
     were derived from theoretical calculations and basic testing.
     More extensive system identification and tuning could enhance
     estimation accuracy.
 5.  **Wheel Slip Detection** - The current implementation does not account for
-    wheel slip, which leads to inaccuracies in state estimation. To avoi this issues
-    The current code limits Romi's maximum acceleration and deceleration rate.
+    wheel slip, which leads to inaccuracies in state estimation. To avoid this issue,
+    the current code limits Romi's maximum acceleration and deceleration rate.
     Implementing slip detection and compensation could allow the Romi to traverse 
     the course more aggressively.

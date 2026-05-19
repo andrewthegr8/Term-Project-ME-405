@@ -33,7 +33,7 @@ On startup, the script performs the following steps:
 
 When a keyboard interrupt occurs (typically from a user pressing Ctrl-C
 via the REPL), the scheduler is halted, all motors are stopped, the IMU
-calibration coefficents are saved to flash memory, and the program prints
+calibration coefficients are saved to flash memory, and the program prints
 debugging statistics from the scheduler as well as the final state of each
 queue before exiting.
 
@@ -98,14 +98,14 @@ def Talker_fun(shares):
       speed. After processing, transitions back to state 0.
 
     .. tip::
-        Only every other packet is sent to cut down on taks run time
+        Only every other packet is sent to cut down on tasks run time
         But, all available telemetry samples are still packed into a
         packet each time to avoid queue overflows.
 
     .. tip::
         This task only checks certain queues for available samples
         before trying to build a telemetry packet. This is because
-        several groups of quues are filled by the same task, so checking
+        several groups of queues are filled by the same task, so checking
         every single queue is redundant.
 
     .. warning::
@@ -250,7 +250,7 @@ def IMU_Interface_fun(shares):
 def SS_Simulator_fun(shares):
     """State-space simulation task.
 
-    This task runs a continous-time state-space model of the Romi robot
+    This task runs a continuous-time state-space model of the Romi robot
     in parallel with the real hardware. It uses the latest measured
     velocities, positions, and IMU heading to feed back into the model,
     uses the motor commands as inputs, and publishes the estimated state to a set of
@@ -258,7 +258,7 @@ def SS_Simulator_fun(shares):
 
     .. note::
         The IMU feedback can be disabled by setting the ``imu_off``
-        share to 1. This feature was added becuase the IMU readings
+        share to 1. This feature was added because the IMU readings
         were being corrupted when the robot was close to the "wall."
 
     .. tip::
@@ -888,7 +888,7 @@ if __name__ == "__main__":
         "f", 10, thread_protect=False, overwrite=True, name="Absolute X Position"
     )
     Y_pos = task_share.Queue(
-        "f", 10, thread_protect=False, overwrite=True, name="Absolte Y Position"
+        "f", 10, thread_protect=False, overwrite=True, name="Absolute Y Position"
     )
     p_v_R = task_share.Queue(
         "f", 10, thread_protect=False, overwrite=True, name="Total Path Length"

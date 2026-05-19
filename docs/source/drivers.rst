@@ -2,7 +2,7 @@ Hardware Drivers
 ----------------------------------
 
 The following classes are used for interfacing with hardware.
-Their methods preform other useful functions as well.
+Their methods perform other useful functions as well.
 
 * :class:`~me405.Motor.Motor` –
   DRV8838-compatible motor driver providing PWM effort control and

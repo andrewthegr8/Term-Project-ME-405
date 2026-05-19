@@ -131,7 +131,7 @@ too close to a target.
 
 .. note::
     The speed-modulation logic was fine-tuned through empirical testing to
-    balance responsiveness with stability. This alogrithm is likely overcomplicated
+    balance responsiveness with stability. This algorithm is likely overcomplicated
     but was left in its current form due to time constraints.
 
 Performance Graphs
@@ -143,9 +143,9 @@ setpoint behavior and motor responses, along with the executed trajectory in the
 world frame.
 
 They were collected as the heading and speed controller parameters were fine-tuned
-to optimize preformance and show the overall run time decreasing from about 16 seconds to 11 seconds.
+to optimize performance and show the overall run time decreasing from about 16 seconds to 11 seconds.
 
-At first, only observations about the overall path were used to guide tuning, but as
+At first, only observations about the overall path were used to guide tuning, but
 eventually velocity setpoint data was also analyzed to identify areas for improvement.
 
 .. note::
@@ -193,7 +193,7 @@ eventually velocity setpoint data was also analyzed to identify areas for improv
 
    Most stable velocity and trajectory behavior, corresponding to the shortest runtime.
 
-Preformance Graph Analysis
+Performance Graph Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 On the last few figures, the bottom-left graph shows the commanded linear velocity setpoint over time.
@@ -273,4 +273,3 @@ For this project, the heading-based controller offered a practical and reliable
 solution, as reflected in the progressively decreasing runtimes observed in testing.
 With additional tuning and refinement,
 this approach could be further optimized for even better performance.
-

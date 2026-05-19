@@ -3,7 +3,7 @@
 This module provides :class:`Queue` and :class:`Share` classes that allow
 tasks to exchange data safely in a MicroPython cooperative multitasking
 environment. Transfers can be protected against corruption by interrupt
-handlers or pre-emptive threads using simple critical sections.
+handlers or preemptive threads using simple critical sections.
 
 This file is **adapted from** John R. Ridgely's original ``task_share.py``
 module. The original work is:
@@ -69,7 +69,7 @@ class BaseShare:
         Args:
             type_code: Single-letter type code as used by :mod:`array`.
             thread_protect: If ``True``, operations will disable interrupts
-                to avoid data corruption in pre-emptive environments.
+                to avoid data corruption in preemptive environments.
             name: Optional human-readable name for diagnostics.
         """
         self._type_code = type_code
@@ -303,7 +303,7 @@ class Share(BaseShare):
 
     A :class:`Share` holds one value of a given :mod:`array` type. Access can
     be protected by disabling interrupts for the duration of each put/get to
-    avoid corruption in pre-emptive environments.
+    avoid corruption in preemptive environments.
 
     Example:
         .. code-block:: python

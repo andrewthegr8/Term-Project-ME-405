@@ -17,7 +17,7 @@ State-Space Model and Observer Equations
 ------------------------------------------
 
 .. note::
-    For simplicty, the output of the observer is simply all of its states.
+    For simplicity, the output of the observer is simply all of its states.
     So, :math:`\hat{y} = \hat{x}`.
 
 State Vector
@@ -150,7 +150,7 @@ on the deviation of the predicted states from observed values.
 .. note:: 
     The global position states :math:`\hat{X}, \hat{Y}` are hard to directly
     measured, especially because they represent the position of Romi's center of gravity.
-    And that's just when Romi's at a stand still. In real time, we have no way of measuring
+    And that's just when Romi is at a standstill. In real time, we have no way of measuring
     Romi's absolute position. In other words the position states are **not observable**.
     So instead we feedback on the observable states,
     wheel velocities and heading, in the hopes of accurately predicting position.
@@ -163,7 +163,7 @@ the state equations were left in scalar form rather than following
 the more compact matrix representation typically used in state-space
 models.
 Then, a 4th-order Runge-Kutta (RK4) integrator) was implemented
-to preform fixed-step numerical integration of the state equations at each
+to perform fixed-step numerical integration of the state equations at each
 control loop iteration. 
 
 The RK4 integrator requires that 2 assumptions be made:
@@ -179,17 +179,17 @@ as quickly as possible, and with as little heap allocation as possible.
 .. Note::
     The MCU used in this project has a very small amount of RAM,
     so running out of heap memory is a real concern. When heap memory
-    is depleted, the intrepreter automatically triggers garbage collection,
+    is depleted, the interpreter automatically triggers garbage collection,
     but this takes a significant amount of time and disrupts real-time
     performance. In this case, it would cause scheduling delays that would
     violate the second RK4 assumption above.
 
-It was dicovered that the key to making sure that the state estimator ran 
-on time and was to ensure that the garbage collector task :func:`~me405.gc_task`
+It was discovered that the key to making sure that the state estimator ran 
+on time was ensuring that the garbage collector task :func:`~me405.gc_task`
 was able to run at its scheduled frequency, or once every "main loop."
 
 .. Note::
-    The final scheduler design had nearly all taks running at the same
+    The final scheduler design had nearly all tasks running at the same
     frequency (once per main loop). This was done to ensure that accurate
     measurements were available to the state estimator at each iteration,
     and to simplify scheduling.
@@ -209,13 +209,13 @@ timesteps.
    :align: center
    :width: 90%
 
-In the image above, task periods, avergae and max execution times, and 
+In the image above, task periods, average and max execution times, and 
 average and max "late" times are shown. The "late" time is the amount of time
 that a task started after its scheduled start time.
 
 While further development and functionality was added to the code
 in preparation for the final demonstration, the task period was increased to 30 ms
-to allow for non-optomized code to run without causing variability in the time steps.
+to allow for non-optimized code to run without causing variability in the time steps.
 
 Observer Performance
 ---------------------
@@ -238,7 +238,7 @@ Romi’s actual response as measured by the motor encoders and IMU.
     predicted position is proof that the state estimator works well enough.
 
 .. note::
-    Very agressive observer gains, :math:`L`, were needed to get the observer to
+    Very aggressive observer gains, :math:`L`, were needed to get the observer to
     quickly converge with the measured values. In fact, increasing the gains
     further caused instability. 
 
@@ -263,14 +263,14 @@ are the same color as the true values in the other graphs.
    :align: center
    :width: 90%
 
-   Observer preformance for a straight-line trajectory.
+   Observer performance for a straight-line trajectory.
 
 .. figure:: images/ActualCircle.png
    :alt: Actual circle trajectory simulation
    :align: center
    :width: 90%
 
-   Observer preformance for a circular trajectory.
+   Observer performance for a circular trajectory.
 
 
 .. figure:: images/Circle.png
@@ -278,20 +278,20 @@ are the same color as the true values in the other graphs.
    :align: center
    :width: 90%
 
-   Observer preformance for Romi pivoting in place.
+   Observer performance for Romi pivoting in place.
 
 IMU Feedback Importance
 -------------------------   
 
 Finally, a question that arose during testing was, how important is the IMU
-heading measurement to the observer performance? Afterall, if there's feedback
+heading measurement to the observer performance? After all, if there's feedback
 on the wheel velocities and the wheels don't slip, then couldn't the heading be
 tracked without IMU feedback?
 
 This question would have gone unanswered, except that during testing, the IMU
 was found to produce erratic heading measurements when Romi was close to a wall
-on the track. Because of the aggressive feedback gains, the oberver predictions 
-woudl become wildly innaccurate. Note that in the graph below the IMU heading becomes
+on the track. Because of the aggressive feedback gains, the observer predictions 
+would become wildly inaccurate. Note that in the graph below the IMU heading becomes
 nonsensical after a certain point in time.
 
 .. figure:: images/badheading.png

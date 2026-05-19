@@ -83,7 +83,7 @@ def make_controller_fsm():
     dot.attr("node", shape="circle")
 
     # States
-    dot.node("S0", "State 0: \n Initalize Timing \n(for integrators)")
+    dot.node("S0", "State 0: \n Initialize Timing \n(for integrators)")
     dot.node("S1", "State 1: \n Run Controllers")
     dot.node("S2", "State 2: \n Stop Robot")
 
