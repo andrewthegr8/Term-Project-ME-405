@@ -112,7 +112,7 @@ class IMU:
         """Check whether the IMU is fully calibrated.
 
         .. warning::
-            The calibration status check is only vaid when the IMU
+            The calibration status check is only valid when the IMU
             is in Fusion mode. Make sure to call :meth:`set_fusion` at some point
             before using this method.
 
@@ -128,7 +128,7 @@ class IMU:
         """Read calibration data from the IMU and store it to a file.
         
         .. warning::
-            The calibration coeffiecients are only valid when the IMU is
+            The calibration coefficients are only valid when the IMU is
             in CONFIG mode. Do not attempt to read or write the calibration
             coefficients when the IMU is in FUSION mode. Make sure to call
             :meth:`set_config` at some point before using this method.
@@ -147,7 +147,7 @@ class IMU:
         """Write calibration data from a file back into the IMU.
 
         .. warning::
-            The calibration coeffiecients are only valid when the IMU is
+            The calibration coefficients are only valid when the IMU is
             in CONFIG mode. Do not attempt to read or write the calibration
             coefficients when the IMU is in FUSION mode. Make sure to call
             :meth:`set_config` at some point before using this method.

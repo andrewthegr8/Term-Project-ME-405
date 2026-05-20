@@ -36,8 +36,8 @@ instead of the on-board ST-Link interface.
 Relevant on-chip peripherals include:
 
 - **I²C** (Used to interface with the IMU)
-- **UART** (Used to interface with the Bluetooth modile)  
-- **GPIO** (Used for motor control, status LEDS, and bump sensing)
+- **UART** (Used to interface with the Bluetooth module)  
+- **GPIO** (Used for motor control, status LEDs, and bump sensing)
 - **ADC (16-channel)** (Used for reflectance sensor array sampling)
 
 STM32 Pinout Details
@@ -234,7 +234,7 @@ Bluetooth Module (HC-05)
 
 The HC-05 is a popular Bluetooth SPP (Serial Port Profile) module that
 enables wireless serial communication between the robot and a PC. The 
-module interfaces with the STM32 via a UART connection and must configured
+module interfaces with the STM32 via a UART connection and must be configured
 and paired with the PC prior to use.
 
 See :doc:`pcui` for details on the PC-side application used to interface

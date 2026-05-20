@@ -11,7 +11,7 @@ complete an obstacle course.
 Robot features include
 
 * Realtime State Estimation via a State Space Observer with Feedback
-* Line Following Capabilities via Analog IR Sesnors
+* Line Following Capabilities via Analog IR Sensors
 * Path Planning with Velocity and Heading Control
 * Realtime Transmission of Telemetry Data to a PC via Bluetooth
 * Obstacle Detection and Avoidance
@@ -22,7 +22,7 @@ Access the full code repository on GitHub `here <https://github.com/andrewthegr8
 Demo
 -----------------
 The goal of the project was to program the robot to autonomously 
-navigate an obstacle sourse using a variety of sensors. The video below shows
+navigate an obstacle course using a variety of sensors. The video below shows
 the robot successfully completing the course.
 
 In the video, the robot uses an IR line sensor to follow the line until the "Y"

@@ -10,10 +10,10 @@ before it is passed to the appropriate task.
 .. tip::
     The ``@micropython.native`` emitter can be used to help code run
     more quickly. However, this emitter cannot be used on generator
-    functions, which is what each task is. So, bundling task preformance into
+    functions, which is what each task is. So, bundling task performance into
     the method of an object and then calling that method in the task means that
     the emitter can be used on the
-    method to optimize the code's preformance. 
+    method to optimize the code's performance. 
 
 The following classes are initialized and passed to tasks, 
 except, of course, :mod:`~me405.cotask` which schedules and runs the tasks.
@@ -21,7 +21,7 @@ except, of course, :mod:`~me405.cotask` which schedules and runs the tasks.
 * :class:`~me405.SSModel.SSModel` –
   Continuous-time state-space model and observer with RK4 integration for
   estimating pose, heading, and wheel states. See the :doc:`ssmodel` page
-  for details regarding the model structure and preformance.
+  for details regarding the model structure and performance.
 
 * :class:`~me405.PIController.PIController` –
   Closed-loop PI controller for regulating wheel velocity using encoder
@@ -30,7 +30,7 @@ except, of course, :mod:`~me405.cotask` which schedules and runs the tasks.
 * :class:`~me405.ThePursuer.ThePursuer` –
   Point seeking navigation controller that selects waypoints and computes
   steering and speed commands for high-level path following. See the
-  :doc:`drivingalgorithm` page detials regarding the algorithm design.
+  :doc:`drivingalgorithm` page details regarding the algorithm design.
 
 * :mod:`~me405.cotask` –
   Cooperative task scheduler providing Task objects, profiling support,
@@ -62,7 +62,7 @@ the model. This section focuses primarily on program functionality.
 Point Targeting Algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See the :doc:`drivingalgorithm` page for more detailed infomation
+See the :doc:`drivingalgorithm` page for more detailed information
 about the course navigation algorithm design. This section focuses primarily
 on program functionality.
 

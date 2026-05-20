@@ -1,7 +1,7 @@
 """Bluetooth serial communication helper.
 
 This module provides the :class:`BTComm` class, a small wrapper around a
-MicroPython ``UART`` object used to faciliate communication with the
+MicroPython ``UART`` object used to facilitate communication with the
 robot over Bluetooth.
 
 The class:
@@ -59,7 +59,7 @@ class BTComm:
           buffer, and return ``True``.
         * ``\\n`` (line feed, ASCII 10) → ignored.
         * Backspace (ASCII 8) → remove the last character from the buffer.
-        * Any other character → appended to the buffer until ``\\r`` is recieved.
+        * Any other character → appended to the buffer until ``\\r`` is received.
 
         Returns:
             bool: ``True`` if a complete line has just been received,
@@ -96,8 +96,8 @@ class BTComm:
         """Send a pre-built packet over the serial link.
         
         .. note::
-            This method will block until the packet hase been
-            fully tansmitted (or at least until is is fully
+            This method will block until the packet has been
+            fully transmitted (or at least until it is fully
             loaded into the TX ring buffer). So, be careful
             using it to transmit very large packets.
 

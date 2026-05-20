@@ -13,7 +13,7 @@ streaming, user input, and data analysis concurrently.
 
 It consists of four primary components:
 
-* A **serial RX thread** that continously reads and decodes telemetry
+* A **serial RX thread** that continuously reads and decodes telemetry
   packets from the robot, using a predefined binary packet format
   (:mod:`Talker`).
 * A **serial TX thread** that sends control commands to the robot
@@ -129,8 +129,8 @@ responsible for decoding the robot's binary telemetry stream.
 
 .. warning::
     The yaw rate is currently not read from the IMU so its field
-    is used to transmit the velocity setpoint. This chnage is not well-documented
-    and is recongized in
+    is used to transmit the velocity setpoint. This change is not well-documented
+    and is recognized in
     the plotting engine (:mod:`GoatedPlotter`) but not the GUI display
     (:mod:`RomiDisplay`).
 
@@ -198,7 +198,7 @@ The **“Live Romi Data”** window shows a unified table with the columns
 
   .. note::
       The X and Y positions displayed are the predicted values.
-      Romi's doesn't know its true position.
+      Romi doesn't know its true position.
 
 * **Auxiliary readouts**
 
@@ -223,11 +223,11 @@ Control widgets
 
 .. warning::
     The GUI controls are designed for developer use and
-    are not robust. For examples, hitting **"Plot"** (or
+    are not robust. For example, hitting **"Plot"** (or
     **"STOP"** when data logging is enabled) without
-    any recorded data can cause the plottng thread to
+    any recorded data can cause the plotting thread to
     raise an exception and crash.
-    Additionally, the frimware sequence triggered by the
+    Additionally, the firmware sequence triggered by the
     **"Update Code"** button is blocking and will freeze
     the GUI window until it completes.
 
@@ -318,7 +318,7 @@ runs asynchronously in its own loop and is activated by the main GUI.
     The :func:`GoatedPlotter` function used :mod:`matplotlib` for plotting
     which uses :mod:`Tkinter` as its default backend. Since a Tkinter
     window is already open for the main GUI, the
-    plotting thread will throw warnings when ever it opens a plot window.
+    plotting thread will throw warnings whenever it opens a plot window.
     These can be safely ignored.
 
 State machine
@@ -346,7 +346,7 @@ deviation (MAD) filter**, replacing samples that deviate more than
 ``threshold × MAD`` with the average of their immediate neighbors.
 
 .. note::
-    The MAD filter is necessary becuase data corrupted during bluetooth
+    The MAD filter is necessary because data corrupted during bluetooth
     transmission regularly produces very large or small values when the binary
     packet is decoded. These outliers would lead to illegible plots before this 
     filter was implemented.
@@ -369,8 +369,8 @@ seconds, and normalized so the first entry begins at ``t=0``.
 
 .. note::
     Due to the controller configuration, there is very little difference
-    between these data sets and for simplicity only ``time_L`` is used for
-    plotting graphs that don't contain to wheel-specific data (eg, Heading).
+    between these data sets, and for simplicity, only ``time_L`` is used for
+    plotting graphs that don't contain wheel-specific data (e.g., heading).
 
 Plot creation (2×2 grid)
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -390,11 +390,11 @@ A figure is created which contains four subplots:
    - A textbox labeling the end time of the run
 
 .. note::
-    An earlier version of this scripts contained a subplot for heading
-    vs. time, contianing both true and predicted values.
+    An earlier version of this script contained a subplot for heading
+    vs. time, containing both true and predicted values.
 
 4. **XY Path with Reference Setpoints**
-   - Actual trajectory (X,Y), mirrored across the +Y axis so the plot aligns wiht the obstacle course layout
+   - Actual trajectory (X,Y), mirrored across the +Y axis so the plot aligns with the obstacle course layout
    - Red dots indicating path setpoints  
    - Equal axis scaling for geometric accuracy
 
@@ -413,7 +413,7 @@ manual timestamp labeling.
 
 .. warning::
     This function is experimental and can sometimes produce
-    erronous results, espcially is Romi does not complete a complete run.
+    erroneous results, especially if Romi does not complete a full run.
 
 Saving outputs
 ^^^^^^^^^^^^^^
@@ -505,7 +505,7 @@ Usage Guide
 Prerequisites
 ~~~~~~~~~~~~~
 
-* Robot firmware using :class:`BTComm` and :func:`Talker_fun` to send/recieve telemetry
+* Robot firmware using :class:`BTComm` and :func:`Talker_fun` to send/receive telemetry
   packets over Bluetooth.
 * PC with:
 
@@ -522,7 +522,7 @@ Running the host
     Sometimes the Bluetooth module will silently disconnect from the PC.
     You can tell this happens when telemetry is not updating in the GUI.
     Even though the code on Romi is active. If this happens,
-    completing the following steps in this order.
+    complete the following steps in this order.
 
     1. Stop the host script ``Talker.py`` (Ctrl+C in terminal).
     2. Power cycle the Romi robot.
@@ -532,8 +532,8 @@ Running the host
 
 
 1. Pair the Bluetooth module with the host PC and determine the virtual COM port.
-   This link has useful information regarding pair the HC-05 Bluetooth module with
-   windows PCs: 
+   This link has useful information on pairing the HC-05 Bluetooth module with
+   Windows PCs: 
 2. Update the Bluetooth and USB serial port strings in ``Talker.py`` if different from
    ``'COM13'`` and ``'COM9'``, respectively.
 3. Start the host script:
@@ -574,5 +574,4 @@ Firmware update workflow
 2. A PuTTY session is launched using the *“Default Settings”* profile to
    interact with the robot's REPL.
 
-3. Once update is complete, the serial reader/writer threads resume.
-
+3. Once the update is complete, the serial reader/writer threads resume.
